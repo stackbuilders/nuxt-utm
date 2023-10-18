@@ -3,7 +3,7 @@ name: CI
 on: [push, workflow_dispatch]
 
 jobs:
-  generate:
+  build:
     timeout-minutes: 10
     runs-on: ubuntu-latest
 
