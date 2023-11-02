@@ -48,9 +48,10 @@ That's it! You can now use Nuxt UTM in your Nuxt app ✨
 
 ## Usage
 
-```js
+```vue
 <script setup>
-  import {useNuxtApp} from "nuxt/app"; const {$utm} = useNuxtApp();
+import { useNuxtApp } from "nuxt/app";
+const { $utm } = useNuxtApp();
 </script>
 ```
 
