@@ -1,72 +1,88 @@
-import { ref } from "vue";
+import { Ref, ref } from "vue";
 import { defineNuxtPlugin } from "#app";
+import { LocationQuery } from "vue-router";
+import { UTMParams, AdditionalInfo, DataObject } from "nuxt-utm";
 
 const LOCAL_STORAGE_KEY = "nuxt-utm-data";
 const SESSION_ID_KEY = "nuxt-utm-session-id";
 
-interface UTMParams {
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  utm_term?: string;
-  utm_content?: string;
-}
-
-interface AdditionalInfo {
-  referrer: string;
-  userAgent: string;
-  language: string;
-  screen: {
-    width: number;
-    height: number;
-  };
-}
-
-interface DataObject {
-  timestamp: string;
-  utmParams: UTMParams;
-  additionalInfo: AdditionalInfo;
-  sessionId: string;
-}
-
-function generateSessionId() {
+const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15);
-}
+};
+
+const readLocalData = () => {
+  const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+  try {
+    if (localData) {
+      return JSON.parse(localData);
+    }
+  } catch (error) {
+    console.error("Error parsing local storage data", error);
+    return;
+  }
+};
+
+const getSessionID = () => {
+  const sessionID = sessionStorage.getItem(SESSION_ID_KEY) || "";
+  if (sessionID == "") {
+    const newSessionID = generateSessionId();
+    sessionStorage.setItem(SESSION_ID_KEY, newSessionID);
+    return newSessionID;
+  }
+  return sessionID;
+};
+
+const urlHasUtmParams = (query: LocationQuery) => {
+  return (
+    query.utm_source ||
+    query.utm_medium ||
+    query.utm_campaign ||
+    query.utm_term ||
+    query.utm_content
+  );
+};
+
+const getUtmParams = (query: LocationQuery) => {
+  const utmParams: UTMParams = {
+    utm_source: query.utm_source?.toString(),
+    utm_medium: query.utm_medium?.toString(),
+    utm_campaign: query.utm_campaign?.toString(),
+    utm_term: query.utm_term?.toString(),
+    utm_content: query.utm_content?.toString(),
+  };
+  return utmParams;
+};
+
+const generateAdditionalInfo = () => {
+  const additionalInfo: AdditionalInfo = {
+    referrer: document.referrer,
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    screen: {
+      width: screen.width,
+      height: screen.height,
+    },
+  };
+  return additionalInfo;
+};
+
+const isRepeatedEntry = (data: Ref<DataObject[]>, currentSessionID: string) => {
+  const lastEntry = data.value[0];
+  return lastEntry && lastEntry.sessionId === currentSessionID;
+};
 
 export default defineNuxtPlugin((nuxtApp) => {
-  console.log("Plugin injected by my-module!");
-
   const data = ref<DataObject[]>([]);
 
   nuxtApp.hook("app:mounted", () => {
-    console.log("_route:", nuxtApp._route);
-    console.log("query:", nuxtApp._route.query);
+    data.value = readLocalData();
 
-    const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
-
-    try {
-      if (localData) {
-        data.value = JSON.parse(localData);
-      }
-    } catch (error) {
-      console.error("Error parsing local storage data", error);
-    }
-
-    let sessionId = sessionStorage.getItem(SESSION_ID_KEY) || "";
-    if (sessionId == "") {
-      sessionId = generateSessionId();
-      sessionStorage.setItem(SESSION_ID_KEY, sessionId);
-    }
+    const sessionId = getSessionID();
 
     const query = nuxtApp._route.query;
 
-    if (
-      !query.utm_source &&
-      !query.utm_medium &&
-      !query.utm_campaign &&
-      !query.utm_term &&
-      !query.utm_content
-    ) {
+    if (!urlHasUtmParams(query)) {
       return {
         provide: {
           utmData: data,
@@ -74,23 +90,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       }; // Exit if no UTM parameters found
     }
 
-    const utmParams: UTMParams = {
-      utm_source: query.utm_source?.toString(),
-      utm_medium: query.utm_medium?.toString(),
-      utm_campaign: query.utm_campaign?.toString(),
-      utm_term: query.utm_term?.toString(),
-      utm_content: query.utm_content?.toString(),
-    };
+    const utmParams = getUtmParams(query);
 
-    const additionalInfo: AdditionalInfo = {
-      referrer: document.referrer,
-      userAgent: navigator.userAgent,
-      language: navigator.language,
-      screen: {
-        width: screen.width,
-        height: screen.height,
-      },
-    };
+    const additionalInfo = generateAdditionalInfo();
 
     const timestamp = new Date().toISOString();
 
@@ -101,16 +103,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       sessionId,
     };
 
-    const lastEntry = data.value[0];
-    if (
-      lastEntry &&
-      lastEntry.utmParams.utm_source === utmParams.utm_source &&
-      lastEntry.utmParams.utm_medium === utmParams.utm_medium &&
-      lastEntry.utmParams.utm_campaign === utmParams.utm_campaign &&
-      lastEntry.utmParams.utm_term === utmParams.utm_term &&
-      lastEntry.utmParams.utm_content === utmParams.utm_content &&
-      lastEntry.sessionId === sessionId
-    ) {
+    if (isRepeatedEntry(data, sessionId)) {
       // Exit if the last entry is the same as the new entry
       return {
         provide: {
