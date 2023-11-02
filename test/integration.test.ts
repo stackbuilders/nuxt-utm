@@ -31,7 +31,7 @@ describe("ssr", async () => {
       utmParamsArray = await JSON.parse(rawData ?? "[]");
     });
 
-    it("Stores  data in local storage", async () => {
+    it("Stores data in local storage", async () => {
       expect(utmParamsArray?.[0]).toBeDefined();
     });
 
