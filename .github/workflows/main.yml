@@ -40,11 +40,11 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      # - name: Install Playwright Browsers
+      #   run: npx playwright install --with-deps
 
       - name: Build Playground
-        run:  yarn dev:build
+        run: yarn dev:build
 
       - name: Execute tests
         run: yarn test
