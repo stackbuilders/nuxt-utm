@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.1.4
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.1.3...v0.1.4)
+
+### 🏡 Chore
+
+- Add repository to package json ([3a469e3](https://github.com/stackbuilders/nuxt-utm/commit/3a469e3))
+
+### ❤️ Contributors
+
+- Luis David Barrera <dbarrera@stackbuilders.com>
+
 ## v0.1.3
 
 [compare changes](https://github.com/your-org/my-module/compare/v0.1.2...v0.1.3)
