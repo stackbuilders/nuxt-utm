@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v0.1.3
+
+[compare changes](https://github.com/your-org/my-module/compare/v0.1.2...v0.1.3)
+
+### 🚀 Enhancements
+
+- **ci:** Add yarn lint as a step in the CI ([5d988dc](https://github.com/your-org/my-module/commit/5d988dc))
+
+### 🏡 Chore
+
+- Add @playwright/test and see if we don't need to install it in CI ([e8f0655](https://github.com/your-org/my-module/commit/e8f0655))
+- Add @playwright/test and see if we don't need to install it in CI" ([e3cfa90](https://github.com/your-org/my-module/commit/e3cfa90))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](http://github.com/sadjow))
+
 ## v0.1.2
 
 [compare changes](https://github.com/your-org/my-module/compare/v0.1.1...v0.1.2)
