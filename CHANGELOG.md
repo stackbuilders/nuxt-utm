@@ -1,6 +1,20 @@
 # Changelog
 
 
+## v0.1.2
+
+[compare changes](https://github.com/your-org/my-module/compare/v0.1.1...v0.1.2)
+
+### 🏡 Chore
+
+- Fix github actions ([f2e8b9a](https://github.com/your-org/my-module/commit/f2e8b9a))
+- Update github actions and add missing integration tests ([30e8e9e](https://github.com/your-org/my-module/commit/30e8e9e))
+- Typo in integration tests ([10eab4e](https://github.com/your-org/my-module/commit/10eab4e))
+
+### ❤️ Contributors
+
+- Luis David Barrera <dbarrera@stackbuilders.com>
+
 ## v0.1.1
 
 
