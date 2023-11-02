@@ -1,6 +1,6 @@
 ---
 repository:
-  description: An intuitive module for seamless management of UTM parameters
+  description: A Nuxt 3 module for tracking UTM parameters.
   has_projects: false
   has_wiki: true
   default_branch: main
