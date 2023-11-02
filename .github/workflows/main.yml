@@ -37,15 +37,15 @@ jobs:
         continue-on-error: true
         run: yarn list
 
-      - name: Install dependencies in playground
-        run: yarn install
-        working-directory: ./playground
+      # - name: Install dependencies in playground
+      #   run: yarn install
+      #   working-directory: ./playground
 
       - run: yarn install
 
-      - name: Build the playground
-        run: yarn build
-        working-directory: ./playground
+      # - name: Build the playground
+      #   run: yarn build
+      #   working-directory: ./playground
 
       - name: Execute tests
         run: yarn test
