@@ -11,7 +11,7 @@ export const readLocalData = (localStorageKey: string) => {
 
   try {
     if (localData) {
-      return JSON.parse(localData);
+      return JSON.parse(localData) as DataObject[];
     }
   } catch (error) {
     console.error("Error parsing local storage data", error);
@@ -29,29 +29,28 @@ export const getSessionID = (sessionIdKey: string) => {
   return sessionID;
 };
 
-export const urlHasUtmParams = (query: LocationQuery) => {
-  return (
+export const urlHasUtmParams = (query: LocationQuery): boolean => {
+  return Boolean(
     query.utm_source ||
-    query.utm_medium ||
-    query.utm_campaign ||
-    query.utm_term ||
-    query.utm_content
+      query.utm_medium ||
+      query.utm_campaign ||
+      query.utm_term ||
+      query.utm_content
   );
 };
 
-export const getUtmParams = (query: LocationQuery) => {
-  const utmParams: UTMParams = {
+export const getUtmParams = (query: LocationQuery): UTMParams => {
+  return {
     utm_source: query.utm_source?.toString(),
     utm_medium: query.utm_medium?.toString(),
     utm_campaign: query.utm_campaign?.toString(),
     utm_term: query.utm_term?.toString(),
     utm_content: query.utm_content?.toString(),
   };
-  return utmParams;
 };
 
-export const getAdditionalInfo = () => {
-  const additionalInfo: AdditionalInfo = {
+export const getAdditionalInfo = (): AdditionalInfo => {
+  return {
     referrer: document.referrer,
     userAgent: navigator.userAgent,
     language: navigator.language,
@@ -60,13 +59,12 @@ export const getAdditionalInfo = () => {
       height: screen.height,
     },
   };
-  return additionalInfo;
 };
 
 export const isRepeatedEntry = (
   data: Ref<DataObject[]>,
   currentSessionID: string
-) => {
+): boolean => {
   const lastEntry = data.value?.[0];
   return lastEntry && lastEntry.sessionId === currentSessionID;
 };

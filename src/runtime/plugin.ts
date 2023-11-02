@@ -43,6 +43,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     // Exit if the last entry is the same as the new entry
     if (isRepeatedEntry(data, sessionId)) return;
 
+    // Add the new item to the data array
     data.value.unshift(dataObject);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.value));
   });
