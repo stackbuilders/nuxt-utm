@@ -19,8 +19,8 @@ const readLocalData = () => {
     }
   } catch (error) {
     console.error("Error parsing local storage data", error);
-    return;
   }
+  return [];
 };
 
 const getSessionID = () => {
@@ -68,7 +68,7 @@ const generateAdditionalInfo = () => {
 };
 
 const isRepeatedEntry = (data: Ref<DataObject[]>, currentSessionID: string) => {
-  const lastEntry = data.value[0];
+  const lastEntry = data.value?.[0];
   return lastEntry && lastEntry.sessionId === currentSessionID;
 };
 
