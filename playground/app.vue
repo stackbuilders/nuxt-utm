@@ -1,5 +1,5 @@
 <template>
-  <div>Nuxt module playground!</div>
+  <div>Nuxt 3 UTM module playground!</div>
   <pre>{{ $utmData }}</pre>
 </template>
 

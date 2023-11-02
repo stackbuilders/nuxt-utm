@@ -40,8 +40,14 @@ jobs:
       # - name: Install dependencies in playground
       #   run: yarn install
       #   working-directory: ./playground
-
       - run: yarn install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Build Playground
+        run:  yarn dev:build
+
 
       # - name: Build the playground
       #   run: yarn build
