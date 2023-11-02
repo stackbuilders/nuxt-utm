@@ -1,6 +1,6 @@
 ---
 repository:
-  description: Quick summary about the repository or library. What is 
+  description: An intuitive module for seamless management of UTM parameters
   has_projects: false
   has_wiki: true
   default_branch: main
