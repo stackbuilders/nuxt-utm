@@ -1,6 +1,5 @@
 # Changelog
 
-
 ## v0.1.8
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.1.5...v0.1.8)
@@ -55,5 +54,3 @@
 
 - Sadjow Leão ([@sadjow](http://github.com/sadjow))
 - Luis David Barrera <dbarrera@stackbuilders.com>
-- Luis David Barrera Díaz
-
