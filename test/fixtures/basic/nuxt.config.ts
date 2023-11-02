@@ -1,5 +1,5 @@
-import MyModule from "../../../src/module";
+import UtmModule from "../../../src/module";
 
 export default defineNuxtConfig({
-  modules: [MyModule],
+  modules: [UtmModule],
 });

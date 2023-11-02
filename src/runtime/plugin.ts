@@ -4,7 +4,7 @@ import {
   getSessionID,
   urlHasUtmParams,
   getUtmParams,
-  generateAdditionalInfo,
+  getAdditionalInfo,
   isRepeatedEntry,
 } from "./utm";
 import { ref } from "vue";
@@ -29,7 +29,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     const utmParams = getUtmParams(query);
 
-    const additionalInfo = generateAdditionalInfo();
+    const additionalInfo = getAdditionalInfo();
 
     const timestamp = new Date().toISOString();
 

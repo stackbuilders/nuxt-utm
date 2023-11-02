@@ -2,7 +2,7 @@ import { Ref } from "vue";
 import { LocationQuery } from "vue-router";
 import { UTMParams, AdditionalInfo, DataObject } from "nuxt-utm";
 
-const generateSessionId = () => {
+export const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15);
 };
 
@@ -50,7 +50,7 @@ export const getUtmParams = (query: LocationQuery) => {
   return utmParams;
 };
 
-export const generateAdditionalInfo = () => {
+export const getAdditionalInfo = () => {
   const additionalInfo: AdditionalInfo = {
     referrer: document.referrer,
     userAgent: navigator.userAgent,
