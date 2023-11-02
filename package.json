@@ -1,6 +1,6 @@
 {
   "name": "nuxt-utm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Nuxt 3 module for tracking UTM parameters.",
   "repository": "your-org/my-module",
   "license": "MIT",
