@@ -25,7 +25,7 @@
 ### 🏡 Chore
 
 - Add @playwright/test and see if we don't need to install it in CI ([e8f0655](https://github.com/stackbuilders/nuxt-utm/commit/e8f0655))
-- Add @playwright/test and see if we don't need to install it in CI" ([e3cfa90](https://github.com/youstackbuilders/nuxt-utmmmit/e3cfa90))
+- Add @playwright/test and see if we don't need to install it in CI" ([e3cfa90](https://github.com/stackbuilders/nuxt-utm/commit/e3cfa90))
   stackbuilders/nuxt-utm
 
 ### ❤️ Contributorsstackbuilders/nuxt-utm
@@ -44,7 +44,7 @@ stackbuilders/nuxt-utm
 
 stackbuilders/nuxt-utm
 
-- Fix github actions ([f2e8b9a](https://github.com/youstackbuilders/nuxt-utmmmit/f2e8b9a))
+- Fix github actions ([f2e8b9a](https://github.com/stackbuilders/nuxt-utm/commit/f2e8b9a))
 - Update github actions and add missing integration tesstackbuilders/nuxt-utms://github.com/stackbuilders/nuxt-utm/commit/30e8e9e))
 - Typo in integration tests ([10eab4e](https://github.com/stackbuilders/nuxt-utm/commit/10eab4e))
 
