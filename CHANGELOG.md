@@ -70,6 +70,5 @@ stackbuilders/nuxt-utm
 
 ### ❤️ Contributors
 
-- Luis David Barrera Díaz 
+- Luis David Barrera Díaz
 - Luis David Barrera <dbarrera@stackbuilders.com>
-
