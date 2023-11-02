@@ -72,19 +72,22 @@ describe("getUtmParams function", () => {
 
 describe("isRepeatedEntry function", () => {
   let data: Ref<DataObject[]>;
+  let newUtmItem: DataObject;
   beforeEach(() => {
     data = ref<DataObject[]>(JSON.parse(`[${utmItem}]`));
+    newUtmItem = JSON.parse(utmItem);
   });
 
   it("Returns true if the utm params and the session already exists in local storage", () => {
-    expect(isRepeatedEntry(data, "beai1gx7dg")).toBeTruthy();
+    expect(isRepeatedEntry(data, newUtmItem)).toBeTruthy();
   });
   it("Returns false if the utm params are the same but the session is different", () => {
-    expect(isRepeatedEntry(data, "newSession")).toBeFalsy();
+    newUtmItem.sessionId = "New Session";
+    expect(isRepeatedEntry(data, newUtmItem)).toBeFalsy();
   });
   it("Returns false if the utm params are different but the session is the same", () => {
-    const data = ref<DataObject[]>(JSON.parse(`[${utmItem}]`));
-    expect(isRepeatedEntry(data, "newSession")).toBeFalsy();
+    newUtmItem.utmParams.utm_content = "New UTM content"
+    expect(isRepeatedEntry(data, newUtmItem)).toBeFalsy();
   });
 });
 

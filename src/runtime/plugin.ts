@@ -41,7 +41,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     };
 
     // Exit if the last entry is the same as the new entry
-    if (isRepeatedEntry(data, sessionId)) return;
+    if (isRepeatedEntry(data, dataObject)) return;
 
     // Add the new item to the data array
     data.value.unshift(dataObject);

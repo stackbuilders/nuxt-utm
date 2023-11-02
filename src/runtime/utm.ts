@@ -63,8 +63,19 @@ export const getAdditionalInfo = (): AdditionalInfo => {
 
 export const isRepeatedEntry = (
   data: Ref<DataObject[]>,
-  currentSessionID: string
+  currentEntry: DataObject
 ): boolean => {
   const lastEntry = data.value?.[0];
-  return lastEntry && lastEntry.sessionId === currentSessionID;
+  const lastUtm = lastEntry?.utmParams;
+  const newUtm = currentEntry.utmParams;
+
+  return (
+    lastEntry &&
+    lastUtm.utm_campaign === newUtm.utm_campaign &&
+    lastUtm.utm_content === newUtm.utm_content &&
+    lastUtm.utm_medium === newUtm.utm_medium &&
+    lastUtm.utm_source === newUtm.utm_source &&
+    lastUtm.utm_term === newUtm.utm_term &&
+    lastEntry.sessionId === currentEntry.sessionId
+  );
 };
