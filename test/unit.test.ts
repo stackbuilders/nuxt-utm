@@ -22,7 +22,7 @@ global.localStorage = (() => {
     clear: (): void => {
       store = {};
     },
-    key: (index: number): string | null => "",
+    key: (): string | null => "",
     length: Object.keys(store).length,
   };
 })();
@@ -86,7 +86,7 @@ describe("isRepeatedEntry function", () => {
     expect(isRepeatedEntry(data, newUtmItem)).toBeFalsy();
   });
   it("Returns false if the utm params are different but the session is the same", () => {
-    newUtmItem.utmParams.utm_content = "New UTM content"
+    newUtmItem.utmParams.utm_content = "New UTM content";
     expect(isRepeatedEntry(data, newUtmItem)).toBeFalsy();
   });
 });
