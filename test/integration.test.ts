@@ -41,10 +41,5 @@ describe("ssr", async () => {
         utm_term: "test_term",
       });
     });
-    it("Stores new UTM params in the same session if they are different. ", async () => {
-      await page.goto(
-        "/?utm_source=test_source2&utm_medium=test_medium2&utm_campaign=test_campaign2&utm_term=test_term2&utm_content=test_content2"
-      );
-    });
   });
 });
