@@ -2,7 +2,7 @@
   "name": "nuxt-utm",
   "version": "0.1.3",
   "description": "A Nuxt 3 module for tracking UTM parameters.",
-  "repository": "your-org/my-module",
+  "repository": "stackbuilders/nuxt-utm",
   "license": "MIT",
   "type": "module",
   "exports": {
