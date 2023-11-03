@@ -1,0 +1,51 @@
+name: CI
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.39.0-jammy
+
+    strategy:
+      matrix:
+        node-version: [16, 18]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+            ${{ runner.os }}-node-
+            ${{ runner.os }}-
+
+      # Only list the state of node modules if cache wasn't hit
+      - if: steps.cache-npm.outputs.cache-hit != 'true'
+        name: List the state of node modules
+        continue-on-error: true
+        run: yarn list
+
+      - name: Install dependencies
+        run: yarn install
+
+      - run: yarn lint --max-warnings 0
+
+      - name: Build Playground
+        run: yarn dev:build
+
+      - name: Execute tests
+        run: yarn test
