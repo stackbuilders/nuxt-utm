@@ -54,6 +54,7 @@ export const getAdditionalInfo = (): AdditionalInfo => {
     referrer: document.referrer,
     userAgent: navigator.userAgent,
     language: navigator.language,
+    landingPageUrl: window.location.href,
     screen: {
       width: screen.width,
       height: screen.height,

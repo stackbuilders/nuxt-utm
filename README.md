@@ -20,7 +20,7 @@ If a visitor arrives at a website that uses the Nuxt UTM module and a UTM parame
 
 - **📍 UTM Tracking**: Easily capture UTM parameters to gain insights into traffic sources and campaign performance.
 - **🔍 Intelligent De-duplication**: Smart recognition of page refreshes to avoid data duplication, ensuring each visit is uniquely accounted for.
-- **🔗 Comprehensive Data Collection**: Alongside UTM parameters, gather additional context such as referrer details, user agent, browser language, and screen resolution. This enriched data empowers your marketing strategies with a deeper understanding of campaign impact.
+- **🔗 Comprehensive Data Collection**: Alongside UTM parameters, gather additional context such as referrer details, user agent, landing page url, browser language, and screen resolution. This enriched data empowers your marketing strategies with a deeper understanding of campaign impact.
 
 ## Quick Setup
 
@@ -73,6 +73,7 @@ The `$utm` will contain an array of UTM parameters collected for use. Each eleme
       referrer: "http://referrer.url", // Referrer URL
       userAgent: "User-Agent String", // User-Agent string of the browser
       language: "en-GB", // Language setting of the browser
+      landingPageUrl: "http://landingpage.url", // The URL of the page the user landed on
       screen: {
         width: 1728,
         height: 1117,
