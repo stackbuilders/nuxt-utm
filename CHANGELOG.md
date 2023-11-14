@@ -1,5 +1,46 @@
 # Changelog
 
+## v0.1.10
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.1.4...v0.1.10)
+
+### 🚀 Enhancements
+
+- **ci:** Return error if lint warns ([41aa042](https://github.com/stackbuilders/nuxt-utm/commit/41aa042))
+- Store The URL of the page the user landed on ([8fef662](https://github.com/stackbuilders/nuxt-utm/commit/8fef662))
+
+### 🩹 Fixes
+
+- Changelog ([da24253](https://github.com/stackbuilders/nuxt-utm/commit/da24253))
+- Usage snippet in the readme ([c0852b0](https://github.com/stackbuilders/nuxt-utm/commit/c0852b0))
+- Remove not used vars (yarn lint works) ([7554ef0](https://github.com/stackbuilders/nuxt-utm/commit/7554ef0))
+
+### 💅 Refactors
+
+- UtmData to utm ([8ddabe6](https://github.com/stackbuilders/nuxt-utm/commit/8ddabe6))
+
+### 🏡 Chore
+
+- Fix repository name ([f79dc36](https://github.com/stackbuilders/nuxt-utm/commit/f79dc36))
+- **release:** V0.1.2 ([899792e](https://github.com/stackbuilders/nuxt-utm/commit/899792e))
+- Replace your-org/my-module with stackbuilders/nuxt-utm ([20fcd4e](https://github.com/stackbuilders/nuxt-utm/commit/20fcd4e))
+- Remove unused vars ([763f928](https://github.com/stackbuilders/nuxt-utm/commit/763f928))
+- Update the README ([936832e](https://github.com/stackbuilders/nuxt-utm/commit/936832e))
+- **release:** V0.1.5 ([88312e8](https://github.com/stackbuilders/nuxt-utm/commit/88312e8))
+- **release:** V0.1.6 ([efcfa13](https://github.com/stackbuilders/nuxt-utm/commit/efcfa13))
+- **release:** V0.1.7 ([03ec2d6](https://github.com/stackbuilders/nuxt-utm/commit/03ec2d6))
+- Add keywords to package.json ([8e84abc](https://github.com/stackbuilders/nuxt-utm/commit/8e84abc))
+- **release:** V0.1.8 ([6fbe62f](https://github.com/stackbuilders/nuxt-utm/commit/6fbe62f))
+- **release:** V0.1.9 ([c73f5e1](https://github.com/stackbuilders/nuxt-utm/commit/c73f5e1))
+- Test with playwright container ([5b3c216](https://github.com/stackbuilders/nuxt-utm/commit/5b3c216))
+- Add status badge to the README ([e929e93](https://github.com/stackbuilders/nuxt-utm/commit/e929e93))
+
+### ❤️ Contributors
+
+- Luis David Barrera Díaz <hakenprog@gmail.com>
+- Sadjow Leão ([@sadjow](http://github.com/sadjow))
+- Luis David Barrera ([@hakenprog](http://github.com/hakenprog))
+
 ## v0.1.9
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.1.5...v0.1.9)

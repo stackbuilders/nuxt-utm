@@ -1,4 +1,4 @@
-import { DataObject } from 'nuxt-utm';
+import { DataObject } from "nuxt-utm";
 import { describe, it, expect, beforeEach } from "vitest";
 import { fileURLToPath } from "node:url";
 import { setup, $fetch, createPage } from "@nuxt/test-utils";
@@ -10,6 +10,19 @@ describe("ssr", async () => {
     browser: true,
   });
 
+  let entries: DataObject[];
+  let page: Page;
+
+  beforeEach(async () => {
+    page = await createPage(
+      "/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content"
+    );
+    const rawData = await page.evaluate(() =>
+      window.localStorage.getItem("nuxt-utm-data")
+    );
+    entries = await JSON.parse(rawData ?? "[]");
+  });
+
   describe("Module Playground", () => {
     it("Renders the index page", async () => {
       const html = await $fetch("/");
@@ -17,26 +30,35 @@ describe("ssr", async () => {
     });
   });
 
+  describe("Additional info", () => {
+    it("Stores data in local storage", () => {
+      expect(entries?.[0]).toBeDefined();
+    });
+
+    it("Stores Additional info", () => {
+      expect(entries?.[0].additionalInfo).toBeDefined();
+    });
+
+    it("Stores the correct values", async () => {
+      const info = await page.evaluate(() => {
+        return {
+          referrer: document.referrer,
+          userAgent: navigator.userAgent,
+          language: navigator.language,
+          landingPageUrl: window.location.href,
+          screen: {
+            width: screen.width,
+            height: screen.height,
+          },
+        };
+      });
+      expect(entries?.[0].additionalInfo).toEqual(info);
+    });
+  });
+
   describe("UTM params", () => {
-    let utmParamsArray: DataObject[];
-    let page: Page;
-
-    beforeEach(async () => {
-      page = await createPage(
-        "/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content"
-      );
-      const rawData = await page.evaluate(() =>
-        window.localStorage.getItem("nuxt-utm-data")
-      );
-      utmParamsArray = await JSON.parse(rawData ?? "[]");
-    });
-
-    it("Stores data in local storage", async () => {
-      expect(utmParamsArray?.[0]).toBeDefined();
-    });
-
-    it("Stores UTM params", async () => {
-      expect(utmParamsArray?.[0].utmParams).toEqual({
+    it("Stores UTM params", () => {
+      expect(entries?.[0].utmParams).toEqual({
         utm_campaign: "test_campaign",
         utm_content: "test_content",
         utm_medium: "test_medium",
@@ -50,8 +72,8 @@ describe("ssr", async () => {
       const rawData = await page?.evaluate(() =>
         window.localStorage.getItem("nuxt-utm-data")
       );
-      utmParamsArray = await JSON.parse(rawData ?? "[]");
-      expect(utmParamsArray.length).toEqual(1);
+      entries = await JSON.parse(rawData ?? "[]");
+      expect(entries.length).toEqual(1);
     });
 
     it("Stores a new value if the UTM params are different but the session is the same", async () => {
@@ -62,8 +84,8 @@ describe("ssr", async () => {
       const rawData = await page.evaluate(() =>
         localStorage.getItem("nuxt-utm-data")
       );
-      utmParamsArray = await JSON.parse(rawData ?? "[]");
-      expect(utmParamsArray[0].utmParams).toEqual({
+      entries = await JSON.parse(rawData ?? "[]");
+      expect(entries[0].utmParams).toEqual({
         utm_campaign: "test_campaign2",
         utm_content: "test_content2",
         utm_medium: "test_medium2",
@@ -80,8 +102,8 @@ describe("ssr", async () => {
       const rawData = await page.evaluate(() =>
         localStorage.getItem("nuxt-utm-data")
       );
-      utmParamsArray = await JSON.parse(rawData ?? "[]");
-      expect(utmParamsArray[0].utmParams).toEqual({
+      entries = await JSON.parse(rawData ?? "[]");
+      expect(entries[0].utmParams).toEqual({
         utm_campaign: "test_campaign",
         utm_content: "test_content",
         utm_medium: "test_medium",

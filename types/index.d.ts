@@ -11,6 +11,7 @@ declare module "nuxt-utm" {
     referrer: string;
     userAgent: string;
     language: string;
+    landingPageUrl: string;
     screen: {
       width: number;
       height: number;
