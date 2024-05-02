@@ -91,29 +91,29 @@ In the `$utm` array, each entry provides a `timestamp` indicating when the UTM p
 
 ```bash
 # Install dependencies
-npm install
+yarn install
 
 # Generate type stubs
-npm run dev:prepare
+yarn dev:prepare
 
 # Develop with the playground
-npm run dev
+yarn dev
 
 # Build the playground
-npm run dev:build
+yarn dev:build
 
 # Run ESLint
-npm run lint
+yarn lint
 
 # Install Playwright Browsers
 npx playwright install --with-deps
 
 # Run Vitest
-npm run test
-npm run test:watch
+yarn test
+yarn test:watch
 
 # Release new version
-npm run release
+yarn release
 ```
 
 ## License
