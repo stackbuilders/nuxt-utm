@@ -6,6 +6,10 @@
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
+**Built in collaboration with the Durst Organization**
+
+---
+
 A Nuxt 3 module for tracking UTM parameters.
 
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
