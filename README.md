@@ -53,13 +53,33 @@ That's it! You can now use Nuxt UTM in your Nuxt app ✨
 
 ## Usage
 
-You can use ```useNuxtUTM``` composable to access the UTM object:
+### Configuration
+
+You can configure the module by passing options in your `nuxt.config.ts`:
+
+```js
+export default defineNuxtConfig({
+  modules: ["nuxt-utm"],
+  utm: {
+    enabled: true, // defaults to true
+  },
+});
+```
+
+#### Options
+
+- `enabled`: Boolean (default: `true`) - Controls whether UTM tracking is active. When set to `false`, the module won't track any UTM parameters or add any functionality to your app.
+
+### Accessing UTM Data
+
+You can use `useNuxtUTM` composable to access the UTM object:
 
 ```vue
 <script setup>
 const utm = useNuxtUTM();
 </script>
 ```
+
 > Remember: You don't need to import the composable because nuxt imports it automatically.
 
 Alternatively, you can get the UTM information through the Nuxt App with the following instructions:
@@ -106,7 +126,7 @@ In the `$utm` array, each entry provides a `timestamp` indicating when the UTM p
 
 ### Devenv
 
-You can take advantage of [devenv.sh](https://devenv.sh)  to quickly create the development environment for this this project. Use it in combination with [direnv](https://direnv.net/) to quickly load all the environment while navigating into the project directory in your shell.
+You can take advantage of [devenv.sh](https://devenv.sh) to quickly create the development environment for this this project. Use it in combination with [direnv](https://direnv.net/) to quickly load all the environment while navigating into the project directory in your shell.
 
 ```bash
 # Install dependencies
