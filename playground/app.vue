@@ -1,10 +1,10 @@
 <template>
   <div>Nuxt 3 UTM module playground!</div>
-  <pre>{{ $utm }}</pre>
+  <pre>{{ utm }}</pre>
 </template>
 
 <script setup>
-import { useNuxtApp } from "nuxt/app";
+import { useNuxtUTM } from '#imports';
 
-const { $utm } = useNuxtApp();
+const utm = useNuxtUTM();
 </script>
