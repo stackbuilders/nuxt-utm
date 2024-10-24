@@ -53,6 +53,17 @@ That's it! You can now use Nuxt UTM in your Nuxt app ✨
 
 ## Usage
 
+You can use ```useNuxtUTM``` composable to access the UTM object:
+
+```vue
+<script setup>
+const utm = useNuxtUTM();
+</script>
+```
+> Remember: You don't need to import the composable because nuxt imports it automatically.
+
+Alternatively, you can get the UTM information through the Nuxt App with the following instructions:
+
 ```vue
 <script setup>
 import { useNuxtApp } from "nuxt/app";
@@ -60,7 +71,7 @@ const { $utm } = useNuxtApp();
 </script>
 ```
 
-The `$utm` will contain an array of UTM parameters collected for use. Each element in the array represents a set of UTM parameters collected from a URL visit, and is structured as follows:
+Regardless of the option you choose to use the module, the `utm' object will contain an array of UTM parameters collected for use. Each element in the array represents a set of UTM parameters collected from a URL visit, and is structured as follows
 
 ```js
 [
@@ -92,6 +103,10 @@ The `$utm` will contain an array of UTM parameters collected for use. Each eleme
 In the `$utm` array, each entry provides a `timestamp` indicating when the UTM parameters were collected, the `utmParams` object containing the UTM parameters, `additionalInfo` object with more context about the visit, and a `sessionId` to differentiate visits in different sessions.
 
 ## Development
+
+### Devenv
+
+You can take advantage of [devenv.sh](https://devenv.sh)  to quickly create the development environment for this this project. Use it in combination with [direnv](https://direnv.net/) to quickly load all the environment while navigating into the project directory in your shell.
 
 ```bash
 # Install dependencies
