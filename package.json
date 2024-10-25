@@ -54,6 +54,7 @@
     "changelogen": "^0.5.5",
     "eslint": "^8.49.0",
     "nuxt": "^3.7.3",
+    "playwright": "^1.48.1",
     "playwright-core": "^1.39.0",
     "vitest": "^0.33.0"
   }
