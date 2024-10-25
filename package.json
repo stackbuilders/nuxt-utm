@@ -1,6 +1,6 @@
 {
   "name": "nuxt-utm",
-  "version": "0.1.10",
+  "version": "0.2.2",
   "description": "A Nuxt 3 module for tracking UTM parameters.",
   "keywords": [
     "nuxt",
@@ -16,7 +16,10 @@
     "nuxt module",
     "nuxt utm"
   ],
-  "repository": "stackbuilders/nuxt-utm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stackbuilders/nuxt-utm.git"
+  },
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -36,7 +39,7 @@
     "dev": "nuxi dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "release": "npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch"
