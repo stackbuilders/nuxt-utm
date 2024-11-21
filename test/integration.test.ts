@@ -118,7 +118,10 @@ describe("Module configuration", () => {
   describe("when enabled", async () => {
     await setup({
       rootDir: fileURLToPath(new URL("./fixtures/basic", import.meta.url)),
+      server: true,
       browser: true,
+      setupTimeout: 60000,
+      build: true,
     });
 
     it("should track UTM parameters", async () => {
@@ -136,7 +139,10 @@ describe("Module configuration", () => {
   describe("when disabled", async () => {
     await setup({
       rootDir: fileURLToPath(new URL("./fixtures/disabled", import.meta.url)),
+      server: true,
       browser: true,
+      setupTimeout: 60000,
+      build: true,
     });
 
     it("should not track UTM parameters", async () => {
