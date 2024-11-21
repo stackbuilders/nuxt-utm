@@ -113,3 +113,40 @@ describe("ssr", async () => {
     });
   });
 });
+
+describe("Module configuration", () => {
+  describe("when enabled", async () => {
+    await setup({
+      rootDir: fileURLToPath(new URL("./fixtures/basic", import.meta.url)),
+      browser: true,
+    });
+
+    it("should track UTM parameters", async () => {
+      const page = await createPage(
+        "/?utm_source=test_source&utm_medium=test_medium"
+      );
+      const rawData = await page.evaluate(() =>
+        window.localStorage.getItem("nuxt-utm-data")
+      );
+      const entries = JSON.parse(rawData ?? "[]");
+      expect(entries.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("when disabled", async () => {
+    await setup({
+      rootDir: fileURLToPath(new URL("./fixtures/disabled", import.meta.url)),
+      browser: true,
+    });
+
+    it("should not track UTM parameters", async () => {
+      const page = await createPage(
+        "/?utm_source=test_source&utm_medium=test_medium"
+      );
+      const rawData = await page.evaluate(() =>
+        window.localStorage.getItem("nuxt-utm-data")
+      );
+      expect(rawData).toBeNull();
+    });
+  });
+});
