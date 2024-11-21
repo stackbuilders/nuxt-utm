@@ -17,7 +17,7 @@ export default defineNuxtModule<ModuleOptions>({
   defaults: {
     enabled: true,
   },
-  setup(options, nuxt) {
+  setup(options) {
     const resolver = createResolver(import.meta.url);
 
     if (options.enabled) {
