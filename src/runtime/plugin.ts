@@ -6,6 +6,8 @@ import {
   getUtmParams,
   getAdditionalInfo,
   isRepeatedEntry,
+  urlHasGCLID,
+  getGCLID,
 } from "./utm";
 import { ref } from "vue";
 import { defineNuxtPlugin } from "#app";
@@ -39,6 +41,10 @@ export default defineNuxtPlugin((nuxtApp) => {
       additionalInfo,
       sessionId,
     };
+
+    if (urlHasGCLID) {
+      dataObject.gclidParams = getGCLID(query);
+    }
 
     // Exit if the last entry is the same as the new entry
     if (isRepeatedEntry(data, dataObject)) return;
