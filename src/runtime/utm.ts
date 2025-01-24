@@ -80,6 +80,8 @@ export const isRepeatedEntry = (
   const lastEntry = data.value?.[0];
   const lastUtm = lastEntry?.utmParams;
   const newUtm = currentEntry.utmParams;
+  const lastGCLID = lastEntry?.gclidParams;
+  const newGCLID = currentEntry.gclidParams;
 
   return (
     lastEntry &&
@@ -88,6 +90,8 @@ export const isRepeatedEntry = (
     lastUtm.utm_medium === newUtm.utm_medium &&
     lastUtm.utm_source === newUtm.utm_source &&
     lastUtm.utm_term === newUtm.utm_term &&
-    lastEntry.sessionId === currentEntry.sessionId
+    lastEntry.sessionId === currentEntry.sessionId &&
+    lastGCLID?.gad_source === newGCLID?.gad_source &&
+    lastGCLID?.gclid === newGCLID?.gclid
   );
 };
