@@ -1,6 +1,6 @@
 import { Ref } from "vue";
 import { LocationQuery } from "vue-router";
-import { UTMParams, AdditionalInfo, DataObject } from "nuxt-utm";
+import { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from "nuxt-utm";
 
 export const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15);
@@ -35,7 +35,7 @@ export const urlHasUtmParams = (query: LocationQuery): boolean => {
       query.utm_medium ||
       query.utm_campaign ||
       query.utm_term ||
-      query.utm_content
+      query.utm_content,
   );
 };
 
@@ -46,6 +46,17 @@ export const getUtmParams = (query: LocationQuery): UTMParams => {
     utm_campaign: query.utm_campaign?.toString(),
     utm_term: query.utm_term?.toString(),
     utm_content: query.utm_content?.toString(),
+  };
+};
+
+export const urlHasGCLID = (query: LocationQuery): boolean => {
+  return Boolean(query.gclid || query.gad_source);
+};
+
+export const getGCLID = (query: LocationQuery): GCLIDParams => {
+  return {
+    gclid: query.gclid?.toString(),
+    gad_source: query.gad_source?.toString(),
   };
 };
 
@@ -64,11 +75,13 @@ export const getAdditionalInfo = (): AdditionalInfo => {
 
 export const isRepeatedEntry = (
   data: Ref<DataObject[]>,
-  currentEntry: DataObject
+  currentEntry: DataObject,
 ): boolean => {
   const lastEntry = data.value?.[0];
   const lastUtm = lastEntry?.utmParams;
   const newUtm = currentEntry.utmParams;
+  const lastGCLID = lastEntry?.gclidParams;
+  const newGCLID = currentEntry.gclidParams;
 
   return (
     lastEntry &&
@@ -77,6 +90,8 @@ export const isRepeatedEntry = (
     lastUtm.utm_medium === newUtm.utm_medium &&
     lastUtm.utm_source === newUtm.utm_source &&
     lastUtm.utm_term === newUtm.utm_term &&
-    lastEntry.sessionId === currentEntry.sessionId
+    lastEntry.sessionId === currentEntry.sessionId &&
+    lastGCLID?.gad_source === newGCLID?.gad_source &&
+    lastGCLID?.gclid === newGCLID?.gclid
   );
 };

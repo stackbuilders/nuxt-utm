@@ -7,6 +7,11 @@ declare module "nuxt-utm" {
     utm_content?: string;
   }
 
+  interface GCLIDParams {
+    gclid?: string;
+    gad_source?: string;
+  }
+
   interface AdditionalInfo {
     referrer: string;
     userAgent: string;
@@ -23,5 +28,6 @@ declare module "nuxt-utm" {
     utmParams: UTMParams;
     additionalInfo: AdditionalInfo;
     sessionId: string;
+    gclidParams?: GCLIDParams;
   }
 }
