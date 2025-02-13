@@ -2,6 +2,7 @@ name: Publish the release to npm
 
 on:
   workflow_dispatch:
+  push:
   release:
     types: [created]
 
