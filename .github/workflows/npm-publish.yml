@@ -1,8 +1,7 @@
-name: Publish the release to npm
+name: Publish to NPM
 
 on:
   workflow_dispatch:
-  push:
   release:
     types: [created]
 
@@ -17,6 +16,6 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: yarn install
       - run: yarn dev:build
-      - run: yarn release
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

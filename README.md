@@ -140,6 +140,8 @@ yarn test:watch
 yarn release
 ```
 
+For detailed information about the release process, please refer to our [Release Documentation](/docs/RELEASING.md).
+
 ## License
 
 <!-- NOTE: If you need a different type of licence, please check with the OSS team before changing it -->
