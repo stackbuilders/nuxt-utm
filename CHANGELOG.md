@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.2.5
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.3...v0.2.5)
+
+### 🏡 Chore
+
+- **CI:** Create workflow to release to NPM ([#40](https://github.com/stackbuilders/nuxt-utm/pull/40))
+- **CI:** Remove yarn publish and use npm publish instead ([5b33b32](https://github.com/stackbuilders/nuxt-utm/commit/5b33b32))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](http://github.com/sadjow))
+
 ## v0.2.4
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.3...v0.2.4)
