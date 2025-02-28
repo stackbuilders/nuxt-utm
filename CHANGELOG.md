@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.4
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.3...v0.2.4)
+
 ## v0.2.2
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.1.5...v0.2.2)
