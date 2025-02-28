@@ -1,6 +1,6 @@
 {
   "name": "nuxt-utm",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A Nuxt 3 module for tracking UTM parameters.",
   "keywords": [
     "nuxt",
@@ -40,7 +40,6 @@
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build --stub && nuxt-module-build prepare && nuxi prepare playground",
     "release": "npm run prepack && changelogen --release && git push --follow-tags",
-    "publish": "npm run prepack && npm publish",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch"
