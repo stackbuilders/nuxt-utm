@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.7
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.6...v0.2.7)
+
+### 🚀 Enhancements
+
+- Track visits even when UTM parameters are absent ([#47](https://github.com/stackbuilders/nuxt-utm/pull/47))
+
+### 🏡 Chore
+
+- **release:** V0.2.6 ([80fcf1b](https://github.com/stackbuilders/nuxt-utm/commit/80fcf1b))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](http://github.com/sadjow))
+
 ## v0.2.6
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.5...v0.2.6)
