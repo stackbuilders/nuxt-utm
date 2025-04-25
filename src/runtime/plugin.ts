@@ -2,7 +2,6 @@ import { DataObject } from "nuxt-utm";
 import {
   readLocalData,
   getSessionID,
-  urlHasUtmParams,
   getUtmParams,
   getAdditionalInfo,
   isRepeatedEntry,
