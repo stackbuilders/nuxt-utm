@@ -6,7 +6,7 @@
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
-**Built in collaboration with the Durst Organization**
+**Built in collaboration with The Durst Organization**
 
 ---
 
