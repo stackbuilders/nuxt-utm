@@ -54,12 +54,3 @@ coverage
 Network Trash Folder
 Temporary Items
 .apdisk
-# Devenv
-.devenv*
-devenv.local.nix
-
-# direnv
-.direnv
-
-# pre-commit
-.pre-commit-config.yaml

@@ -109,10 +109,6 @@ In the `$utm` array, each entry provides a `timestamp` indicating when the UTM p
 
 ## Development
 
-### Devenv
-
-You can take advantage of [devenv.sh](https://devenv.sh) to quickly create the development environment for this this project. Use it in combination with [direnv](https://direnv.net/) to quickly load all the environment while navigating into the project directory in your shell.
-
 ```bash
 # Install dependencies
 yarn install
