@@ -2,7 +2,6 @@ import { DataObject } from "nuxt-utm";
 import {
   readLocalData,
   getSessionID,
-  urlHasUtmParams,
   getUtmParams,
   getAdditionalInfo,
   isRepeatedEntry,
@@ -25,14 +24,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     const sessionId = getSessionID(SESSION_ID_KEY);
 
     const query = nuxtApp._route.query;
-
-    // Exit if no UTM parameters found
-    if (!urlHasUtmParams(query)) return;
-
     const utmParams = getUtmParams(query);
-
     const additionalInfo = getAdditionalInfo();
-
     const timestamp = new Date().toISOString();
 
     const dataObject: DataObject = {
@@ -42,7 +35,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       sessionId,
     };
 
-    if (urlHasGCLID) {
+    if (urlHasGCLID(query)) {
       dataObject.gclidParams = getGCLID(query);
     }
 

@@ -68,6 +68,17 @@ describe("getUtmParams function", () => {
       utm_content: "test_content",
     });
   });
+
+  it("Returns undefined values when no UTM params are present", () => {
+    const locationQueryMock = {};
+    expect(getUtmParams(locationQueryMock)).toEqual({
+      utm_source: undefined,
+      utm_medium: undefined,
+      utm_campaign: undefined,
+      utm_term: undefined,
+      utm_content: undefined,
+    });
+  });
 });
 
 describe("isRepeatedEntry function", () => {

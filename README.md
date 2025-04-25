@@ -6,7 +6,7 @@
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
 
-**Built in collaboration with the Durst Organization**
+**Built in collaboration with The Durst Organization**
 
 ---
 
@@ -108,10 +108,6 @@ Regardless of the option you choose to use the module, the `utm' object will con
 In the `$utm` array, each entry provides a `timestamp` indicating when the UTM parameters were collected, the `utmParams` object containing the UTM parameters, `additionalInfo` object with more context about the visit, and a `sessionId` to differentiate visits in different sessions.
 
 ## Development
-
-### Devenv
-
-You can take advantage of [devenv.sh](https://devenv.sh) to quickly create the development environment for this this project. Use it in combination with [direnv](https://direnv.net/) to quickly load all the environment while navigating into the project directory in your shell.
 
 ```bash
 # Install dependencies

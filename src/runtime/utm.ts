@@ -35,7 +35,7 @@ export const urlHasUtmParams = (query: LocationQuery): boolean => {
       query.utm_medium ||
       query.utm_campaign ||
       query.utm_term ||
-      query.utm_content,
+      query.utm_content
   );
 };
 
@@ -75,7 +75,7 @@ export const getAdditionalInfo = (): AdditionalInfo => {
 
 export const isRepeatedEntry = (
   data: Ref<DataObject[]>,
-  currentEntry: DataObject,
+  currentEntry: DataObject
 ): boolean => {
   const lastEntry = data.value?.[0];
   const lastUtm = lastEntry?.utmParams;
