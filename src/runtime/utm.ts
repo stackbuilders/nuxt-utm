@@ -1,6 +1,11 @@
-import { Ref } from "vue";
-import { LocationQuery } from "vue-router";
-import { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from "nuxt-utm";
+import type { Ref } from "vue";
+import type { LocationQuery } from "vue-router";
+import type {
+  UTMParams,
+  AdditionalInfo,
+  DataObject,
+  GCLIDParams,
+} from "nuxt-utm";
 
 export const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15);

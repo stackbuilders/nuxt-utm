@@ -1,4 +1,4 @@
-import { DataObject } from "nuxt-utm";
+import type { DataObject } from "nuxt-utm";
 import {
   readLocalData,
   getSessionID,
@@ -10,7 +10,7 @@ import {
 } from "./utm";
 import { ref } from "vue";
 import { defineNuxtPlugin } from "#app";
-import { HookResult } from "@unhead/schema";
+// import { type HookResult } from "@unhead/schema";
 
 const LOCAL_STORAGE_KEY = "nuxt-utm-data";
 const SESSION_ID_KEY = "nuxt-utm-session-id";
@@ -18,7 +18,7 @@ const SESSION_ID_KEY = "nuxt-utm-session-id";
 export default defineNuxtPlugin((nuxtApp) => {
   const data = ref<DataObject[]>([]);
 
-  nuxtApp.hook("app:mounted", (): HookResult => {
+  nuxtApp.hook("app:mounted", (): any => {
     data.value = readLocalData(LOCAL_STORAGE_KEY);
 
     const sessionId = getSessionID(SESSION_ID_KEY);
