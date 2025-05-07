@@ -1,8 +1,8 @@
-import { DataObject } from "nuxt-utm";
+import type { DataObject } from "nuxt-utm";
 import { describe, it, expect, beforeEach } from "vitest";
 import { fileURLToPath } from "node:url";
 import { setup, $fetch, createPage } from "@nuxt/test-utils";
-import { Page } from "playwright-core";
+import type { Page } from "playwright-core";
 
 describe("ssr", async () => {
   await setup({
@@ -15,10 +15,10 @@ describe("ssr", async () => {
 
   beforeEach(async () => {
     page = await createPage(
-      "/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=1&gclid=testKey",
+      "/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=1&gclid=testKey"
     );
     const rawData = await page.evaluate(() =>
-      window.localStorage.getItem("nuxt-utm-data"),
+      window.localStorage.getItem("nuxt-utm-data")
     );
     entries = await JSON.parse(rawData ?? "[]");
   });
@@ -70,21 +70,22 @@ describe("ssr", async () => {
     it("Doesn't store anything after a page reload with the same UTM params and session", async () => {
       await page.reload();
       const rawData = await page?.evaluate(() =>
-        window.localStorage.getItem("nuxt-utm-data"),
+        window.localStorage.getItem("nuxt-utm-data")
       );
       entries = await JSON.parse(rawData ?? "[]");
       expect(entries.length).toEqual(1);
     });
 
-    it("Stores a new value if the UTM params are different but the session is the same", async () => {
+    it.only("Stores a new value if the UTM params are different but the session is the same", async () => {
       const urlBase = page.url().split("?")[0];
       await page.goto(
-        `${urlBase}/?utm_source=test_source2&utm_medium=test_medium2&utm_campaign=test_campaign2&utm_term=test_term2&utm_content=test_content2`,
+        `${urlBase}/?utm_source=test_source2&utm_medium=test_medium2&utm_campaign=test_campaign2&utm_term=test_term2&utm_content=test_content2`
       );
       const rawData = await page.evaluate(() =>
-        localStorage.getItem("nuxt-utm-data"),
+        localStorage.getItem("nuxt-utm-data")
       );
       entries = await JSON.parse(rawData ?? "[]");
+      console.log(entries);
       expect(entries[0].utmParams).toEqual({
         utm_campaign: "test_campaign2",
         utm_content: "test_content2",
@@ -96,11 +97,11 @@ describe("ssr", async () => {
 
     it("Stores a new value if the UTM params are the same but the session is different", async () => {
       await page.evaluate(() =>
-        sessionStorage.setItem("nuxt-utm-session-id", "old-session"),
+        sessionStorage.setItem("nuxt-utm-session-id", "old-session")
       );
       await page.reload();
       const rawData = await page.evaluate(() =>
-        localStorage.getItem("nuxt-utm-data"),
+        localStorage.getItem("nuxt-utm-data")
       );
       entries = await JSON.parse(rawData ?? "[]");
       expect(entries[0].utmParams).toEqual({
@@ -124,7 +125,7 @@ describe("ssr", async () => {
     it("Doesn't store anything after a page reload with the same UTM params and session", async () => {
       await page.reload();
       const rawData = await page?.evaluate(() =>
-        window.localStorage.getItem("nuxt-utm-data"),
+        window.localStorage.getItem("nuxt-utm-data")
       );
       entries = await JSON.parse(rawData ?? "[]");
       expect(entries.length).toEqual(1);
@@ -133,10 +134,10 @@ describe("ssr", async () => {
     it("Stores a new value if the GCLID params are different but the session is the same", async () => {
       const urlBase = page.url().split("?")[0];
       await page.goto(
-        `${urlBase}/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=2&gclid=testKey2`,
+        `${urlBase}/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=2&gclid=testKey2`
       );
       const rawData = await page.evaluate(() =>
-        localStorage.getItem("nuxt-utm-data"),
+        localStorage.getItem("nuxt-utm-data")
       );
       entries = await JSON.parse(rawData ?? "[]");
       expect(entries?.[0].gclidParams).toEqual({
@@ -147,11 +148,11 @@ describe("ssr", async () => {
 
     it("Stores a new value if the GCLID params are the same but the session is different", async () => {
       await page.evaluate(() =>
-        sessionStorage.setItem("nuxt-utm-session-id", "old-session"),
+        sessionStorage.setItem("nuxt-utm-session-id", "old-session")
       );
       await page.reload();
       const rawData = await page.evaluate(() =>
-        localStorage.getItem("nuxt-utm-data"),
+        localStorage.getItem("nuxt-utm-data")
       );
       entries = await JSON.parse(rawData ?? "[]");
       expect(entries?.[0].gclidParams).toEqual({

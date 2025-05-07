@@ -1,5 +1,5 @@
-import { ref, Ref } from "vue";
-import { DataObject } from "nuxt-utm";
+import { ref, type Ref } from "vue";
+import type { DataObject } from "nuxt-utm";
 import {
   isRepeatedEntry,
   readLocalData,
