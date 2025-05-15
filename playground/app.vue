@@ -4,7 +4,7 @@
 </template>
 
 <script setup>
-import { useNuxtUTM } from '#imports';
+import { useNuxtUTM } from '#imports'
 
-const utm = useNuxtUTM();
+const utm = useNuxtUTM()
 </script>

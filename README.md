@@ -45,8 +45,8 @@ npm install --save-dev nuxt-utm
 
 ```js
 export default defineNuxtConfig({
-  modules: ["nuxt-utm"],
-});
+  modules: ['nuxt-utm'],
+})
 ```
 
 That's it! You can now use Nuxt UTM in your Nuxt app ✨
@@ -57,7 +57,7 @@ You can use `useNuxtUTM` composable to access the UTM object:
 
 ```vue
 <script setup>
-const utm = useNuxtUTM();
+const utm = useNuxtUTM()
 </script>
 ```
 
@@ -67,42 +67,41 @@ Alternatively, you can get the UTM information through the Nuxt App with the fol
 
 ```vue
 <script setup>
-import { useNuxtApp } from "nuxt/app";
-const { $utm } = useNuxtApp();
+import { useNuxtApp } from 'nuxt/app'
+const { $utm } = useNuxtApp()
 </script>
 ```
 
 Regardless of the option you choose to use the module, the `utm' object will contain an array of UTM parameters collected for use. Each element in the array represents a set of UTM parameters collected from a URL visit, and is structured as follows
 
-```js
+```json
 [
   {
-    timestamp: "2023-11-02T10:11:17.219Z", // Timestamp of the URL visit
-    utmParams: {
-      utm_source: "test_source",
-      utm_medium: "test_medium",
-      utm_campaign: "test_campaign",
-      utm_term: "test_term",
-      utm_content: "test_content",
+    "timestamp": "2023-11-02T10:11:17.219Z",
+    "utmParams": {
+      "utm_source": "test_source",
+      "utm_medium": "test_medium",
+      "utm_campaign": "test_campaign",
+      "utm_term": "test_term",
+      "utm_content": "test_content"
     },
-    additionalInfo: {
-      referrer: "http://referrer.url", // Referrer URL
-      userAgent: "User-Agent String", // User-Agent string of the browser
-      language: "en-GB", // Language setting of the browser
-      landingPageUrl: "http://landingpage.url", // The URL of the page the user landed on
-      screen: {
-        width: 1728,
-        height: 1117,
-      },
+    "additionalInfo": {
+      "referrer": "http://referrer.url",
+      "userAgent": "User-Agent String",
+      "language": "en-GB",
+      "landingPageUrl": "http://landingpage.url",
+      "screen": {
+        "width": 1728,
+        "height": 1117
+      }
     },
-    sessionId: "beai1gx7dg",
-    gclidParams: {
-      gclid: "CjklsefawEFRfeafads",
-      gad_source: "1",
-    },
-  }, // the first item in this array is the most recent
-  // ... old items
-];
+    "sessionId": "beai1gx7dg",
+    "gclidParams": {
+      "gclid": "CjklsefawEFRfeafads",
+      "gad_source": "1"
+    }
+  }
+]
 ```
 
 In the `$utm` array, each entry provides a `timestamp` indicating when the UTM parameters were collected, the `utmParams` object containing the UTM parameters, `additionalInfo` object with more context about the visit, and a `sessionId` to differentiate visits in different sessions.

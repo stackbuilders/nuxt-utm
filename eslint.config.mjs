@@ -10,11 +10,28 @@ export default createConfigForNuxt({
     stylistic: true,
   },
   dirs: {
-    src: [
-      './playground',
+    src: ['./playground'],
+  },
+}).append({
+  rules: {
+    '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
+    '@stylistic/semi': ['error', 'never'],
+    '@stylistic/comma-dangle': ['error', 'always-multiline'],
+    '@stylistic/operator-linebreak': 'off',
+    '@stylistic/brace-style': 'off',
+    '@stylistic/indent-binary-ops': 'off',
+    '@stylistic/member-delimiter-style': [
+      'error',
+      {
+        multiline: {
+          delimiter: 'none',
+          requireLast: false,
+        },
+        singleline: {
+          delimiter: 'comma',
+          requireLast: false,
+        },
+      },
     ],
   },
 })
-  .append(
-    // your custom flat config here...
-  )
