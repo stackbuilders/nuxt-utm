@@ -72,7 +72,7 @@ describe('ssr', async () => {
       expect(entries.length).toEqual(1)
     })
 
-    it.only('Stores a new value if the UTM params are different but the session is the same', async () => {
+    it('Stores a new value if the UTM params are different but the session is the same', async () => {
       const urlBase = page.url().split('?')[0]
       await page.goto(
         `${urlBase}/?utm_source=test_source2&utm_medium=test_medium2&utm_campaign=test_campaign2&utm_term=test_term2&utm_content=test_content2`,
