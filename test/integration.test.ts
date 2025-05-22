@@ -73,13 +73,24 @@ describe('ssr', async () => {
     })
 
     it('Stores a new value if the UTM params are different but the session is the same', async () => {
-      const urlBase = page.url().split('?')[0]
-      await page.goto(
-        `${urlBase}/?utm_source=test_source2&utm_medium=test_medium2&utm_campaign=test_campaign2&utm_term=test_term2&utm_content=test_content2`,
+      const currentSessionId = await page.evaluate(() =>
+        sessionStorage.getItem('nuxt-utm-session-id'),
       )
-      const rawData = await page.evaluate(() => localStorage.getItem('nuxt-utm-data'))
+
+      const newPage = await createPage(
+        '/?utm_source=test_source2&utm_medium=test_medium2&utm_campaign=test_campaign2&utm_term=test_term2&utm_content=test_content2',
+      )
+
+      if (currentSessionId) {
+        await newPage.evaluate((sessionId) => {
+          sessionStorage.setItem('nuxt-utm-session-id', sessionId)
+        }, currentSessionId)
+      }
+
+      await newPage.reload()
+
+      const rawData = await newPage.evaluate(() => localStorage.getItem('nuxt-utm-data'))
       entries = await JSON.parse(rawData ?? '[]')
-      console.log(entries)
       expect(entries[0].utmParams).toEqual({
         utm_campaign: 'test_campaign2',
         utm_content: 'test_content2',
@@ -87,6 +98,8 @@ describe('ssr', async () => {
         utm_source: 'test_source2',
         utm_term: 'test_term2',
       })
+
+      await newPage.close()
     })
 
     it('Stores a new value if the UTM params are the same but the session is different', async () => {
@@ -120,16 +133,30 @@ describe('ssr', async () => {
     })
 
     it('Stores a new value if the GCLID params are different but the session is the same', async () => {
-      const urlBase = page.url().split('?')[0]
-      await page.goto(
-        `${urlBase}/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=2&gclid=testKey2`,
+      const currentSessionId = await page.evaluate(() =>
+        sessionStorage.getItem('nuxt-utm-session-id'),
       )
-      const rawData = await page.evaluate(() => localStorage.getItem('nuxt-utm-data'))
+
+      const newPage = await createPage(
+        '/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=2&gclid=testKey2',
+      )
+
+      if (currentSessionId) {
+        await newPage.evaluate((sessionId) => {
+          sessionStorage.setItem('nuxt-utm-session-id', sessionId)
+        }, currentSessionId)
+      }
+
+      await newPage.reload()
+
+      const rawData = await newPage.evaluate(() => localStorage.getItem('nuxt-utm-data'))
       entries = await JSON.parse(rawData ?? '[]')
       expect(entries?.[0].gclidParams).toEqual({
         gclid: 'testKey2',
         gad_source: '2',
       })
+
+      await newPage.close()
     })
 
     it('Stores a new value if the GCLID params are the same but the session is different', async () => {

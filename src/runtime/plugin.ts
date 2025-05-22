@@ -18,7 +18,9 @@ const SESSION_ID_KEY = 'nuxt-utm-session-id'
 export default defineNuxtPlugin((nuxtApp) => {
   const data = ref<DataObject[]>([])
 
-  nuxtApp.hook('app:mounted', () => {
+  const processUtmData = () => {
+    if (typeof window === 'undefined') return
+
     data.value = readLocalData(LOCAL_STORAGE_KEY)
 
     const sessionId = getSessionID(SESSION_ID_KEY)
@@ -45,7 +47,9 @@ export default defineNuxtPlugin((nuxtApp) => {
     // Add the new item to the data array
     data.value.unshift(dataObject)
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.value))
-  })
+  }
+
+  nuxtApp.hook('app:mounted', processUtmData)
 
   return {
     provide: {
