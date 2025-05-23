@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { LocationQuery } from 'vue-router'
-import { getGCLID } from '../../src/runtime/utm'
 import type { GCLIDParams } from 'nuxt-utm'
+import { getGCLID } from '../../src/runtime/utm'
 
 describe('getGCLID', () => {
   it('should return GCLID and gad_source when both are present in query', () => {
