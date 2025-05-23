@@ -1,6 +1,6 @@
 {
   "name": "nuxt-utm",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A Nuxt 3 module for tracking UTM parameters.",
   "keywords": [
     "nuxt",
@@ -25,8 +25,7 @@
   "exports": {
     ".": {
       "types": "./dist/types.d.mts",
-      "import": "./dist/module.mjs",
-      "require": "./dist/module.cjs"
+      "import": "./dist/module.mjs"
     }
   },
   "main": "./dist/module.mjs",
