@@ -1,0 +1,22 @@
+# dependencies
+node_modules
+.nuxt
+.output
+dist
+
+# logs
+*.log
+
+# coverage files
+coverage
+.nyc_output
+
+# OSX
+.DS_Store
+
+# Editors
+.idea
+.vscode
+
+# git
+.git 
