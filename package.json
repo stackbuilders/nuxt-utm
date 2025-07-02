@@ -1,6 +1,6 @@
 {
   "name": "nuxt-utm",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "A Nuxt 3 module for tracking UTM parameters.",
   "keywords": [
     "nuxt",

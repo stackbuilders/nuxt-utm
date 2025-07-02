@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.10
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.7...v0.2.10)
+
+### 🩹 Fixes
+
+- Address security vulnerabilities and upgrade Nuxt to v3.17.2 ([#49](https://github.com/stackbuilders/nuxt-utm/pull/49))
+- Npm pre-pack build by removing the clj requiredment ([954122b](https://github.com/stackbuilders/nuxt-utm/commit/954122b))
+
+### 🏡 Chore
+
+- **release:** V0.2.8 ([0d0e1e3](https://github.com/stackbuilders/nuxt-utm/commit/0d0e1e3))
+- **release:** V0.2.9 ([2e827c2](https://github.com/stackbuilders/nuxt-utm/commit/2e827c2))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](https://github.com/sadjow))
+- Luis David Barrera Díaz <hakenprog@gmail.com>
+
 ## v0.2.9
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.7...v0.2.9)
