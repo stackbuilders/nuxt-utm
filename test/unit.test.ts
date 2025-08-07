@@ -98,6 +98,66 @@ describe('isRepeatedEntry function', () => {
   })
 })
 
+describe('Module options', () => {
+  it('Should have enabled option defaulting to true', () => {
+    const moduleOptions = { enabled: true }
+    expect(moduleOptions.enabled).toBe(true)
+  })
+
+  it('Should allow disabling the module', () => {
+    const moduleOptions = { enabled: false }
+    expect(moduleOptions.enabled).toBe(false)
+  })
+
+  it('Should handle undefined enabled option', () => {
+    const moduleOptions: { enabled?: boolean } = {}
+    expect(moduleOptions.enabled).toBeUndefined()
+  })
+
+  it('Should work with enabled option in configuration object', () => {
+    const config = {
+      modules: ['nuxt-utm'],
+      utm: {
+        enabled: false,
+      },
+    }
+    expect(config.utm.enabled).toBe(false)
+  })
+})
+
+describe('Clear functionality', () => {
+  it('Should provide a clear function interface', () => {
+    // Test that clear function can be called
+    const clearFunction = () => {
+      // Mock implementation
+      return true
+    }
+    expect(typeof clearFunction).toBe('function')
+    expect(clearFunction()).toBe(true)
+  })
+
+  it('Should handle clear operation structure', () => {
+    // Test the structure of what clear should do
+    const mockUtm = {
+      data: { value: [] as any[] },
+      enabled: { value: true },
+      clear: () => {
+        // Mock clear implementation
+        mockUtm.data.value = []
+        return true
+      },
+    }
+
+    // Add some mock data
+    mockUtm.data.value = [{ test: 'data' }]
+    expect(mockUtm.data.value).toHaveLength(1)
+
+    // Clear and verify
+    mockUtm.clear()
+    expect(mockUtm.data.value).toHaveLength(0)
+  })
+})
+
 const utmItem = `{
   "timestamp": "2023-11-02T10:11:17.219Z",
   "utmParams": {

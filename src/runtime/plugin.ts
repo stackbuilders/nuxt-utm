@@ -1,5 +1,5 @@
 import type { DataObject } from 'nuxt-utm'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import {
   readLocalData,
   getSessionID,
@@ -9,24 +9,42 @@ import {
   urlHasGCLID,
   getGCLID,
 } from './utm'
-import { defineNuxtPlugin } from '#app'
+import { defineNuxtPlugin, useRuntimeConfig, useRoute } from '#app'
 // import { type HookResult } from "@unhead/schema";
 
 const LOCAL_STORAGE_KEY = 'nuxt-utm-data'
 const SESSION_ID_KEY = 'nuxt-utm-session-id'
 
 export default defineNuxtPlugin((nuxtApp) => {
+  const runtimeConfig = useRuntimeConfig()
+  const utmConfig = (runtimeConfig.public.utm as { enabled?: boolean } | undefined) ?? {}
+  const enabled = ref(utmConfig.enabled ?? true)
+
   const data = ref<DataObject[]>([])
 
-  const processUtmData = () => {
-    if (typeof window === 'undefined') return
-
+  // Initialize data from localStorage on startup
+  if (typeof window !== 'undefined') {
     data.value = readLocalData(LOCAL_STORAGE_KEY)
+  }
 
-    const sessionId = getSessionID(SESSION_ID_KEY)
+  const processUtmData = () => {
+    if (typeof window === 'undefined' || !enabled.value) return
+
+    // Always refresh data from localStorage first
+    data.value = readLocalData(LOCAL_STORAGE_KEY)
 
     const query = nuxtApp._route.query
     const utmParams = getUtmParams(query)
+
+    // Only proceed if we have UTM parameters in the URL
+    const hasUtmParams = Object.values(utmParams).some((value) => value !== undefined)
+    const hasGCLID = urlHasGCLID(query)
+
+    if (!hasUtmParams && !hasGCLID) {
+      return // No UTM params or GCLID, don't add new entry
+    }
+
+    const sessionId = getSessionID(SESSION_ID_KEY)
     const additionalInfo = getAdditionalInfo()
     const timestamp = new Date().toISOString()
 
@@ -37,7 +55,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       sessionId,
     }
 
-    if (urlHasGCLID(query)) {
+    if (hasGCLID) {
       dataObject.gclidParams = getGCLID(query)
     }
 
@@ -49,11 +67,19 @@ export default defineNuxtPlugin((nuxtApp) => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.value))
   }
 
-  nuxtApp.hook('app:mounted', processUtmData)
+  const clearData = () => {
+    if (typeof window === 'undefined') return
+    localStorage.removeItem(LOCAL_STORAGE_KEY)
+    sessionStorage.removeItem(SESSION_ID_KEY)
+    data.value = []
+  }
+
+  const route = useRoute()
+  watch(() => route.fullPath, processUtmData, { immediate: true })
 
   return {
     provide: {
-      utm: data,
+      utm: { data, enabled, clear: clearData },
     },
   }
 })
