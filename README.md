@@ -10,7 +10,7 @@
 
 ---
 
-A Nuxt 3 module for tracking UTM parameters.
+A Nuxt 3/4 module for tracking UTM parameters.
 
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
   <!-- - [🏀 Online playground](https://stackblitz.com/github/stackbuilders/nuxt-utm?file=playground%2Fapp.vue) -->
