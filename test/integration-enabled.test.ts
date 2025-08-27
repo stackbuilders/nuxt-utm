@@ -18,6 +18,7 @@ describe('Module when enabled', async () => {
     page = await createPage(
       '/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=1&gclid=testKey',
     )
+    await page.waitForTimeout(500) // Wait for data to be processed
     const rawData = await page.evaluate(() => window.localStorage.getItem('nuxt-utm-data'))
     entries = await JSON.parse(rawData ?? '[]')
   })

@@ -1,12 +1,13 @@
 <template>
   <div>
     <h1>UTM Tracker</h1>
-    <pre>{{ $utm }}</pre>
+    <p>Tracking: {{ utm.trackingEnabled.value ? 'Enabled' : 'Disabled' }}</p>
+    <pre>{{ utm.data.value }}</pre>
   </div>
 </template>
 
 <script setup>
-import { useNuxtApp } from 'nuxt/app'
+import { useNuxtUTM } from '#imports'
 
-const { $utm } = useNuxtApp()
+const utm = useNuxtUTM()
 </script>
