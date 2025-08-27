@@ -4,9 +4,10 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { setup, $fetch, createPage } from '@nuxt/test-utils'
 import type { Page } from 'playwright-core'
 
-describe('ssr', async () => {
+describe('Module when enabled', async () => {
   await setup({
     rootDir: fileURLToPath(new URL('./fixtures/basic', import.meta.url)),
+    server: true,
     browser: true,
   })
 
