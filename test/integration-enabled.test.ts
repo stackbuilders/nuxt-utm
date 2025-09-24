@@ -4,9 +4,10 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { setup, $fetch, createPage } from '@nuxt/test-utils'
 import type { Page } from 'playwright-core'
 
-describe('ssr', async () => {
+describe('Module when enabled', async () => {
   await setup({
     rootDir: fileURLToPath(new URL('./fixtures/basic', import.meta.url)),
+    server: true,
     browser: true,
   })
 
@@ -17,6 +18,7 @@ describe('ssr', async () => {
     page = await createPage(
       '/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content&gad_source=1&gclid=testKey',
     )
+    await page.waitForFunction(() => window.localStorage.getItem('nuxt-utm-data'))
     const rawData = await page.evaluate(() => window.localStorage.getItem('nuxt-utm-data'))
     entries = await JSON.parse(rawData ?? '[]')
   })

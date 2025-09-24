@@ -1,5 +1,12 @@
 export default defineNuxtConfig({
   modules: ['../src/module'],
   devtools: { enabled: true },
-  utm: {},
+  app: {
+    head: {
+      title: 'Nuxt UTM Playground',
+    },
+  },
+  utm: {
+    trackingEnabled: true,
+  },
 })
