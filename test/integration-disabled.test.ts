@@ -11,7 +11,7 @@ describe('Module when tracking disabled by default', async () => {
 
   it('should not track UTM parameters when disabled', async () => {
     const page = await createPage('/?utm_source=test_source&utm_medium=test_medium')
-    await page.waitForTimeout(500)
+    await page.waitForSelector('p:has-text("Tracking: Disabled")')
     const rawData = await page.evaluate(() => window.localStorage.getItem('nuxt-utm-data'))
     expect(rawData).toBeNull()
     await page.close()
