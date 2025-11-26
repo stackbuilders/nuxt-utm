@@ -69,7 +69,7 @@
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
-    "nuxt": "^3.17.2 || ^4.0.0",
+    "nuxt": "^4.1.0",
     "playwright": "^1.52.0",
     "playwright-core": "^1.52.0",
     "prettier": "^3.5.3",
