@@ -10,7 +10,7 @@
 
 ---
 
-A Nuxt 3 module for tracking UTM parameters.
+A Nuxt 3/4 module for tracking UTM parameters.
 
 - [✨ &nbsp;Release Notes](/CHANGELOG.md)
   <!-- - [🏀 Online playground](https://stackblitz.com/github/stackbuilders/nuxt-utm?file=playground%2Fapp.vue) -->
@@ -53,26 +53,122 @@ That's it! You can now use Nuxt UTM in your Nuxt app ✨
 
 ## Usage
 
-You can use `useNuxtUTM` composable to access the UTM object:
+### Configuration
+
+You can configure the module by passing options in your `nuxt.config.ts`:
+
+```js
+export default defineNuxtConfig({
+  modules: ['nuxt-utm'],
+  utm: {
+    trackingEnabled: true, // defaults to true - initial tracking state
+  },
+})
+```
+
+#### Options
+
+- `trackingEnabled`: Boolean (default: `true`) - Sets the initial state for UTM tracking. This can be changed at runtime.
+
+### Runtime Tracking Control
+
+The module provides runtime control over tracking, perfect for implementing cookie consent banners or user privacy preferences.
+
+#### Using the Composable
 
 ```vue
 <script setup>
 const utm = useNuxtUTM()
+
+// The composable returns:
+// - data: Reactive array of collected UTM data
+// - trackingEnabled: Reactive boolean indicating if tracking is active
+// - enableTracking(): Enable UTM tracking
+// - disableTracking(): Disable UTM tracking
+// - clearData(): Clear all stored UTM data
 </script>
 ```
 
-> Remember: You don't need to import the composable because nuxt imports it automatically.
+#### Example: Cookie Banner Integration
 
-Alternatively, you can get the UTM information through the Nuxt App with the following instructions:
+```vue
+<template>
+  <div v-if="showBanner" class="cookie-banner">
+    <p>We use tracking to improve your experience.</p>
+    <button @click="acceptTracking">Accept</button>
+    <button @click="rejectTracking">Reject</button>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const utm = useNuxtUTM()
+const showBanner = ref(!utm.trackingEnabled.value)
+
+const acceptTracking = () => {
+  utm.enableTracking()
+  showBanner.value = false
+}
+
+const rejectTracking = () => {
+  utm.disableTracking()
+  utm.clearData() // Optional: clear any existing data
+  showBanner.value = false
+}
+</script>
+```
+
+#### Privacy Controls
+
+```vue
+<template>
+  <div class="privacy-settings">
+    <h3>Privacy Settings</h3>
+    <label>
+      <input 
+        type="checkbox" 
+        :checked="utm.trackingEnabled.value"
+        @change="toggleTracking"
+      />
+      Enable UTM tracking
+    </label>
+    <button @click="utm.clearData" v-if="utm.data.value.length > 0">
+      Clear tracking data ({{ utm.data.value.length }} entries)
+    </button>
+  </div>
+</template>
+
+<script setup>
+const utm = useNuxtUTM()
+
+const toggleTracking = (event) => {
+  if (event.target.checked) {
+    utm.enableTracking()
+  } else {
+    utm.disableTracking()
+  }
+}
+</script>
+```
+
+### Accessing UTM Data
+
+You can use `useNuxtUTM` composable to access the UTM data:
 
 ```vue
 <script setup>
-import { useNuxtApp } from 'nuxt/app'
-const { $utm } = useNuxtApp()
+const utm = useNuxtUTM()
+
+// Access the collected data
+console.log(utm.data.value)
 </script>
 ```
 
-Regardless of the option you choose to use the module, the `utm' object will contain an array of UTM parameters collected for use. Each element in the array represents a set of UTM parameters collected from a URL visit, and is structured as follows
+> Remember: You don't need to import the composable because Nuxt imports it automatically.
+
+### Data Structure
+
+The `data` property contains an array of UTM parameters collected. Each element in the array represents a set of UTM parameters collected from a URL visit, and is structured as follows
 
 ```json
 [
@@ -104,7 +200,15 @@ Regardless of the option you choose to use the module, the `utm' object will con
 ]
 ```
 
-In the `$utm` array, each entry provides a `timestamp` indicating when the UTM parameters were collected, the `utmParams` object containing the UTM parameters, `additionalInfo` object with more context about the visit, and a `sessionId` to differentiate visits in different sessions.
+Each entry provides a `timestamp` indicating when the UTM parameters were collected, the `utmParams` object containing the UTM parameters, `additionalInfo` object with more context about the visit, and a `sessionId` to differentiate visits in different sessions.
+
+### Key Features
+
+- **Runtime Control**: Enable/disable tracking dynamically based on user consent
+- **Privacy Friendly**: Respects user preferences and provides clear data management
+- **Persistent Preferences**: Tracking preferences are saved and persist across sessions
+- **Data Clearing**: Ability to completely remove all collected data
+- **Session Management**: Automatically manages sessions to avoid duplicate tracking
 
 ## Development
 
