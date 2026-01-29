@@ -32,7 +32,7 @@ jobs:
             echo "version=$VERSION" >> $GITHUB_OUTPUT
           fi
 
-  create-release:
+  release-and-publish:
     needs: check-release
     if: needs.check-release.outputs.should_release == 'true'
     runs-on: ubuntu-latest
@@ -49,3 +49,22 @@ jobs:
           gh release create "v$VERSION" \
             --title "v$VERSION" \
             --generate-notes
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build
+        run: yarn dev:build
+
+      - name: Prepack
+        run: npm run prepack
+
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
