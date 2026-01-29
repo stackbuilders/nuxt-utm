@@ -1,0 +1,51 @@
+name: Release on Merge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Triggers on version bump; actual release check happens in check-release job
+      - 'package.json'
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.check.outputs.should_release }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if release needed
+        id: check
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists, skipping release"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          else
+            echo "Tag $TAG does not exist, will create release"
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
+  create-release:
+    needs: check-release
+    if: needs.check-release.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ needs.check-release.outputs.version }}"
+          gh release create "v$VERSION" \
+            --title "v$VERSION" \
+            --generate-notes

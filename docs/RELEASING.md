@@ -4,22 +4,34 @@ This document outlines the release process for the Nuxt UTM module.
 
 ## Release Workflow
 
-We follow a two-step release process:
+We follow a PR-based release process that works with protected branches:
 
-1. **Manual Release Preparation (Local)**:
+```mermaid
+flowchart TD
+    A[Create release branch] --> B[Run yarn release:prepare]
+    B --> C[Commit and push branch]
+    C --> D[Open PR to main]
+    D --> E[PR Review and Merge]
+    E --> F{Version tag exists?}
+    F -->|No| G[Create git tag]
+    G --> H[Create GitHub Release]
+    H --> I[Publish to NPM]
+    F -->|Yes| J[Skip release]
+```
 
-   - Version bump
+1. **Create a Release PR**:
+
+   - Version bump in `package.json`
    - CHANGELOG update
-   - Tag creation
-   - Git commit
+   - Open PR for review
 
-2. **Automated NPM Publishing (GitHub Actions)**:
-   - Triggered by the newly created release/tag
-   - Builds and publishes the package to NPM
+2. **Automated Release (GitHub Actions)**:
+   - Triggered automatically when the PR is merged to main
+   - Detects the new version and creates a git tag
+   - Creates a GitHub Release
+   - Publishes the package to NPM
 
-## Manual Release Steps
-
-To create a new release:
+## Creating a Release
 
 1. Ensure you have the latest changes from the main branch:
 
@@ -28,43 +40,51 @@ To create a new release:
    git pull origin main
    ```
 
-2. Make sure all tests pass:
+2. Create a release branch:
+
+   ```bash
+   git checkout -b release-X.Y.Z
+   ```
+
+3. Make sure all tests pass:
 
    ```bash
    yarn test
    ```
 
-3. Run the release script, which will:
+4. Run the release script, which will:
 
-   - Bump the version in package.json
-   - Update the CHANGELOG.md
-   - Create a git tag
-   - Commit changes
+   - Bump the version in `package.json`
+   - Update the `CHANGELOG.md`
 
    ```bash
-   yarn release
+   yarn release:prepare
    ```
 
-4. Push the changes including the new tag:
+5. Commit and push the release branch:
+
    ```bash
-   # This will be done automatically by the release script
+   git add .
+   git commit -m "chore: release vX.Y.Z"
+   git push -u origin release-X.Y.Z
    ```
 
-## Automated NPM Publishing
+6. Open a Pull Request to `main` and get it reviewed.
 
-After the manual release process:
+7. Once the PR is merged, the CI will automatically:
+   - Detect the new version
+   - Create a git tag (`vX.Y.Z`)
+   - Create a GitHub Release
+   - Trigger the NPM publish workflow
 
-1. GitHub Actions workflow [npm-publish.yml](../.github/workflows/npm-publish.yml) will be triggered automatically when:
+## Automated Release Detection
 
-   - A new GitHub release is created
-   - OR manually triggered via workflow_dispatch
+The [release-on-merge.yml](../.github/workflows/release-on-merge.yml) workflow runs on every push to `main` that modifies `package.json`. It:
 
-2. The workflow will:
-   - Check out the repository
-   - Set up Node.js
-   - Install dependencies
-   - Build the module
-   - Publish to NPM using the credentials stored in GitHub secrets
+1. Reads the version from `package.json`
+2. Checks if a git tag for that version already exists
+3. If no tag exists, creates the tag and a GitHub Release
+4. The GitHub Release triggers the [npm-publish.yml](../.github/workflows/npm-publish.yml) workflow
 
 ## Version Numbering
 
@@ -76,16 +96,24 @@ We follow [Semantic Versioning](https://semver.org/) for this project:
 
 ## Troubleshooting
 
-If the automated publishing fails:
+If the automated release fails:
 
 1. Check the GitHub Actions logs for errors
 2. Ensure the `npm_token` secret is correctly set in the repository settings
-3. Verify that the version in package.json hasn't already been published
+3. Verify that the version in `package.json` hasn't already been published
+4. If the release workflow failed but the tag was created, you can manually trigger the `npm-publish` workflow
+
+If a release was skipped:
+
+1. The workflow only runs when `package.json` is modified
+2. Check if the git tag already exists for the version
+3. You can manually trigger the release by creating a GitHub Release
 
 ## Additional Notes
 
 - The release process uses [changelogen](https://github.com/unjs/changelogen) to generate CHANGELOG entries
 - Always verify that the published package works correctly by installing it in a test project
+- The main branch is protected; all releases must go through a PR
 
 ---
 
