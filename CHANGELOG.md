@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.2.11
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.10...v0.2.11)
+
+### 🚀 Enhancements
+
+- Add Nuxt 4 compatibility ([#52](https://github.com/stackbuilders/nuxt-utm/pull/52))
+- Add runtime tracking control with privacy features ([#54](https://github.com/stackbuilders/nuxt-utm/pull/54))
+
+### 🩹 Fixes
+
+- Npm pre-pack build by removing the clj requiredment ([#51](https://github.com/stackbuilders/nuxt-utm/pull/51))
+- **deps:** Address open security vulnerabilities ([#71](https://github.com/stackbuilders/nuxt-utm/pull/71))
+
+### 🏡 Chore
+
+- **deps-dev:** Bump nuxt from 4.0.3 to 4.1.0 ([#65](https://github.com/stackbuilders/nuxt-utm/pull/65))
+- **deps-dev:** Bump nuxt from 4.0.3 to 4.1.0 in /playground ([#57](https://github.com/stackbuilders/nuxt-utm/pull/57))
+- **deps-dev:** Bump playwright from 1.52.0 to 1.57.0 ([#58](https://github.com/stackbuilders/nuxt-utm/pull/58))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](https://github.com/sadjow))
+
 ## v0.2.10
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.7...v0.2.10)
