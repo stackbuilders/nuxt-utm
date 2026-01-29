@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.13
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.12...v0.2.13)
+
+### 🩹 Fixes
+
+- Add npm publish to release-on-merge workflow ([#93](https://github.com/stackbuilders/nuxt-utm/pull/93))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](https://github.com/sadjow))
+
 ## v0.2.12
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.10...v0.2.12)
