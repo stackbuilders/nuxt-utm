@@ -17,6 +17,7 @@ export default createConfigForNuxt({
     '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
     '@stylistic/semi': ['error', 'never'],
     '@stylistic/comma-dangle': ['error', 'always-multiline'],
+    '@stylistic/arrow-parens': ['error', 'always'],
     '@stylistic/operator-linebreak': 'off',
     '@stylistic/brace-style': 'off',
     '@stylistic/indent-binary-ops': 'off',
