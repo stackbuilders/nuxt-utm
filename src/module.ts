@@ -1,4 +1,4 @@
-import { defineNuxtModule, addPlugin, addImports, createResolver } from '@nuxt/kit'
+import { defineNuxtModule, addPlugin, addImports, addTypeTemplate, createResolver } from '@nuxt/kit'
 
 export interface ModuleOptions {
   trackingEnabled?: boolean
@@ -26,6 +26,22 @@ export default defineNuxtModule<ModuleOptions>({
     addImports({
       name: 'useNuxtUTM',
       from: resolver.resolve('runtime/composables'),
+    })
+
+    addTypeTemplate({
+      filename: 'types/utm-hooks.d.ts',
+      getContents: () =>
+        [
+          'import type { DataObject, BeforeTrackContext } from "nuxt-utm"',
+          '',
+          'declare module "#app" {',
+          '  interface RuntimeNuxtHooks {',
+          '    "utm:before-track": (context: BeforeTrackContext) => void | Promise<void>',
+          '    "utm:before-persist": (data: DataObject) => void | Promise<void>',
+          '    "utm:tracked": (data: DataObject) => void | Promise<void>',
+          '  }',
+          '}',
+        ].join('\n'),
     })
   },
 })
