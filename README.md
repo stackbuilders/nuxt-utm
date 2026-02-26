@@ -217,6 +217,8 @@ Each entry provides a `timestamp` indicating when the UTM parameters were collec
 
 The module provides three runtime hooks that let you extend the tracking pipeline. You can use them to skip tracking, enrich data with custom parameters, or trigger side effects after tracking completes. Hooks can be registered via a Nuxt plugin or through the `useNuxtUTM` composable.
 
+This keeps your tracking strategy flexible: enrich once in your app, then forward the same enriched payload wherever you need it.
+
 #### Available Hooks
 
 | Hook               | When it fires                          | Receives                                        | Purpose                                              |
@@ -282,6 +284,38 @@ const cleanup = utm.onBeforePersist((data) => {
 // Unregister when no longer needed
 // cleanup()
 </script>
+```
+
+#### Example: add `pageCategory`
+
+Use `utm:before-persist` to enrich every tracked event with a normalized `pageCategory`. This pattern is useful when you want one internal taxonomy that can be reused across your app and backend.
+
+```typescript
+// plugins/utm-page-category.client.ts
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.hook('utm:before-persist', (data) => {
+    const url = new URL(data.additionalInfo.landingPageUrl)
+    const explicitCategory = url.searchParams.get('page_category')
+
+    // Optional fallback categorization from pathname
+    const fallbackCategory = url.pathname.startsWith('/pricing') ? 'pricing' : 'general'
+
+    data.customParams = {
+      ...data.customParams,
+      pageCategory: explicitCategory ?? fallbackCategory,
+    }
+  })
+})
+```
+
+Tracked data will include:
+
+```json
+{
+  "customParams": {
+    "pageCategory": "pricing"
+  }
+}
 ```
 
 #### Hook: `utm:before-track`
