@@ -12,6 +12,7 @@ declare global {
       beforePersistData: DataObject | null
       trackedCalled: boolean
       trackedData: DataObject | null
+      callOrder: string[]
     }
   }
 }
@@ -28,11 +29,17 @@ export default defineNuxtPlugin((nuxtApp) => {
     beforePersistData: null,
     trackedCalled: false,
     trackedData: null,
+    callOrder: [],
   }
 
   nuxtApp.hook('utm:before-track', (context) => {
+    window.__utmHookResults.callOrder.push('before-track')
     window.__utmHookResults.beforeTrackCalled = true
     window.__utmHookResults.beforeTrackContext = { ...context }
+
+    if (context.query._throw_before_track === '1') {
+      throw new Error('before-track hook error')
+    }
 
     if (context.query._skip_tracking === '1') {
       context.skip = true
@@ -40,8 +47,14 @@ export default defineNuxtPlugin((nuxtApp) => {
   })
 
   nuxtApp.hook('utm:before-persist', (data) => {
+    window.__utmHookResults.callOrder.push('before-persist')
     window.__utmHookResults.beforePersistCalled = true
     window.__utmHookResults.beforePersistData = { ...data }
+
+    const url = new URL(data.additionalInfo.landingPageUrl)
+    if (url.searchParams.get('_throw_before_persist') === '1') {
+      throw new Error('before-persist hook error')
+    }
 
     data.customParams = {
       ...data.customParams,
@@ -51,7 +64,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   })
 
   nuxtApp.hook('utm:tracked', (data) => {
+    window.__utmHookResults.callOrder.push('tracked')
     window.__utmHookResults.trackedCalled = true
     window.__utmHookResults.trackedData = JSON.parse(JSON.stringify(data))
+
+    const url = new URL(data.additionalInfo.landingPageUrl)
+    if (url.searchParams.get('_throw_tracked') === '1') {
+      throw new Error('tracked hook error')
+    }
   })
 })

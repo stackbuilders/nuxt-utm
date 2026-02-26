@@ -19,6 +19,38 @@ export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const data = ref<DataObject[]>([])
 
+  const logHookError = (hookName: string, error: unknown): boolean => {
+    console.error(`[nuxt-utm] Hook "${hookName}" failed`, error)
+    return false
+  }
+
+  const runBeforeTrackHook = async (context: BeforeTrackContext): Promise<boolean> => {
+    try {
+      await nuxtApp.callHook('utm:before-track', context)
+      return true
+    } catch (error) {
+      return logHookError('utm:before-track', error)
+    }
+  }
+
+  const runBeforePersistHook = async (dataObject: DataObject): Promise<boolean> => {
+    try {
+      await nuxtApp.callHook('utm:before-persist', dataObject)
+      return true
+    } catch (error) {
+      return logHookError('utm:before-persist', error)
+    }
+  }
+
+  const runTrackedHook = async (dataObject: DataObject): Promise<boolean> => {
+    try {
+      await nuxtApp.callHook('utm:tracked', dataObject)
+      return true
+    } catch (error) {
+      return logHookError('utm:tracked', error)
+    }
+  }
+
   const getInitialTrackingState = (): boolean => {
     if (typeof window === 'undefined') return config.public.utm?.trackingEnabled ?? true
 
@@ -41,8 +73,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     const route = nuxtApp._route
 
     const beforeTrackContext: BeforeTrackContext = { route, query, skip: false }
-    await nuxtApp.callHook('utm:before-track', beforeTrackContext)
-    if (beforeTrackContext.skip) return
+    const beforeTrackSucceeded = await runBeforeTrackHook(beforeTrackContext)
+    if (!beforeTrackSucceeded || beforeTrackContext.skip) return
 
     const sessionId = getSessionID(SESSION_ID_KEY)
     const utmParams = getUtmParams(query)
@@ -60,14 +92,15 @@ export default defineNuxtPlugin((nuxtApp) => {
       dataObject.gclidParams = getGCLID(query)
     }
 
-    await nuxtApp.callHook('utm:before-persist', dataObject)
+    const beforePersistSucceeded = await runBeforePersistHook(dataObject)
+    if (!beforePersistSucceeded) return
 
     if (isRepeatedEntry(data, dataObject)) return
 
     data.value.unshift(dataObject)
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.value))
 
-    await nuxtApp.callHook('utm:tracked', dataObject)
+    await runTrackedHook(dataObject)
   }
 
   const enableTracking = () => {

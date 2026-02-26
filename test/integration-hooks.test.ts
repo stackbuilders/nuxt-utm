@@ -17,6 +17,7 @@ interface HookResults {
   beforePersistData: DataObject | null
   trackedCalled: boolean
   trackedData: DataObject | null
+  callOrder: string[]
 }
 
 const getHookResults = (page: Page): Promise<HookResults> =>
@@ -148,6 +149,7 @@ describe('Hooks mechanism', async () => {
       expect(results.beforeTrackCalled).toBe(true)
       expect(results.beforePersistCalled).toBe(true)
       expect(results.trackedCalled).toBe(true)
+      expect(results.callOrder).toEqual(['before-track', 'before-persist', 'tracked'])
 
       await page.close()
     })
@@ -164,6 +166,77 @@ describe('Hooks mechanism', async () => {
       expect(results.beforeTrackCalled).toBe(true)
       expect(results.beforePersistCalled).toBe(false)
       expect(results.trackedCalled).toBe(false)
+      expect(results.callOrder).toEqual(['before-track'])
+
+      await page.close()
+    })
+  })
+
+  describe('hook errors', () => {
+    it('stops tracking when before-track throws', async () => {
+      const page = await createPage('/?utm_source=throw_before_track&_throw_before_track=1')
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { __utmHookResults: HookResults }).__utmHookResults
+            ?.beforeTrackCalled,
+      )
+
+      const results = await getHookResults(page)
+      expect(results.beforeTrackCalled).toBe(true)
+      expect(results.beforePersistCalled).toBe(false)
+      expect(results.trackedCalled).toBe(false)
+      expect(results.callOrder).toEqual(['before-track'])
+
+      const entries = await getStoredEntries(page)
+      const hasTrackedEntry = entries.some(
+        (entry: DataObject) => entry.utmParams?.utm_source === 'throw_before_track',
+      )
+      expect(hasTrackedEntry).toBe(false)
+
+      await page.close()
+    })
+
+    it('stops tracking when before-persist throws', async () => {
+      const page = await createPage('/?utm_source=throw_before_persist&_throw_before_persist=1')
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { __utmHookResults: HookResults }).__utmHookResults
+            ?.beforePersistCalled,
+      )
+
+      const results = await getHookResults(page)
+      expect(results.beforeTrackCalled).toBe(true)
+      expect(results.beforePersistCalled).toBe(true)
+      expect(results.trackedCalled).toBe(false)
+      expect(results.callOrder).toEqual(['before-track', 'before-persist'])
+
+      const entries = await getStoredEntries(page)
+      const hasTrackedEntry = entries.some(
+        (entry: DataObject) => entry.utmParams?.utm_source === 'throw_before_persist',
+      )
+      expect(hasTrackedEntry).toBe(false)
+
+      await page.close()
+    })
+
+    it('keeps stored data when tracked throws', async () => {
+      const page = await createPage('/?utm_source=throw_tracked&_throw_tracked=1')
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { __utmHookResults: HookResults }).__utmHookResults?.trackedCalled,
+      )
+
+      const results = await getHookResults(page)
+      expect(results.beforeTrackCalled).toBe(true)
+      expect(results.beforePersistCalled).toBe(true)
+      expect(results.trackedCalled).toBe(true)
+      expect(results.callOrder).toEqual(['before-track', 'before-persist', 'tracked'])
+
+      const entries = await getStoredEntries(page)
+      const savedEntry = entries.find(
+        (entry: DataObject) => entry.utmParams?.utm_source === 'throw_tracked',
+      )
+      expect(savedEntry).toBeDefined()
 
       await page.close()
     })
