@@ -101,6 +101,22 @@ describe('Hooks mechanism', async () => {
 
       await page.close()
     })
+
+    it('supports consumer hooks for custom pageCategory tracking', async () => {
+      const page = await createPage(
+        '/?utm_source=page_category_test&utm_medium=test&page_category=pricing',
+      )
+      await page.waitForFunction(() => window.localStorage.getItem('nuxt-utm-data'))
+
+      const entries = await getStoredEntries(page)
+      const trackedEntry = entries.find(
+        (entry: DataObject) => entry.utmParams?.utm_source === 'page_category_test',
+      )
+
+      expect(trackedEntry?.customParams?.pageCategory).toBe('pricing')
+
+      await page.close()
+    })
   })
 
   describe('utm:tracked', () => {
