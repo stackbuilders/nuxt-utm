@@ -1,4 +1,4 @@
-import type { DataObject } from 'nuxt-utm'
+import type { DataObject, BeforeTrackContext } from 'nuxt-utm'
 import { ref, readonly } from 'vue'
 import {
   readLocalData,
@@ -19,7 +19,38 @@ export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const data = ref<DataObject[]>([])
 
-  // Initialize tracking enabled state from config or localStorage
+  const logHookError = (hookName: string, error: unknown): boolean => {
+    console.error(`[nuxt-utm] Hook "${hookName}" failed`, error)
+    return false
+  }
+
+  const runBeforeTrackHook = async (context: BeforeTrackContext): Promise<boolean> => {
+    try {
+      await nuxtApp.callHook('utm:before-track', context)
+      return true
+    } catch (error) {
+      return logHookError('utm:before-track', error)
+    }
+  }
+
+  const runBeforePersistHook = async (dataObject: DataObject): Promise<boolean> => {
+    try {
+      await nuxtApp.callHook('utm:before-persist', dataObject)
+      return true
+    } catch (error) {
+      return logHookError('utm:before-persist', error)
+    }
+  }
+
+  const runTrackedHook = async (dataObject: DataObject): Promise<boolean> => {
+    try {
+      await nuxtApp.callHook('utm:tracked', dataObject)
+      return true
+    } catch (error) {
+      return logHookError('utm:tracked', error)
+    }
+  }
+
   const getInitialTrackingState = (): boolean => {
     if (typeof window === 'undefined') return config.public.utm?.trackingEnabled ?? true
 
@@ -32,15 +63,20 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const trackingEnabled = ref(getInitialTrackingState())
 
-  const processUtmData = () => {
+  const processUtmData = async () => {
     if (typeof window === 'undefined') return
     if (!trackingEnabled.value) return
 
     data.value = readLocalData(LOCAL_STORAGE_KEY)
 
-    const sessionId = getSessionID(SESSION_ID_KEY)
-
     const query = nuxtApp._route.query
+    const route = nuxtApp._route
+
+    const beforeTrackContext: BeforeTrackContext = { route, query, skip: false }
+    const beforeTrackSucceeded = await runBeforeTrackHook(beforeTrackContext)
+    if (!beforeTrackSucceeded || beforeTrackContext.skip) return
+
+    const sessionId = getSessionID(SESSION_ID_KEY)
     const utmParams = getUtmParams(query)
     const additionalInfo = getAdditionalInfo()
     const timestamp = new Date().toISOString()
@@ -56,19 +92,21 @@ export default defineNuxtPlugin((nuxtApp) => {
       dataObject.gclidParams = getGCLID(query)
     }
 
-    // Exit if the last entry is the same as the new entry
+    const beforePersistSucceeded = await runBeforePersistHook(dataObject)
+    if (!beforePersistSucceeded) return
+
     if (isRepeatedEntry(data, dataObject)) return
 
-    // Add the new item to the data array
     data.value.unshift(dataObject)
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.value))
+
+    await runTrackedHook(dataObject)
   }
 
   const enableTracking = () => {
     trackingEnabled.value = true
     if (typeof window !== 'undefined') {
       localStorage.setItem(TRACKING_ENABLED_KEY, 'true')
-      // Process current page data when enabling
       processUtmData()
     }
   }
@@ -88,7 +126,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
   }
 
-  // Load existing data on initialization
   if (typeof window !== 'undefined') {
     data.value = readLocalData(LOCAL_STORAGE_KEY)
   }

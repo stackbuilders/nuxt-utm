@@ -1,4 +1,6 @@
 declare module 'nuxt-utm' {
+  import type { RouteLocationNormalized, LocationQuery } from 'vue-router'
+
   interface UTMParams {
     utm_source?: string
     utm_medium?: string
@@ -29,5 +31,12 @@ declare module 'nuxt-utm' {
     additionalInfo: AdditionalInfo
     sessionId: string
     gclidParams?: GCLIDParams
+    customParams?: Record<string, unknown>
+  }
+
+  interface BeforeTrackContext {
+    route: RouteLocationNormalized
+    query: LocationQuery
+    skip: boolean
   }
 }

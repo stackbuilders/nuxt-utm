@@ -6,22 +6,18 @@
       <h2>Tracking Controls</h2>
       <p>
         Tracking is currently:
-        <strong :class="{ enabled: utm.trackingEnabled.value, disabled: !utm.trackingEnabled.value }">
+        <strong
+          :class="{ enabled: utm.trackingEnabled.value, disabled: !utm.trackingEnabled.value }"
+        >
           {{ utm.trackingEnabled.value ? 'ENABLED' : 'DISABLED' }}
         </strong>
       </p>
 
       <div class="buttons">
-        <button
-          :disabled="utm.trackingEnabled.value"
-          @click="utm.enableTracking"
-        >
+        <button @click="utm.enableTracking">
           Enable Tracking
         </button>
-        <button
-          :disabled="!utm.trackingEnabled.value"
-          @click="utm.disableTracking"
-        >
+        <button @click="utm.disableTracking">
           Disable Tracking
         </button>
         <button
@@ -32,11 +28,25 @@
         </button>
       </div>
 
+      <h2>Custom Hook Testing</h2>
+      <div class="buttons">
+        <button @click="visitWithPageCategory('pricing')">
+          Track pageCategory: pricing
+        </button>
+        <button @click="visitWithPageCategory('features')">
+          Track pageCategory: features
+        </button>
+      </div>
+
       <div class="info">
         <p>Try visiting with UTM parameters:</p>
         <a href="/?utm_source=test&utm_medium=demo&utm_campaign=playground">
           Add UTM params to URL
         </a>
+        <p class="hint">
+          Then click a custom hook button above and check
+          <code>customParams.pageCategory</code> in collected data.
+        </p>
       </div>
     </div>
 
@@ -51,6 +61,15 @@
 import { useNuxtUTM } from '#imports'
 
 const utm = useNuxtUTM()
+
+const visitWithPageCategory = (pageCategory) => {
+  const url = new URL(window.location.href)
+  url.searchParams.set('utm_source', 'playground')
+  url.searchParams.set('utm_medium', 'manual-test')
+  url.searchParams.set('utm_campaign', 'custom-hook')
+  url.searchParams.set('page_category', pageCategory)
+  window.location.href = `${url.pathname}?${url.searchParams.toString()}`
+}
 </script>
 
 <style scoped>
@@ -58,7 +77,10 @@ const utm = useNuxtUTM()
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 h1 {
@@ -127,6 +149,10 @@ button.danger:hover {
 
 .info a:hover {
   text-decoration: underline;
+}
+
+.hint {
+  margin-top: 0.75rem;
 }
 
 .data {
