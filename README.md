@@ -25,6 +25,7 @@ If a visitor arrives at a website that uses the Nuxt UTM module and a UTM parame
 - **📍 UTM Tracking**: Easily capture UTM parameters to gain insights into traffic sources and campaign performance.
 - **🔍 Intelligent De-duplication**: Smart recognition of page refreshes to avoid data duplication, ensuring each visit is uniquely accounted for.
 - **🔗 Comprehensive Data Collection**: Alongside UTM parameters, gather additional context such as referrer details, user agent, landing page url, browser language, and screen resolution. This enriched data empowers your marketing strategies with a deeper understanding of campaign impact.
+- **🔌 Hooks & Extensibility**: Three runtime hooks (`utm:before-track`, `utm:before-persist`, `utm:tracked`) let you skip tracking, enrich data with custom parameters, or trigger side effects after tracking completes.
 
 ## Quick Setup
 
@@ -86,6 +87,9 @@ const utm = useNuxtUTM()
 // - enableTracking(): Enable UTM tracking
 // - disableTracking(): Disable UTM tracking
 // - clearData(): Clear all stored UTM data
+// - onBeforeTrack(cb): Hook called before data collection
+// - onBeforePersist(cb): Hook called to enrich/modify collected data before saving
+// - onTracked(cb): Hook called after data is saved
 </script>
 ```
 
@@ -125,11 +129,7 @@ const rejectTracking = () => {
   <div class="privacy-settings">
     <h3>Privacy Settings</h3>
     <label>
-      <input 
-        type="checkbox" 
-        :checked="utm.trackingEnabled.value"
-        @change="toggleTracking"
-      />
+      <input type="checkbox" :checked="utm.trackingEnabled.value" @change="toggleTracking" />
       Enable UTM tracking
     </label>
     <button @click="utm.clearData" v-if="utm.data.value.length > 0">
@@ -195,6 +195,9 @@ The `data` property contains an array of UTM parameters collected. Each element 
     "gclidParams": {
       "gclid": "CjklsefawEFRfeafads",
       "gad_source": "1"
+    },
+    "customParams": {
+      "fbclid": "abc123"
     }
   }
 ]
@@ -209,6 +212,149 @@ Each entry provides a `timestamp` indicating when the UTM parameters were collec
 - **Persistent Preferences**: Tracking preferences are saved and persist across sessions
 - **Data Clearing**: Ability to completely remove all collected data
 - **Session Management**: Automatically manages sessions to avoid duplicate tracking
+
+### Hooks
+
+The module provides three runtime hooks that let you extend the tracking pipeline. You can use them to skip tracking, enrich data with custom parameters, or trigger side effects after tracking completes. Hooks can be registered via a Nuxt plugin or through the `useNuxtUTM` composable.
+
+This keeps your tracking strategy flexible: enrich once in your app, then forward the same enriched payload wherever you need it.
+
+#### Available Hooks
+
+| Hook               | When it fires                          | Receives                                        | Purpose                                              |
+| ------------------ | -------------------------------------- | ----------------------------------------------- | ---------------------------------------------------- |
+| `utm:before-track` | Before data collection                 | `BeforeTrackContext` (`{ route, query, skip }`) | Conditionally skip tracking by setting `skip = true` |
+| `utm:before-persist` | After data is collected, before saving | `DataObject` (mutable)                        | Enrich or modify the data, add `customParams`        |
+| `utm:tracked`      | After data is saved to localStorage    | `DataObject` (final)                            | Side effects: send to API, fire analytics, log       |
+
+#### Registering Hooks via Plugin
+
+Create a Nuxt plugin to register hooks that run on every page visit:
+
+```typescript
+// plugins/utm-hooks.client.ts
+export default defineNuxtPlugin((nuxtApp) => {
+  // Skip tracking on admin pages
+  nuxtApp.hook('utm:before-track', (context) => {
+    if (context.route.path.startsWith('/admin')) {
+      context.skip = true
+    }
+  })
+
+  // Add custom marketing parameters
+  nuxtApp.hook('utm:before-persist', (data) => {
+    const query = nuxtApp._route.query
+    if (query.fbclid) {
+      data.customParams = {
+        ...data.customParams,
+        fbclid: String(query.fbclid),
+      }
+    }
+    if (query.msclkid) {
+      data.customParams = {
+        ...data.customParams,
+        msclkid: String(query.msclkid),
+      }
+    }
+  })
+
+  // Send data to your backend after tracking
+  nuxtApp.hook('utm:tracked', async (data) => {
+    await $fetch('/api/marketing/track', {
+      method: 'POST',
+      body: data,
+    })
+  })
+})
+```
+
+#### Registering Hooks via Composable
+
+The `useNuxtUTM` composable provides convenience methods for registering hooks. Each method returns a cleanup function to unregister the hook.
+
+```vue
+<script setup>
+const utm = useNuxtUTM()
+
+// Register a before-persist hook
+const cleanup = utm.onBeforePersist((data) => {
+  data.customParams = { ...data.customParams, source: 'vue-component' }
+})
+
+// Unregister when no longer needed
+// cleanup()
+</script>
+```
+
+#### Example: add `pageCategory`
+
+Use `utm:before-persist` to enrich every tracked event with a normalized `pageCategory`. This pattern is useful when you want one internal taxonomy that can be reused across your app and backend.
+
+```typescript
+// plugins/utm-page-category.client.ts
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.hook('utm:before-persist', (data) => {
+    const url = new URL(data.additionalInfo.landingPageUrl)
+    const explicitCategory = url.searchParams.get('page_category')
+
+    // Optional fallback categorization from pathname
+    const fallbackCategory = url.pathname.startsWith('/pricing') ? 'pricing' : 'general'
+
+    data.customParams = {
+      ...data.customParams,
+      pageCategory: explicitCategory ?? fallbackCategory,
+    }
+  })
+})
+```
+
+Tracked data will include:
+
+```json
+{
+  "customParams": {
+    "pageCategory": "pricing"
+  }
+}
+```
+
+#### Hook: `utm:before-track`
+
+Called before any data collection begins. The handler receives a `BeforeTrackContext` object with `route`, `query`, and a `skip` flag. Set `skip = true` to prevent tracking for the current page visit.
+
+```typescript
+nuxtApp.hook('utm:before-track', (context) => {
+  // context.route - the current route object
+  // context.query - the current URL query parameters
+  // context.skip  - set to true to skip tracking
+})
+```
+
+#### Hook: `utm:before-persist`
+
+Called after the `DataObject` is built but before it is checked for duplicates and saved. The handler receives the `DataObject` directly and can mutate it to add or modify fields. This is the primary hook for adding `customParams`.
+
+```typescript
+nuxtApp.hook('utm:before-persist', (data) => {
+  // Add any custom tracking parameters
+  data.customParams = {
+    ...data.customParams,
+    myCustomField: 'value',
+  }
+})
+```
+
+> Note: `customParams` are not included in the de-duplication check. Only UTM parameters, GCLID parameters, and session ID are compared.
+
+#### Hook: `utm:tracked`
+
+Called after data is saved to localStorage. The handler receives the final `DataObject`. Use this for side effects like sending data to a backend or triggering analytics events.
+
+```typescript
+nuxtApp.hook('utm:tracked', async (data) => {
+  console.log('Tracked:', data.utmParams, data.customParams)
+})
+```
 
 ## Development
 
