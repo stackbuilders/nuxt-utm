@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.15
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.14...v0.2.15)
+
+### 🏡 Chore
+
+- **deps-dev:** Bump nuxt from 4.4.4 to 4.4.6 ([#124](https://github.com/stackbuilders/nuxt-utm/pull/124))
+- **deps-dev:** Bump nuxt from 4.4.4 to 4.4.6 in /playground ([#125](https://github.com/stackbuilders/nuxt-utm/pull/125))
+
 ## v0.2.14
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.13...v0.2.14)
