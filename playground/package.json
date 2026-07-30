@@ -7,6 +7,9 @@
     "build": "nuxi build",
     "generate": "nuxi generate"
   },
+  "resolutions": {
+    "**/vite/esbuild": "0.28.1"
+  },
   "devDependencies": {
     "nuxt": "^4.4.7"
   }
