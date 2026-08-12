@@ -11,6 +11,6 @@
     "**/vite/esbuild": "0.28.1"
   },
   "devDependencies": {
-    "nuxt": "^4.4.7"
+    "nuxt": "^4.5.1"
   }
 }
