@@ -1,0 +1,16 @@
+version: 2
+
+updates:
+  # Keep the repository's existing security-update-only policy while applying
+  # consistent ownership to both Yarn lockfiles.
+  - package-ecosystem: npm
+    directories:
+      - '/'
+      - '/playground'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    assignees:
+      - sadjow
+    reviewers:
+      - sadjow
