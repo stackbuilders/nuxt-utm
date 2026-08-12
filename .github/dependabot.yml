@@ -1,15 +1,20 @@
 version: 2
 
 updates:
-  # Keep the repository's existing security-update-only policy while applying
-  # consistent ownership to both Yarn lockfiles.
+  # Wait for routine releases to stabilize before Dependabot proposes them.
+  # GitHub intentionally bypasses cooldowns for known vulnerability fixes.
   - package-ecosystem: npm
     directories:
       - '/'
       - '/playground'
     schedule:
       interval: weekly
-    open-pull-requests-limit: 0
+    cooldown:
+      default-days: 7
+      semver-patch-days: 7
+      semver-minor-days: 14
+      semver-major-days: 30
+    open-pull-requests-limit: 5
     assignees:
       - sadjow
     reviewers:
