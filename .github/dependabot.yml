@@ -1,0 +1,21 @@
+version: 2
+
+updates:
+  # Wait for routine releases to stabilize before Dependabot proposes them.
+  # GitHub intentionally bypasses cooldowns for known vulnerability fixes.
+  - package-ecosystem: npm
+    directories:
+      - '/'
+      - '/playground'
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+      semver-patch-days: 7
+      semver-minor-days: 14
+      semver-major-days: 30
+    open-pull-requests-limit: 5
+    assignees:
+      - sadjow
+    reviewers:
+      - sadjow
