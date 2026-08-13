@@ -15,12 +15,6 @@ jobs:
       github.repository == 'stackbuilders/nuxt-utm'
     runs-on: ubuntu-latest
     steps:
-      - name: Read Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-        with:
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
-
       - name: Approve Dependabot updates
         run: gh pr review --approve "$PR_URL"
         env:
