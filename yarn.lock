@@ -406,7 +406,7 @@
     fast-wrap-ansi "^0.1.3"
     sisteransi "^1.0.5"
 
-"@clack/prompts@^1.3.0", "@clack/prompts@^1.5.1", "@clack/prompts@^1.7.0":
+"@clack/prompts@^1.5.1", "@clack/prompts@^1.7.0":
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/@clack/prompts/-/prompts-1.7.0.tgz#2d6ced363a608ba23f6b9611205b8306c85bbf0d"
   integrity sha512-y7/yvZ2TPAnR9+jnc00klvNNLkJiXFFrQA/hlLCcxA9a2A4zQIOimyFQ9XfwYKiGD1fb5GY8vbKIIgO8d5Tb2A==
@@ -1019,14 +1019,6 @@
   resolved "https://registry.yarnpkg.com/@nuxt/devalue/-/devalue-2.0.2.tgz#5749f04df13bda4c863338d8dabaf370f45ef7c7"
   integrity sha512-GBzP8zOc7CGWyFQS6dv1lQz8VVpz5C2yRszbXufwG/9zhStTIH50EtD87NmWbTMwXDvZLNg8GIpb1UFdH93JCA==
 
-"@nuxt/devtools-kit@3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@nuxt/devtools-kit/-/devtools-kit-3.3.1.tgz#ad2851551fd42060d1244a1aecfe8db196b70505"
-  integrity sha512-abn6A4UY6c4q9p7tKALEvrBeU+NXEpY/TtrTEC4PYtOUGDODxQdVTud6nIn1aqCnAF1DTY1dZXg+APXt54D4xA==
-  dependencies:
-    "@nuxt/kit" "^4.4.4"
-    execa "^8.0.1"
-
 "@nuxt/devtools-kit@3.4.1", "@nuxt/devtools-kit@^3.2.4":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@nuxt/devtools-kit/-/devtools-kit-3.4.1.tgz#56cf90ffe4b2386d42a7f83dea1da5f829bf4915"
@@ -1043,20 +1035,6 @@
     "@nuxt/kit" "^3.19.3"
     execa "^8.0.1"
 
-"@nuxt/devtools-wizard@3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@nuxt/devtools-wizard/-/devtools-wizard-3.3.1.tgz#aeaddd47a46a8bd77900ca0e9cdf4531b63ad152"
-  integrity sha512-pWT/Cm1/ktgSWYwRl1yYASwTIWNK1VfT7TU8vZOAOFha9Kj5znr9xuGQIFqJ0IDW1PNGuR/EUQO4BAPUIPguWg==
-  dependencies:
-    "@clack/prompts" "^1.3.0"
-    consola "^3.4.2"
-    diff "^8.0.4"
-    execa "^8.0.1"
-    magicast "^0.5.2"
-    pathe "^2.0.3"
-    pkg-types "^2.3.1"
-    semver "^7.7.4"
-
 "@nuxt/devtools-wizard@3.4.1":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@nuxt/devtools-wizard/-/devtools-wizard-3.4.1.tgz#25ccc8a398d0e15a20a8afbc22afcfc85adff6d0"
@@ -1071,46 +1049,7 @@
     pkg-types "^2.3.1"
     semver "^7.8.5"
 
-"@nuxt/devtools@^3.1.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@nuxt/devtools/-/devtools-3.3.1.tgz#103d09fa469feee68156abbffe02c208ebb27243"
-  integrity sha512-JQXSZxHeUgJ7Vh8PyK0YhO6w+iT47fJtw+Fsg8DHuL1nWd2FKlx9vUJCu52wkm9uS9PPrAd6IU8dS8sUHKJQRA==
-  dependencies:
-    "@nuxt/devtools-kit" "3.3.1"
-    "@nuxt/devtools-wizard" "3.3.1"
-    "@nuxt/kit" "^4.4.4"
-    "@vue/devtools-core" "^8.1.1"
-    "@vue/devtools-kit" "^8.1.1"
-    birpc "^4.0.0"
-    consola "^3.4.2"
-    destr "^2.0.5"
-    error-stack-parser-es "^1.0.5"
-    execa "^8.0.1"
-    fast-npm-meta "^1.5.0"
-    get-port-please "^3.2.0"
-    hookable "^6.1.1"
-    image-meta "^0.2.2"
-    is-installed-globally "^1.0.0"
-    launch-editor "^2.13.2"
-    local-pkg "^1.1.2"
-    magicast "^0.5.2"
-    nypm "^0.6.6"
-    ohash "^2.0.11"
-    pathe "^2.0.3"
-    perfect-debounce "^2.1.0"
-    pkg-types "^2.3.1"
-    semver "^7.7.4"
-    simple-git "^3.36.0"
-    sirv "^3.0.2"
-    structured-clone-es "^2.0.0"
-    tinyglobby "^0.2.16"
-    unstorage "^1.17.5"
-    vite-plugin-inspect "^11.3.3"
-    vite-plugin-vue-tracer "^1.3.0"
-    which "^6.0.1"
-    ws "^8.20.0"
-
-"@nuxt/devtools@^3.3.1":
+"@nuxt/devtools@^3.1.1", "@nuxt/devtools@^3.3.1":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@nuxt/devtools/-/devtools-3.4.1.tgz#931e9b0b29005b4f81230694586042549541c6c5"
   integrity sha512-20zZs6k/zAdi+PM7s1BwxE3hanZ+R1OGi5DWCKPyzSnhUUeeNebvWNgec7Rwnx6iKLkJfK4WFIZ+FL2QurG/ZQ==
@@ -1230,7 +1169,7 @@
     untyped "^2.0.0"
     verkit "^0.2.0"
 
-"@nuxt/kit@^3.17.2 || ^4.0.0", "@nuxt/kit@^4.4.4", "@nuxt/kit@^4.4.8", "@nuxt/kit@^4.5.1":
+"@nuxt/kit@^3.17.2 || ^4.0.0", "@nuxt/kit@^4.4.8", "@nuxt/kit@^4.5.1":
   version "4.5.2"
   resolved "https://registry.yarnpkg.com/@nuxt/kit/-/kit-4.5.2.tgz#fa338b169d14d9e66f973ded551d2376edb72398"
   integrity sha512-l66LU9DcJYjmNwqwAj2I5UGRrUbnG2DOKGChnN70zIGtn0eq/z87gi/FRgha6eMb9/FmB1PFHgtx6PWVml1C2Q==
@@ -2492,7 +2431,7 @@
   dependencies:
     "@vue/devtools-kit" "^8.2.1"
 
-"@vue/devtools-core@^8.1.1", "@vue/devtools-core@^8.2.1":
+"@vue/devtools-core@^8.2.1":
   version "8.2.1"
   resolved "https://registry.yarnpkg.com/@vue/devtools-core/-/devtools-core-8.2.1.tgz#fd7b32f26f181aa2e1bd5e2f985c3c78c4ba6274"
   integrity sha512-s/VfAY9oDTb/kFEWmy461jaFde2MIV1RO/gi1vwM+PAZBZ/Pc2Ndu3BNBdZUze8QDUuyYvElbEEGA83syjJfzA==
@@ -2500,7 +2439,7 @@
     "@vue/devtools-kit" "^8.2.1"
     "@vue/devtools-shared" "^8.2.1"
 
-"@vue/devtools-kit@^8.1.1", "@vue/devtools-kit@^8.2.1":
+"@vue/devtools-kit@^8.2.1":
   version "8.2.1"
   resolved "https://registry.yarnpkg.com/@vue/devtools-kit/-/devtools-kit-8.2.1.tgz#ad45babb12c51931d32d1b67ffaebc251f550ce9"
   integrity sha512-FIGIuq3AWReEpbAHY/cRGeHDfI0qOb8OCQ3YjbEAX04uaxIDbGc9rhkbVcG7rnfHPXE3RsU5KrWOu9V/okd8AQ==
@@ -2686,11 +2625,6 @@ ansi-styles@^6.1.0, ansi-styles@^6.2.1:
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-6.2.3.tgz#c044d5dcc521a076413472597a1acb1f103c4041"
   integrity sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg==
 
-ansis@^4.1.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/ansis/-/ansis-4.2.0.tgz#2e6e61c46b11726ac67f78785385618b9e658780"
-  integrity sha512-HqZ5rWlFjGiV0tDm3UxxgNRqsOTniqoKZu0pIAfh7TZQMGuZK+hH0drySty0si0QXj1ieop4+SkSfPZBPPkHig==
-
 ansis@^4.3.0, ansis@^4.3.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/ansis/-/ansis-4.3.1.tgz#2815c1ef490adaf0d612ae3a699e90cbcf70a917"
@@ -2874,7 +2808,7 @@ bindings@^1.4.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
-birpc@^2.4.0, birpc@^2.6.1:
+birpc@^2.6.1:
   version "2.9.0"
   resolved "https://registry.yarnpkg.com/birpc/-/birpc-2.9.0.tgz#b59550897e4cd96a223e2a6c1475b572236ed145"
   integrity sha512-KrayHS5pBi69Xi9JmvoqrIgYGDkD6mcSe/i6YKi3w5kekCLzrX4+nawcXqrj2tIp50Kw/mT/s3p+GVK0A0sKxw==
@@ -4034,11 +3968,6 @@ fast-levenshtein@^2.0.6:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==
 
-fast-npm-meta@^1.5.0:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/fast-npm-meta/-/fast-npm-meta-1.5.1.tgz#02657a44d508b6989b7af56b048c118b54a8a3b4"
-  integrity sha512-tWhw7z4jFuQgZB9tbQyUh5BY9nNd/wimM+fBLfmmJjakkJDNvbJKm0nQ5ruPKC0us1HGg7L6iBk1fxpSzcgSaA==
-
 fast-npm-meta@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/fast-npm-meta/-/fast-npm-meta-2.2.0.tgz#af60fe24871f6d024475d35140731f92adc37a93"
@@ -4705,7 +4634,7 @@ knitwork@^1.2.0, knitwork@^1.3.0:
   resolved "https://registry.yarnpkg.com/knitwork/-/knitwork-1.3.0.tgz#4a0d0b0d45378cac909ee1117481392522bd08a4"
   integrity sha512-4LqMNoONzR43B1W0ek0fhXMsDNW/zxa1NdFAVMY+k28pgZLovR4G3PB5MrpTxCy1QaZCqNoiaKPr5w5qZHfSNw==
 
-launch-editor@^2.13.2, launch-editor@^2.14.1:
+launch-editor@^2.14.1:
   version "2.14.1"
   resolved "https://registry.yarnpkg.com/launch-editor/-/launch-editor-2.14.1.tgz#f7e0da3f58aaea03fea01074d840b5f739ed7ddc"
   integrity sha512-QWBrQsMpH7gPr965dsKD/3cKWiNoTjpATQf++Xq63N6sKRGMwlVXz41O1IZTMfZQgBctD/K5Zt06+/I6pP6+HA==
@@ -4945,16 +4874,7 @@ magic-string@^1.0.0, magic-string@^1.1.0:
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.5.5"
 
-magicast@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/magicast/-/magicast-0.5.2.tgz#70cea9df729c164485049ea5df85a390281dfb9d"
-  integrity sha512-E3ZJh4J3S9KfwdjZhe2afj6R9lGIN5Pher1pF39UGrXRqq/VDaGVIGN13BjHd2u8B61hArAGOnso7nBOouW3TQ==
-  dependencies:
-    "@babel/parser" "^7.29.0"
-    "@babel/types" "^7.29.0"
-    source-map-js "^1.2.1"
-
-magicast@^0.5.4:
+magicast@^0.5.2, magicast@^0.5.4:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/magicast/-/magicast-0.5.4.tgz#bbe38dfd6037670057f33abf22b8aa79d5e99d0a"
   integrity sha512-llBEhWm1SacoRwgHUoQJYtwp4PBLF4faQi5TCpIGyGs9n4y5+juI0tDgyKIfpqxckRHaHzouUEph3THklWh03w==
@@ -5352,16 +5272,7 @@ nuxt@^4.2.1:
     vue "^3.5.40"
     vue-router "^5.2.0"
 
-nypm@^0.6.6:
-  version "0.6.6"
-  resolved "https://registry.yarnpkg.com/nypm/-/nypm-0.6.6.tgz#431ee4560126ebaa377376f0e168640336ee8920"
-  integrity sha512-vRyr0r4cbBapw07Xw8xrj9Teq3o7MUD35rSaTcanDbW+aK2XHDgJFiU6ZTj2GBw7Q12ysdsyFss+Vdz4hQ0Y6Q==
-  dependencies:
-    citty "^0.2.2"
-    pathe "^2.0.3"
-    tinyexec "^1.1.1"
-
-nypm@^0.6.8, nypm@^0.6.9:
+nypm@^0.6.6, nypm@^0.6.8, nypm@^0.6.9:
   version "0.6.9"
   resolved "https://registry.yarnpkg.com/nypm/-/nypm-0.6.9.tgz#d7c2a2dffd94e1ca0349c721d73d6b776e22899c"
   integrity sha512-zxlE2yvSWZWmHcNdT3+5zV2lrCogeE9YOklHrR3dFjqutq5wO7GFDYLFDRXLsYnJzwvy/im9fYoxePvS0VTW0w==
@@ -5423,7 +5334,7 @@ onetime@^6.0.0:
   dependencies:
     mimic-fn "^4.0.0"
 
-open@^10.1.2, open@^10.2.0:
+open@^10.1.2:
   version "10.2.0"
   resolved "https://registry.yarnpkg.com/open/-/open-10.2.0.tgz#b9d855be007620e80b6fb05fac98141fe62db73c"
   integrity sha512-YgBpdJHPyQ2UE5x+hlSXcnejzAvD0b22U2OuAP+8OnlJT+PjWPxtgmGqKKc+RgTM63U9gN0YzrYc71R2WT/hTA==
@@ -6505,7 +6416,7 @@ simple-git@^3.36.0:
     "@simple-git/argv-parser" "^1.1.0"
     debug "^4.4.0"
 
-sirv@^3.0.1, sirv@^3.0.2:
+sirv@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/sirv/-/sirv-3.0.2.tgz#f775fccf10e22a40832684848d636346f41cd970"
   integrity sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==
@@ -6718,11 +6629,6 @@ strip-literal@^4.0.0:
   integrity sha512-PaqAvfUZKBwc/SLmNZtHmzK+v19Z4O4eS3cKPeGvbIv/U3pnyEq4Tuw3/4v/FwfM8VQaEawsyCcOQ0P+kpwWWw==
   dependencies:
     js-tokens "^10.0.0"
-
-structured-clone-es@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/structured-clone-es/-/structured-clone-es-2.0.0.tgz#ab53cf4e2934c7b5fb17bda9761ac5e809d1b9cd"
-  integrity sha512-5UuAHmBLXYPCl22xWJrFuGmIhBKQzxISPVz6E7nmTmTcAOpUzlbjKJsRrCE4vADmMQ0dzeCnlWn9XufnAGf76Q==
 
 structured-clone-es@^2.0.1:
   version "2.0.1"
@@ -7236,14 +7142,6 @@ verkit@^0.3.1:
   resolved "https://registry.yarnpkg.com/verkit/-/verkit-0.3.2.tgz#0511ea63310551b62a20c010aa820350c5c350c6"
   integrity sha512-zj/ob3UsvJGN0whEAKFp53REA5X66hvffVqoCtVQAakJKnKlH+/PcOfMoFwIG/o4rElqLv/ycAFlx8ZlXUorCg==
 
-vite-dev-rpc@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/vite-dev-rpc/-/vite-dev-rpc-1.1.0.tgz#a54be63cc4dbb127bce1360e4b12d9038087c204"
-  integrity sha512-pKXZlgoXGoE8sEKiKJSng4hI1sQ4wi5YT24FCrwrLt6opmkjlqPPVmiPWWJn8M8byMxRGzp1CrFuqQs4M/Z39A==
-  dependencies:
-    birpc "^2.4.0"
-    vite-hot-client "^2.1.0"
-
 vite-dev-rpc@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/vite-dev-rpc/-/vite-dev-rpc-2.0.0.tgz#fd12621897f551d49a0b1a31ae7085aba77192aa"
@@ -7252,7 +7150,7 @@ vite-dev-rpc@^2.0.0:
     birpc "^4.0.0"
     vite-hot-client "^2.2.0"
 
-vite-hot-client@^2.1.0, vite-hot-client@^2.2.0:
+vite-hot-client@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/vite-hot-client/-/vite-hot-client-2.2.0.tgz#284fa1afa63cc8781d079515884eb49d2890ac2f"
   integrity sha512-76Zs9zrHbH7M7wqeyooGQKdX+yg0pQ0xuQ1PbFp4z5a0Lzn2e5IPFoCswnmqZ4GiwqB4Jo3WcDAMO9jARTJl8w==
@@ -7281,21 +7179,6 @@ vite-plugin-checker@^0.14.5:
     proper-lockfile "^4.1.2"
     tiny-invariant "^1.3.3"
 
-vite-plugin-inspect@^11.3.3:
-  version "11.3.3"
-  resolved "https://registry.yarnpkg.com/vite-plugin-inspect/-/vite-plugin-inspect-11.3.3.tgz#2b9c4db9574c59ebcf9647b37bb4eb5c5596b3be"
-  integrity sha512-u2eV5La99oHoYPHE6UvbwgEqKKOQGz86wMg40CCosP6q8BkB6e5xPneZfYagK4ojPJSj5anHCrnvC20DpwVdRA==
-  dependencies:
-    ansis "^4.1.0"
-    debug "^4.4.1"
-    error-stack-parser-es "^1.0.5"
-    ohash "^2.0.11"
-    open "^10.2.0"
-    perfect-debounce "^2.0.0"
-    sirv "^3.0.1"
-    unplugin-utils "^0.3.0"
-    vite-dev-rpc "^1.1.0"
-
 vite-plugin-inspect@^11.4.1:
   version "11.4.1"
   resolved "https://registry.yarnpkg.com/vite-plugin-inspect/-/vite-plugin-inspect-11.4.1.tgz#f8b5b985ae1183d32e7a1dcee28d2607b62277e6"
@@ -7310,17 +7193,6 @@ vite-plugin-inspect@^11.4.1:
     sirv "^3.0.2"
     unplugin-utils "^0.3.1"
     vite-dev-rpc "^2.0.0"
-
-vite-plugin-vue-tracer@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/vite-plugin-vue-tracer/-/vite-plugin-vue-tracer-1.3.0.tgz#b6a9fbe56e68698a9c90a35dbca0d9414fbfca4b"
-  integrity sha512-Cgfce6VikzOw5MUJTpeg50s5rRjzU1Vr61ZjuHunVVHLjZZ5AUlgyExHthZ3r59vtoz9W2rDt23FYG81avYBKw==
-  dependencies:
-    estree-walker "^3.0.3"
-    exsolve "^1.0.8"
-    magic-string "^0.30.21"
-    pathe "^2.0.3"
-    source-map-js "^1.2.1"
 
 vite-plugin-vue-tracer@^1.4.0:
   version "1.5.0"
@@ -7541,7 +7413,7 @@ wrap-ansi@^9.0.0:
     string-width "^7.0.0"
     strip-ansi "^7.1.0"
 
-ws@^8.20.0, ws@^8.21.1:
+ws@^8.21.1:
   version "8.21.3"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.21.3.tgz#660b4faddb6a3e575c86e078126919961f4de4fc"
   integrity sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==
