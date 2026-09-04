@@ -1009,10 +1009,10 @@
   resolved "https://registry.yarnpkg.com/@nuxt/devalue/-/devalue-2.0.2.tgz#5749f04df13bda4c863338d8dabaf370f45ef7c7"
   integrity sha512-GBzP8zOc7CGWyFQS6dv1lQz8VVpz5C2yRszbXufwG/9zhStTIH50EtD87NmWbTMwXDvZLNg8GIpb1UFdH93JCA==
 
-"@nuxt/devtools-kit@3.4.1":
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/@nuxt/devtools-kit/-/devtools-kit-3.4.1.tgz#56cf90ffe4b2386d42a7f83dea1da5f829bf4915"
-  integrity sha512-6ltPm2yUW8GvDdf3VJna7+flLi+ej7xRfSr+S4ovevKt/CuPf9EqYOn1jW7Kw/U1MXt/71zkn+/O2vu3G6O9Hg==
+"@nuxt/devtools-kit@3.4.2", "@nuxt/devtools-kit@^3.4.1":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@nuxt/devtools-kit/-/devtools-kit-3.4.2.tgz#951e50070ded4e71b5f2fa1ce812c7d7528f1778"
+  integrity sha512-TPPbmH9xrExagYxfCe6JgtbHmgchfgDdA656Yws18rn8I/oCvB+gcw3kTWBBp2sC9ipZPXsgbsW/yZnVnGNBiA==
   dependencies:
     "@nuxt/kit" "^4.5.1"
     execa "^8.0.1"
@@ -1025,18 +1025,10 @@
     "@nuxt/kit" "^3.19.3"
     execa "^8.0.1"
 
-"@nuxt/devtools-kit@^3.4.1":
+"@nuxt/devtools-wizard@3.4.2":
   version "3.4.2"
-  resolved "https://registry.yarnpkg.com/@nuxt/devtools-kit/-/devtools-kit-3.4.2.tgz#951e50070ded4e71b5f2fa1ce812c7d7528f1778"
-  integrity sha512-TPPbmH9xrExagYxfCe6JgtbHmgchfgDdA656Yws18rn8I/oCvB+gcw3kTWBBp2sC9ipZPXsgbsW/yZnVnGNBiA==
-  dependencies:
-    "@nuxt/kit" "^4.5.1"
-    execa "^8.0.1"
-
-"@nuxt/devtools-wizard@3.4.1":
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/@nuxt/devtools-wizard/-/devtools-wizard-3.4.1.tgz#25ccc8a398d0e15a20a8afbc22afcfc85adff6d0"
-  integrity sha512-taGeuTnkHsZVjgD9r6NXvvHaBzB2j4mCgOmlmkz3ntsqgh1SJfmsD11Tmtl7FVAxJS8Wuvuzgt0GyTlADBW9Wg==
+  resolved "https://registry.yarnpkg.com/@nuxt/devtools-wizard/-/devtools-wizard-3.4.2.tgz#67c42f0ea122c5e39fd5f1d888bc87d04e50e73c"
+  integrity sha512-U2G8fw7KW1rdECyJDho5N14z8hSllpTk430KG1QPLjrv5w3pDksZ+YcpITd0u762Vw3gq3Arpg65Bk6U4ua6aQ==
   dependencies:
     "@clack/prompts" "^1.7.0"
     consola "^3.4.2"
@@ -1048,12 +1040,12 @@
     semver "^7.8.5"
 
 "@nuxt/devtools@^3.1.1", "@nuxt/devtools@^3.3.1":
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/@nuxt/devtools/-/devtools-3.4.1.tgz#931e9b0b29005b4f81230694586042549541c6c5"
-  integrity sha512-20zZs6k/zAdi+PM7s1BwxE3hanZ+R1OGi5DWCKPyzSnhUUeeNebvWNgec7Rwnx6iKLkJfK4WFIZ+FL2QurG/ZQ==
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@nuxt/devtools/-/devtools-3.4.2.tgz#6006a8ecf56cb496e7e77218f441326de24a03be"
+  integrity sha512-Nidg0/zB710cyK89ltTkv66hMfPlIPlKA+Yb67bIrAkNm5PoTwQ1goHdFWHIAGZ9nTadcVTzATwMwa56nvl/Wg==
   dependencies:
-    "@nuxt/devtools-kit" "3.4.1"
-    "@nuxt/devtools-wizard" "3.4.1"
+    "@nuxt/devtools-kit" "3.4.2"
+    "@nuxt/devtools-wizard" "3.4.2"
     "@nuxt/kit" "^4.5.1"
     "@vue/devtools-core" "^8.2.1"
     "@vue/devtools-kit" "^8.2.1"
@@ -2720,12 +2712,7 @@ birpc@^2.6.1:
   resolved "https://registry.yarnpkg.com/birpc/-/birpc-2.9.0.tgz#b59550897e4cd96a223e2a6c1475b572236ed145"
   integrity sha512-KrayHS5pBi69Xi9JmvoqrIgYGDkD6mcSe/i6YKi3w5kekCLzrX4+nawcXqrj2tIp50Kw/mT/s3p+GVK0A0sKxw==
 
-birpc@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/birpc/-/birpc-4.0.0.tgz#cceef485926b93496735201896d86c3a182ad30f"
-  integrity sha512-LShSxJP0KTmd101b6DRyGBj57LZxSDYWKitQNW/mi8GRMvZb078Uf9+pveax1DrVL89vm7mWe+TovdI/UDOuPw==
-
-birpc@^4.1.0:
+birpc@^4.0.0, birpc@^4.1.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/birpc/-/birpc-4.2.0.tgz#9509d1abf0824f1447ce4f4fbcd4e4696beb6f79"
   integrity sha512-KxgKcZPfrtzJDDALHPguGpGJUrzdgpymyiQQgzFjWreHMOpWrnFNVREr5J48x2DBh8ZVioscrV1SBkDipGiX+Q==
