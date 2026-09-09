@@ -13,11 +13,10 @@ jobs:
   build:
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.57.0-jammy
 
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         node-version: [22, 24, 26]
 
@@ -49,6 +48,15 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Cache Playwright browser
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
+
+      - name: Install Playwright browser
+        run: yarn playwright-core install chromium
 
       - run: yarn lint --max-warnings 0
 
