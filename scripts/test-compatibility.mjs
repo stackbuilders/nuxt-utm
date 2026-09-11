@@ -8,6 +8,9 @@ import { chromium } from 'playwright'
 
 export async function testCompatibility({ root, directory, tarball }) {
   const version = process.env.NUXT_VERSION ?? '4'
+  const pnpmCommand = process.env.npm_execpath ? process.execPath : 'pnpm'
+  const pnpmArguments = process.env.npm_execpath ? [process.env.npm_execpath] : []
+  const { packageManager } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
   const fixture = join(directory, 'app')
   cpSync(join(root, 'test/package-fixture/app'), fixture, { recursive: true })
   for (const entry of readdirSync(fixture, { recursive: true })) {
@@ -20,6 +23,7 @@ export async function testCompatibility({ root, directory, tarball }) {
       name: 'nuxt-utm-compatibility',
       private: true,
       type: 'module',
+      packageManager,
       dependencies: { 'nuxt': version, 'nuxt-utm': `file:${tarball}`, 'vue': '^3.5.0' },
       devDependencies: { 'typescript': '~5.9.3', 'vue-tsc': '^3.3.8' },
     }),
@@ -28,22 +32,26 @@ export async function testCompatibility({ root, directory, tarball }) {
     join(fixture, 'tsconfig.json'),
     JSON.stringify({ extends: './.nuxt/tsconfig.json' }),
   )
-  const run = (command, args) =>
-    execFileSync(command, args, {
+  const run = (args) =>
+    execFileSync(pnpmCommand, [...pnpmArguments, ...args], {
       cwd: fixture,
       stdio: 'inherit',
       timeout: 300_000,
       env: { ...process.env, NUXT_TELEMETRY_DISABLED: '1' },
     })
-  run('corepack', ['yarn', 'install', '--non-interactive'])
+  const allowBuilds = JSON.parse(execFileSync(pnpmCommand, [...pnpmArguments, 'config', 'get', 'allowBuilds', '--json'], {
+    cwd: root, encoding: 'utf8',
+  }))
+  writeFileSync(join(fixture, 'pnpm-workspace.yaml'), JSON.stringify({ allowBuilds }))
+  run(['install', '--no-frozen-lockfile'])
   const installed = JSON.parse(
     readFileSync(join(fixture, 'node_modules/nuxt/package.json'), 'utf8'),
   )
   console.log(`Testing published package with Nuxt ${installed.version}`)
-  run('corepack', ['yarn', 'nuxt', 'prepare'])
-  run('corepack', ['yarn', 'vue-tsc', '--noEmit'])
-  run('corepack', ['yarn', 'nuxt', 'build'])
-  run('corepack', ['yarn', 'nuxt', 'generate'])
+  run(['exec', 'nuxt', 'prepare'])
+  run(['exec', 'vue-tsc', '--noEmit'])
+  run(['exec', 'nuxt', 'build'])
+  run(['exec', 'nuxt', 'generate'])
 
   const publicDirectory = join(fixture, '.output/public')
   const contentTypes = {

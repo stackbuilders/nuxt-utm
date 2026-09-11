@@ -11,3 +11,9 @@ Thank you for your interest in contributing to this Stack Builders' library. To 
 ## Getting help
 
 Contact any of our current maintainers, or send us an email at [community@stackbuilders.com](mailto:community@stackbuilders.com) for more information. Thank you for contributing!
+
+## Local development
+
+Use the pnpm version pinned in `package.json`. With Corepack installed, run `corepack enable`, then `pnpm install --frozen-lockfile` and `pnpm dev:prepare` from the repository root. The module and playground share `pnpm-lock.yaml`; install dependencies from the root and use `pnpm --dir playground build` to build the playground directly.
+
+Before submitting a change, run `pnpm lint`, `pnpm test:types`, `pnpm test`, and `pnpm test:package`. For runtime changes, also run `pnpm test:compatibility` and `NUXT_VERSION=3 pnpm test:compatibility` to test independent static-site consumers.

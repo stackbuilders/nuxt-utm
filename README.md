@@ -31,7 +31,7 @@ This is browser-local campaign context, not a reporting dashboard or a cross-dev
 ## Setup
 
 ```bash
-yarn add --dev nuxt-utm
+pnpm add --dev nuxt-utm
 ```
 
 ```ts
@@ -243,22 +243,25 @@ Supported UTM fields are `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`,
 
 ## Development
 
+Use the pnpm version pinned in `package.json`. The commands below assume Corepack is installed; see [pnpm installation](https://pnpm.io/installation) if needed.
+
 ```bash
-yarn install --frozen-lockfile
-yarn dev:prepare
-yarn playwright-core install chromium
-yarn lint
-yarn test:types
-yarn test
-yarn test:package
-yarn test:compatibility
-NUXT_VERSION=3 yarn test:compatibility
-yarn dev:build
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev:prepare
+pnpm playwright-core install chromium
+pnpm lint
+pnpm test:types
+pnpm test
+pnpm test:package
+pnpm test:compatibility
+NUXT_VERSION=3 pnpm test:compatibility
+pnpm dev:build
 ```
 
 `test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3. CI runs both release lines separately from the Node 22, 24, and 26 checks. These are tested configurations, not runtime version restrictions.
 
-Use `yarn dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
+Use `pnpm dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
 
 ## License
 
