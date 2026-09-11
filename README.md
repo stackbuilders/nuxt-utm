@@ -158,7 +158,7 @@ await utm.capture()
 | `clearData()`                                               | Clear history and the session ID, and cancel pending collection. Keeps the tracking preference. |
 | `onBeforeTrack(cb)`, `onBeforePersist(cb)`, `onTracked(cb)` | Register a hook; return a function that unregisters it.                                         |
 
-Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams.utm_source`. Data is empty during server rendering; collection occurs in the browser after mounting. Call `getAttribution()` from a client action after mounting, such as the form handler above.
+Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams.utm_source`. Data is empty during server rendering; collection occurs in the browser after mounting. Wrap browser-history displays in Nuxt’s `<ClientOnly>` to avoid hydration mismatches when a returning visitor already has stored history. Call `getAttribution()` from a client action after mounting, such as the form handler above.
 
 ## Tracking preferences and storage
 
@@ -251,8 +251,12 @@ yarn lint
 yarn test:types
 yarn test
 yarn test:package
+yarn test:compatibility
+NUXT_VERSION=3 yarn test:compatibility
 yarn dev:build
 ```
+
+`test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3. CI runs both release lines separately from the Node 22, 24, and 26 checks. These are tested configurations, not runtime version restrictions.
 
 Use `yarn dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
 
