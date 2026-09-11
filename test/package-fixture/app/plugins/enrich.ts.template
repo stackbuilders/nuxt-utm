@@ -1,0 +1,18 @@
+import { defineNuxtPlugin } from '#app'
+import { useNuxtUTM, useNuxtApp } from '#imports'
+import type { AttributionSnapshot, DataObject } from 'nuxt-utm'
+
+export default defineNuxtPlugin((nuxtApp) => {
+  const utm = useNuxtUTM()
+  const app = useNuxtApp()
+  const snapshot: Promise<AttributionSnapshot> = app.$utmGetAttribution()
+  void snapshot
+  nuxtApp.hook('utm:before-persist', async (entry: DataObject) => {
+    await Promise.resolve()
+    entry.customParams = { page: new URL(entry.additionalInfo.landingPageUrl).pathname }
+  })
+  nuxtApp.hook('utm:tracked', async () => {
+    const snapshot: AttributionSnapshot = await utm.getAttribution()
+    if (!snapshot.history.length) throw new Error('Saved history must be available')
+  })
+})

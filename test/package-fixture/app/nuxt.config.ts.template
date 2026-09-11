@@ -1,0 +1,9 @@
+import { defineNuxtConfig } from 'nuxt/config'
+
+export default defineNuxtConfig({
+  modules: ['nuxt-utm'],
+  srcDir: '.',
+  devtools: { enabled: false },
+  utm: { trackOnRouteChange: true, maxEntries: 10 },
+  nitro: { prerender: { routes: ['/contact'] } },
+})
