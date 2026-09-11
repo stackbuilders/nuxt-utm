@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import type { DataObject, BeforeTrackContext } from 'nuxt-utm'
+import type { DataObject, BeforeTrackContext } from './types'
 import { useNuxtApp } from '#imports'
 
 type HookCleanup = () => void

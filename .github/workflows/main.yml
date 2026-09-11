@@ -60,6 +60,15 @@ jobs:
 
       - run: yarn lint --max-warnings 0
 
+      - name: Prepare module types
+        run: yarn dev:prepare
+
+      - name: Check types
+        run: yarn test:types
+
+      - name: Validate published package types
+        run: yarn test:package
+
       - name: Build Playground
         run: yarn dev:build
 

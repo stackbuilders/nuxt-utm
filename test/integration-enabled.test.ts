@@ -36,7 +36,7 @@ describe('Module when enabled', async () => {
     })
 
     it('Stores Additional info', () => {
-      expect(entries?.[0].additionalInfo).toBeDefined()
+      expect(entries[0]?.additionalInfo).toBeDefined()
     })
 
     it('Stores the correct values', async () => {
@@ -52,13 +52,13 @@ describe('Module when enabled', async () => {
           },
         }
       })
-      expect(entries?.[0].additionalInfo).toEqual(info)
+      expect(entries[0]?.additionalInfo).toEqual(info)
     })
   })
 
   describe('UTM params', () => {
     it('Stores UTM params', () => {
-      expect(entries?.[0].utmParams).toEqual({
+      expect(entries[0]?.utmParams).toEqual({
         utm_campaign: 'test_campaign',
         utm_content: 'test_content',
         utm_medium: 'test_medium',
@@ -93,7 +93,7 @@ describe('Module when enabled', async () => {
 
       const rawData = await newPage.evaluate(() => localStorage.getItem('nuxt-utm-data'))
       entries = await JSON.parse(rawData ?? '[]')
-      expect(entries[0].utmParams).toEqual({
+      expect(entries[0]?.utmParams).toEqual({
         utm_campaign: 'test_campaign2',
         utm_content: 'test_content2',
         utm_medium: 'test_medium2',
@@ -109,7 +109,7 @@ describe('Module when enabled', async () => {
       await page.reload()
       const rawData = await page.evaluate(() => localStorage.getItem('nuxt-utm-data'))
       entries = await JSON.parse(rawData ?? '[]')
-      expect(entries[0].utmParams).toEqual({
+      expect(entries[0]?.utmParams).toEqual({
         utm_campaign: 'test_campaign',
         utm_content: 'test_content',
         utm_medium: 'test_medium',
@@ -121,7 +121,7 @@ describe('Module when enabled', async () => {
 
   describe('GCLID params', () => {
     it('Stores GCLID params', () => {
-      expect(entries?.[0].gclidParams).toEqual({
+      expect(entries[0]?.gclidParams).toEqual({
         gclid: 'testKey',
         gad_source: '1',
       })
@@ -153,7 +153,7 @@ describe('Module when enabled', async () => {
 
       const rawData = await newPage.evaluate(() => localStorage.getItem('nuxt-utm-data'))
       entries = await JSON.parse(rawData ?? '[]')
-      expect(entries?.[0].gclidParams).toEqual({
+      expect(entries[0]?.gclidParams).toEqual({
         gclid: 'testKey2',
         gad_source: '2',
       })
@@ -166,7 +166,7 @@ describe('Module when enabled', async () => {
       await page.reload()
       const rawData = await page.evaluate(() => localStorage.getItem('nuxt-utm-data'))
       entries = await JSON.parse(rawData ?? '[]')
-      expect(entries?.[0].gclidParams).toEqual({
+      expect(entries[0]?.gclidParams).toEqual({
         gclid: 'testKey',
         gad_source: '1',
       })
