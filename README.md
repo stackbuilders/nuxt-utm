@@ -8,403 +8,257 @@
 
 **Built in collaboration with The Durst Organization**
 
----
+Nuxt UTM keeps campaign information in the browser until your application is ready to use it. It was built for **statically generated Nuxt websites**: collect a visitor's source now, then include it with a lead, signup, or form submission later.
 
-A Nuxt 3/4 module for tracking UTM parameters.
+It supports Nuxt 3 and 4. Collection needs no backend, analytics account, or network request. Your application decides whether and when to send the data to its own API or CRM.
 
-- [✨ &nbsp;Release Notes](/CHANGELOG.md)
-  <!-- - [🏀 Online playground](https://stackblitz.com/github/stackbuilders/nuxt-utm?file=playground%2Fapp.vue) -->
-  <!-- - [📖 &nbsp;Documentation](https://example.com) -->
+[Release notes](CHANGELOG.md) · [Contributing](docs/CONTRIBUTING.md)
 
-## How it works / motivation / purpose
+## What is attribution?
 
-If a visitor arrives at a website that uses the Nuxt UTM module and a UTM parameter is present in the URL, the module will collect the UTM parameters along with additional information. This information is saved in the device's local storage within the user's browser. This is especially useful for static generated websites that can later integrate with the backend to save this data. For example, when a visitor or lead submits a form, you can send this data alongside the form data. Later, this information can be especially useful for evaluating the effectiveness of ad campaigns and assessing their impact.
+Attribution connects an action, such as submitting a contact form, to the campaign that brought the visitor to your site.
 
-## Features
+For example, someone arrives from a Google campaign, returns through a newsletter, and later opens your contact page directly. Nuxt UTM can give your backend:
 
-- **📍 UTM Tracking**: Easily capture UTM parameters to gain insights into traffic sources and campaign performance.
-- **🔍 Intelligent De-duplication**: Smart recognition of page refreshes to avoid data duplication, ensuring each visit is uniquely accounted for.
-- **🔗 Comprehensive Data Collection**: Alongside UTM parameters, gather additional context such as referrer details, user agent, landing page url, browser language, and screen resolution. This enriched data empowers your marketing strategies with a deeper understanding of campaign impact.
-- **🔌 Hooks & Extensibility**: Three runtime hooks (`utm:before-track`, `utm:before-persist`, `utm:tracked`) let you skip tracking, enrich data with custom parameters, or trigger side effects after tracking completes.
+- **First touch:** the oldest retained campaign, Google in this example.
+- **Last touch:** the most recent retained campaign, the newsletter.
+- **History:** the retained visits, newest first, including direct visits by default.
 
-## Quick Setup
+First and last touch consider nonempty UTM or Google click parameters. Direct visits do not replace them; both are `null` when no campaign remains. Retention can remove the original first touch, so these values describe the history still available in this browser.
 
-1. Add `nuxt-utm` dependency to your project
+This is browser-local campaign context, not a reporting dashboard or a cross-device attribution service.
+
+## Setup
 
 ```bash
-# Using pnpm
-pnpm add -D nuxt-utm
-
-# Using yarn
 yarn add --dev nuxt-utm
-
-# Using npm
-npm install --save-dev nuxt-utm
 ```
 
-2. Add `nuxt-utm` to the `modules` section of `nuxt.config.ts`
-
-```js
+```ts
+// nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['nuxt-utm'],
 })
 ```
 
-That's it! You can now use Nuxt UTM in your Nuxt app ✨
+The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting.
 
-## Usage
+## Send attribution with a form
 
-### Configuration
+A static site can send to an independently hosted API. Configure your actual endpoint; Nuxt UTM does not create one:
 
-You can configure the module by passing options in your `nuxt.config.ts`:
-
-```js
+```ts
+// nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['nuxt-utm'],
-  utm: {
-    trackingEnabled: true, // defaults to true - initial tracking state
+  runtimeConfig: {
+    public: {
+      leadEndpoint: 'https://api.example.com/leads',
+    },
   },
 })
 ```
 
-#### Options
-
-- `trackingEnabled`: Boolean (default: `true`) - Sets the initial state for UTM tracking. This can be changed at runtime.
-
-### Runtime Tracking Control
-
-The module provides runtime control over tracking, perfect for implementing cookie consent banners or user privacy preferences.
-
-#### Using the Composable
-
 ```vue
-<script setup>
-const utm = useNuxtUTM()
-
-// The composable returns:
-// - data: Reactive array of collected UTM data
-// - trackingEnabled: Reactive boolean indicating if tracking is active
-// - storageAvailable: Whether collected data can persist in localStorage
-// - enableTracking(): Enable UTM tracking
-// - disableTracking(): Disable UTM tracking
-// - clearData(): Clear all stored UTM data
-// - onBeforeTrack(cb): Hook called before data collection
-// - onBeforePersist(cb): Hook called to enrich/modify collected data before saving
-// - onTracked(cb): Hook called after data is saved
-</script>
-```
-
-#### Example: Cookie Banner Integration
-
-```vue
-<template>
-  <div v-if="showBanner" class="cookie-banner">
-    <p>We use tracking to improve your experience.</p>
-    <button @click="acceptTracking">Accept</button>
-    <button @click="rejectTracking">Reject</button>
-  </div>
-</template>
-
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
+
 const utm = useNuxtUTM()
-const showBanner = ref(!utm.trackingEnabled.value)
+const config = useRuntimeConfig()
+const email = ref('')
+const submitting = ref(false)
+const status = ref('')
 
-const acceptTracking = () => {
-  utm.enableTracking()
-  showBanner.value = false
-}
-
-const rejectTracking = () => {
-  utm.disableTracking()
-  utm.clearData() // Optional: clear any existing data
-  showBanner.value = false
+async function submitLead() {
+  if (submitting.value) return
+  submitting.value = true
+  status.value = ''
+  try {
+    const attribution = await utm.getAttribution()
+    await $fetch(config.public.leadEndpoint, {
+      method: 'POST',
+      body: { email: email.value, attribution },
+    })
+    status.value = 'Thank you. Your request was sent.'
+  } catch {
+    status.value = 'Your request could not be sent. Please try again.'
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
-```
 
-#### Privacy Controls
-
-```vue
 <template>
-  <div class="privacy-settings">
-    <h3>Privacy Settings</h3>
-    <label>
-      <input type="checkbox" :checked="utm.trackingEnabled.value" @change="toggleTracking" />
-      Enable UTM tracking
-    </label>
-    <button @click="utm.clearData" v-if="utm.data.value.length > 0">
-      Clear tracking data ({{ utm.data.value.length }} entries)
+  <form @submit.prevent="submitLead">
+    <label for="email">Email</label>
+    <input id="email" v-model="email" type="email" autocomplete="email" required />
+    <button type="submit" :disabled="submitting">
+      {{ submitting ? 'Sending…' : 'Contact us' }}
     </button>
-  </div>
+    <p role="status">{{ status }}</p>
+  </form>
 </template>
+```
 
-<script setup>
+`getAttribution()` waits for pending collection and enrichment, applies retention, and returns a detached, JSON-serializable `{ firstTouch, lastTouch, history }` snapshot. It does not send anything. Capture the composable during setup as above, then use its methods in event handlers.
+
+The API must accept your static site's origin and validate the submitted data. Campaign values and all browser-stored data are untrusted input. Authentication, duplicate submission handling, and retries belong to your application. A failed submission leaves the local history available; the module does not automatically retry requests or clear data after sending.
+
+## Configuration
+
+All new collection and retention options are opt-in. Existing behavior is preserved by default.
+
+| Option                   | Default | Behavior                                                                     |
+| ------------------------ | ------- | ---------------------------------------------------------------------------- |
+| `trackingEnabled`        | `true`  | Initial tracking preference when no saved preference exists.                 |
+| `trackOnRouteChange`     | `false` | Also capture successful client-side navigations whose full URL path changes. |
+| `captureWithoutCampaign` | `true`  | Include visits without UTM or Google click parameters.                       |
+| `maxAge`                 | Unset   | Retain entries younger than this many seconds. Must be positive and finite.  |
+| `maxEntries`             | Unset   | Retain at most this many entries. Must be a positive integer.                |
+
+For example, to retain up to 100 campaign visits for 30 days and capture client-side navigation:
+
+```ts
+export default defineNuxtConfig({
+  modules: ['nuxt-utm'],
+  utm: {
+    maxAge: 60 * 60 * 24 * 30,
+    maxEntries: 100,
+    captureWithoutCampaign: false,
+    trackOnRouteChange: true,
+  },
+})
+```
+
+Retention runs when history is loaded, a visit is saved, or `getAttribution()` is called. There is no background expiry timer. Without retention options, history has no configured age or entry limit.
+
+Consecutive entries with the same UTM parameters, Google click parameters, and session ID are deduplicated. URLs, timestamps, and `customParams` do not participate in that comparison. This is not a pageview counter. The session ID uses sessionStorage for the current browser tab; it has no inactivity timeout.
+
+## Composable
+
+Nuxt auto-imports `useNuxtUTM`. With auto-imports disabled, import it from `#imports`.
+
+```ts
 const utm = useNuxtUTM()
 
-const toggleTracking = (event) => {
-  if (event.target.checked) {
-    utm.enableTracking()
-  } else {
-    utm.disableTracking()
-  }
-}
-</script>
+const payload = await utm.getAttribution()
+await utm.capture()
 ```
 
-### Storage and pending tracking
+| Member                                                      | Purpose                                                                                         |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `data`                                                      | Read-only reactive history, newest first.                                                       |
+| `firstTouch`, `lastTouch`                                   | Read-only reactive campaign entries, or `null`.                                                 |
+| `trackingEnabled`                                           | Read-only reactive tracking preference.                                                         |
+| `storageAvailable`                                          | Whether browser history can persist in localStorage.                                            |
+| `getAttribution()`                                          | Prepare a detached snapshot after pending persistence completes.                                |
+| `capture()`                                                 | Capture the current route manually, respecting tracking controls, hooks, and deduplication.     |
+| `enableTracking()`                                          | Save the enabled preference and start capturing the current route.                              |
+| `disableTracking()`                                         | Save the disabled preference and cancel pending collection.                                     |
+| `clearData()`                                               | Clear history and the session ID, and cancel pending collection. Keeps the tracking preference. |
+| `onBeforeTrack(cb)`, `onBeforePersist(cb)`, `onTracked(cb)` | Register a hook; return a function that unregisters it.                                         |
 
-Disabling tracking or clearing data cancels pending collection, including collection waiting for an asynchronous hook. Already completed application side effects cannot be undone.
+Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams.utm_source`. Data is empty during server rendering; collection occurs in the browser after mounting. Call `getAttribution()` from a client action after mounting, such as the form handler above.
 
-If browser storage is blocked or full, the module keeps data in memory so your application can still use it during the current page lifetime. `utm.storageAvailable.value` becomes `false` when localStorage is unavailable. Memory-only data and preferences do not survive a reload. Clearing data always clears memory and attempts to remove persisted data; the browser may prevent that removal too.
+## Tracking preferences and storage
 
-Invalid stored entries are ignored. The `utm:tracked` hook runs after an entry has been accepted into the available storage, which can be the memory fallback.
+To start with collection disabled, configure `utm: { trackingEnabled: false }`. Connect `enableTracking()` and `disableTracking()` to your application's preference controls. A previously saved browser preference takes precedence over the configured initial value. Disabling does not delete existing history; also call `clearData()` when deletion is intended.
 
-### Accessing UTM Data
+Disabling tracking or clearing data cancels pending collection, including collection waiting on an asynchronous hook. Already completed application side effects cannot be undone.
 
-You can use `useNuxtUTM` composable to access the UTM data:
+If storage is blocked or full, the module keeps data in memory for the current page lifetime. `storageAvailable.value` becomes `false` if localStorage access fails. Memory-only history and preferences do not survive reloads. Clearing always removes in-memory data and attempts to remove persisted data, but a browser restriction can prevent that removal too. Invalid stored entries are ignored.
 
-```vue
-<script setup>
-const utm = useNuxtUTM()
+History stays within the browser's storage for the site's origin. It is not shared across devices or unrelated domains. The module captures referrer, user agent, browser language, screen dimensions, and the full landing-page URL as well as campaign parameters. Use the hooks to remove context you do not need, and avoid placing sensitive information in URLs or custom data.
 
-// Access the collected data
-console.log(utm.data.value)
-</script>
-```
+## Hooks
 
-> Remember: You don't need to import the composable because Nuxt imports it automatically.
+| Hook                 | Receives                         | Use                                                                 |
+| -------------------- | -------------------------------- | ------------------------------------------------------------------- |
+| `utm:before-track`   | Mutable `{ route, query, skip }` | Set `skip = true` to skip collection, or adjust the captured query. |
+| `utm:before-persist` | Mutable `DataObject`             | Enrich or redact an entry before validation and deduplication.      |
+| `utm:tracked`        | Detached `DataObject`            | React after a new entry is saved, including in memory fallback.     |
 
-### Data Structure
+Register application-wide hooks in a client plugin. Route and query information is captured when collection starts, so use that context or the entry's landing-page URL when enriching asynchronous captures:
 
-The `data` property contains an array of UTM parameters collected. Each element in the array represents a set of UTM parameters collected from a URL visit, and is structured as follows
-
-```json
-[
-  {
-    "timestamp": "2023-11-02T10:11:17.219Z",
-    "utmParams": {
-      "utm_source": "test_source",
-      "utm_medium": "test_medium",
-      "utm_campaign": "test_campaign",
-      "utm_term": "test_term",
-      "utm_content": "test_content"
-    },
-    "additionalInfo": {
-      "referrer": "http://referrer.url",
-      "userAgent": "User-Agent String",
-      "language": "en-GB",
-      "landingPageUrl": "http://landingpage.url",
-      "screen": {
-        "width": 1728,
-        "height": 1117
-      }
-    },
-    "sessionId": "beai1gx7dg",
-    "gclidParams": {
-      "gclid": "CjklsefawEFRfeafads",
-      "gad_source": "1"
-    },
-    "customParams": {
-      "fbclid": "abc123"
-    }
-  }
-]
-```
-
-Each entry provides a `timestamp` indicating when the UTM parameters were collected, the `utmParams` object containing the UTM parameters, `additionalInfo` object with more context about the visit, and a `sessionId` to differentiate visits in different sessions.
-
-### Key Features
-
-- **Runtime Control**: Enable/disable tracking dynamically based on user consent
-- **Privacy Friendly**: Respects user preferences and provides clear data management
-- **Persistent Preferences**: Tracking preferences are saved and persist across sessions
-- **Data Clearing**: Ability to completely remove all collected data
-- **Session Management**: Automatically manages sessions to avoid duplicate tracking
-
-### Hooks
-
-The module provides three runtime hooks that let you extend the tracking pipeline. You can use them to skip tracking, enrich data with custom parameters, or trigger side effects after tracking completes. Hooks can be registered via a Nuxt plugin or through the `useNuxtUTM` composable.
-
-This keeps your tracking strategy flexible: enrich once in your app, then forward the same enriched payload wherever you need it.
-
-#### Available Hooks
-
-| Hook               | When it fires                          | Receives                                        | Purpose                                              |
-| ------------------ | -------------------------------------- | ----------------------------------------------- | ---------------------------------------------------- |
-| `utm:before-track` | Before data collection                 | `BeforeTrackContext` (`{ route, query, skip }`) | Conditionally skip tracking by setting `skip = true` |
-| `utm:before-persist` | After data is collected, before saving | `DataObject` (mutable)                        | Enrich or modify the data, add `customParams`        |
-| `utm:tracked`      | After data is saved to localStorage    | `DataObject` (final)                            | Side effects: send to API, fire analytics, log       |
-
-#### Registering Hooks via Plugin
-
-Create a Nuxt plugin to register hooks that run on every page visit:
-
-```typescript
+```ts
 // plugins/utm-hooks.client.ts
 export default defineNuxtPlugin((nuxtApp) => {
-  // Skip tracking on admin pages
   nuxtApp.hook('utm:before-track', (context) => {
-    if (context.route.path.startsWith('/admin')) {
-      context.skip = true
-    }
+    if (context.route.path.startsWith('/admin')) context.skip = true
   })
 
-  // Add custom marketing parameters
-  nuxtApp.hook('utm:before-persist', (data) => {
-    const query = nuxtApp._route.query
-    if (query.fbclid) {
-      data.customParams = {
-        ...data.customParams,
-        fbclid: String(query.fbclid),
-      }
-    }
-    if (query.msclkid) {
-      data.customParams = {
-        ...data.customParams,
-        msclkid: String(query.msclkid),
-      }
-    }
-  })
-
-  // Send data to your backend after tracking
-  nuxtApp.hook('utm:tracked', async (data) => {
-    await $fetch('/api/marketing/track', {
-      method: 'POST',
-      body: data,
-    })
-  })
-})
-```
-
-#### Registering Hooks via Composable
-
-The `useNuxtUTM` composable provides convenience methods for registering hooks. Each method returns a cleanup function to unregister the hook.
-
-```vue
-<script setup>
-const utm = useNuxtUTM()
-
-// Register a before-persist hook
-const cleanup = utm.onBeforePersist((data) => {
-  data.customParams = { ...data.customParams, source: 'vue-component' }
-})
-
-// Unregister when no longer needed
-// cleanup()
-</script>
-```
-
-#### Example: add `pageCategory`
-
-Use `utm:before-persist` to enrich every tracked event with a normalized `pageCategory`. This pattern is useful when you want one internal taxonomy that can be reused across your app and backend.
-
-```typescript
-// plugins/utm-page-category.client.ts
-export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.hook('utm:before-persist', (data) => {
     const url = new URL(data.additionalInfo.landingPageUrl)
-    const explicitCategory = url.searchParams.get('page_category')
-
-    // Optional fallback categorization from pathname
-    const fallbackCategory = url.pathname.startsWith('/pricing') ? 'pricing' : 'general'
-
-    data.customParams = {
-      ...data.customParams,
-      pageCategory: explicitCategory ?? fallbackCategory,
-    }
+    const fbclid = url.searchParams.get('fbclid')
+    if (fbclid) data.customParams = { ...data.customParams, fbclid }
+    data.additionalInfo.landingPageUrl = `${url.origin}${url.pathname}`
   })
 })
 ```
 
-Tracked data will include:
+Custom fields must be JSON-serializable. Keep the required data shape intact when redacting it, for example replace a string with `''`. A failing before hook or invalid resulting entry skips that capture. Changes made by an after-save hook do not mutate retained history. `getAttribution()` waits for before hooks and persistence, but does not wait for after-save side effects.
 
-```json
-{
-  "customParams": {
-    "pageCategory": "pricing"
-  }
+Do not await `capture()` or `getAttribution()` inside a before hook: that would wait on the collection currently running the hook. Use the hook's input instead. Component hooks can be removed when their owner is disposed:
+
+```ts
+import { onScopeDispose } from 'vue'
+
+const utm = useNuxtUTM()
+const stop = utm.onBeforePersist((entry) => {
+  entry.customParams = { ...entry.customParams, pageCategory: 'apartments' }
+})
+onScopeDispose(stop)
+```
+
+## Data and TypeScript
+
+Each history entry has this shape:
+
+```ts
+import type { DataObject, AttributionSnapshot } from 'nuxt-utm'
+
+const entry: DataObject = {
+  timestamp: '2026-01-01T12:00:00.000Z',
+  utmParams: { utm_source: 'google', utm_medium: 'cpc', utm_campaign: 'apartments' },
+  gclidParams: { gclid: 'example-click-id', gad_source: '1' },
+  additionalInfo: {
+    referrer: 'https://www.google.com/',
+    userAgent: 'Example browser',
+    language: 'en',
+    landingPageUrl: 'https://example.com/?utm_source=google',
+    screen: { width: 1280, height: 720 },
+  },
+  sessionId: 'example-session',
+  customParams: { pageCategory: 'apartments' },
+}
+
+const attribution: AttributionSnapshot = {
+  firstTouch: entry,
+  lastTouch: entry,
+  history: [entry],
 }
 ```
 
-#### Hook: `utm:before-track`
-
-Called before any data collection begins. The handler receives a `BeforeTrackContext` object with `route`, `query`, and a `skip` flag. Set `skip = true` to prevent tracking for the current page visit.
-
-```typescript
-nuxtApp.hook('utm:before-track', (context) => {
-  // context.route - the current route object
-  // context.query - the current URL query parameters
-  // context.skip  - set to true to skip tracking
-})
-```
-
-#### Hook: `utm:before-persist`
-
-Called after the `DataObject` is built but before it is checked for duplicates and saved. The handler receives the `DataObject` directly and can mutate it to add or modify fields. This is the primary hook for adding `customParams`.
-
-```typescript
-nuxtApp.hook('utm:before-persist', (data) => {
-  // Add any custom tracking parameters
-  data.customParams = {
-    ...data.customParams,
-    myCustomField: 'value',
-  }
-})
-```
-
-> Note: `customParams` are not included in the de-duplication check. Only UTM parameters, GCLID parameters, and session ID are compared.
-
-#### Hook: `utm:tracked`
-
-Called after data is saved to localStorage. The handler receives the final `DataObject`. Use this for side effects like sending data to a backend or triggering analytics events.
-
-```typescript
-nuxtApp.hook('utm:tracked', async (data) => {
-  console.log('Tracked:', data.utmParams, data.customParams)
-})
-```
+Supported UTM fields are `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, and `utm_content`. Google fields are `gclid` and `gad_source`. `gclidParams` and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
 
 ## Development
 
 ```bash
-# Install dependencies
-yarn install
-
-# Generate type stubs
+yarn install --frozen-lockfile
 yarn dev:prepare
-
-# Develop with the playground
-yarn dev
-
-# Build the playground
-yarn dev:build
-
-# Run ESLint
+yarn playwright-core install chromium
 yarn lint
-
-# Install Playwright Browsers
-npx playwright install --with-deps
-
-# Run Vitest
+yarn test:types
 yarn test
-yarn test:watch
-
-# Release new version
-yarn release
+yarn test:package
+yarn dev:build
 ```
 
-For detailed information about the release process, please refer to our [Release Documentation](/docs/RELEASING.md).
+Use `yarn dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
 
 ## License
 
-<!-- NOTE: If you need a different type of licence, please check with the OSS team before changing it -->
-
-MIT, see [the LICENSE file](LICENSE).
-
-## Contributing
-
-Do you want to contribute to this project? Please take a look at our [contributing guideline](/docs/CONTRIBUTING.md) to know how you can help us build it.
+MIT, see [LICENSE](LICENSE).
 
 <!-- Badges -->
 

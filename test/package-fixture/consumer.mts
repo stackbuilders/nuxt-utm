@@ -1,6 +1,19 @@
-import type { DataObject, BeforeTrackContext, ModuleOptions, UTMParams, UseNuxtUTMReturn } from 'nuxt-utm'
+import type {
+  DataObject,
+  BeforeTrackContext,
+  ModuleOptions,
+  UTMParams,
+  UseNuxtUTMReturn,
+  AttributionSnapshot,
+} from 'nuxt-utm'
 
-export const options: ModuleOptions = { trackingEnabled: false }
+export const options: ModuleOptions = {
+  trackingEnabled: false,
+  maxAge: 86400,
+  maxEntries: 100,
+  trackOnRouteChange: true,
+  captureWithoutCampaign: false,
+}
 export function campaign(data: DataObject): string | undefined {
   return data.utmParams.utm_campaign
 }
@@ -17,4 +30,9 @@ export function enrich(utm: UseNuxtUTMReturn): void {
     // @ts-expect-error Hook payloads must not become any when consumed outside this repository.
     data.utmParams = 123
   })
+}
+
+export async function payload(utm: UseNuxtUTMReturn): Promise<AttributionSnapshot> {
+  await utm.capture()
+  return utm.getAttribution()
 }

@@ -1,8 +1,13 @@
-import type { BeforeTrackContext, DataObject, NuxtUTMHooks } from './types'
+import type { BeforeTrackContext, DataObject, ModuleOptions, NuxtUTMHooks } from './types'
 import type { RouteLocationNormalized } from 'vue-router'
 import { computed, ref, readonly } from 'vue'
 import { createStorage } from './storage'
-import { isDataObject } from './history'
+import {
+  createAttributionSnapshot,
+  getCampaignTouches,
+  isDataObject,
+  retainHistory,
+} from './history'
 import {
   readLocalData,
   getSessionID,
@@ -10,16 +15,21 @@ import {
   getAdditionalInfo,
   isRepeatedEntry,
   urlHasGCLID,
+  urlHasUtmParams,
   getGCLID,
 } from './utm'
-import { defineNuxtPlugin, useRuntimeConfig } from '#app'
+import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#app'
 
 const LOCAL_STORAGE_KEY = 'nuxt-utm-data'
 const SESSION_ID_KEY = 'nuxt-utm-session-id'
 const TRACKING_ENABLED_KEY = 'nuxt-utm-tracking-enabled'
 
 export default defineNuxtPlugin((nuxtApp) => {
-  const options = useRuntimeConfig().public.utm
+  const options = useRuntimeConfig().public.utm as Required<
+    Pick<ModuleOptions, 'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign'>
+  > &
+    ModuleOptions
+  const router = useRouter()
   const isClient = typeof window !== 'undefined'
   const local = createStorage(() => localStorage)
   const session = createStorage(() => sessionStorage)
@@ -28,8 +38,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   const trackingEnabled = ref(
     storedPreference === null ? options.trackingEnabled : storedPreference === 'true',
   )
+  const touches = computed(() => getCampaignTouches(data.value))
   let generation = 0
   let pending = Promise.resolve()
+  let cancelPending!: () => void
+  let cancelled = new Promise<void>((resolve) => {
+    cancelPending = resolve
+  })
 
   function saveHistory(entries: DataObject[]) {
     if (entries.length) local.setItem(LOCAL_STORAGE_KEY, JSON.stringify(entries))
@@ -39,7 +54,10 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   function refreshHistory() {
     if (!isClient) return
-    data.value = readLocalData(LOCAL_STORAGE_KEY, local)
+    const stored = readLocalData(LOCAL_STORAGE_KEY, local)
+    const retained = retainHistory(stored, options)
+    data.value = retained
+    if (retained.length !== stored.length) saveHistory(retained)
   }
 
   async function runHook<Name extends keyof NuxtUTMHooks>(
@@ -57,6 +75,10 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   function invalidatePending() {
     generation += 1
+    cancelPending()
+    cancelled = new Promise<void>((resolve) => {
+      cancelPending = resolve
+    })
     pending = Promise.resolve()
   }
 
@@ -78,6 +100,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (!isActive()) return
       if (!(await runHook('utm:before-track', context)) || context.skip || !isActive()) return
 
+      if (!options.captureWithoutCampaign && !urlHasUtmParams(query) && !urlHasGCLID(query)) return
+
       const entry: DataObject = {
         timestamp,
         utmParams: getUtmParams(query),
@@ -94,14 +118,19 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
       refreshHistory()
       if (isRepeatedEntry(data, snapshot)) return
-      saveHistory([snapshot, ...data.value])
-      await runHook('utm:tracked', JSON.parse(JSON.stringify(snapshot)))
+      const retained = retainHistory([snapshot, ...data.value], options)
+      if (!retained.includes(snapshot)) return
+      saveHistory(retained)
+      return snapshot
     }
 
-    pending = pending.then(process).catch(() => {
+    const operation = Promise.race([pending.then(process), cancelled]).catch(() => {
       console.warn('[nuxt-utm] Tracking failed; this visit could not be completed')
     })
-    return pending
+    pending = operation.then(() => {})
+    return operation.then(async (entry) => {
+      if (entry && isActive()) await runHook('utm:tracked', JSON.parse(JSON.stringify(entry)))
+    })
   }
 
   const enableTracking = () => {
@@ -127,14 +156,35 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
   }
 
+  const getAttribution = async () => {
+    let current: Promise<void>
+    do {
+      current = pending
+      await current
+    } while (current !== pending)
+    refreshHistory()
+    return createAttributionSnapshot(data.value)
+  }
+
   refreshHistory()
-  nuxtApp.hook('app:mounted', () => capture())
+  nuxtApp.hook('app:mounted', async () => {
+    if (options.trackOnRouteChange) {
+      router.afterEach((to, from, failure) => {
+        if (!failure && to.fullPath !== from.fullPath) void capture(to)
+      })
+    }
+    await capture()
+  })
 
   return {
     provide: {
       utm: readonly(data),
       utmTrackingEnabled: readonly(trackingEnabled),
       utmStorageAvailable: computed(() => isClient && local.persistent.value),
+      utmFirstTouch: readonly(computed(() => touches.value.firstTouch)),
+      utmLastTouch: readonly(computed(() => touches.value.lastTouch)),
+      utmGetAttribution: getAttribution,
+      utmCapture: () => capture(),
       utmEnableTracking: enableTracking,
       utmDisableTracking: disableTracking,
       utmClearData: clearData,
