@@ -1,4 +1,4 @@
-import type { DataObject, BeforeTrackContext } from 'nuxt-utm'
+import type { DataObject, BeforeTrackContext } from './types'
 import { ref, readonly } from 'vue'
 import {
   readLocalData,

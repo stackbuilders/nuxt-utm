@@ -7,7 +7,7 @@ global.localStorage = (() => {
   let store: Record<string, string> = {}
 
   return {
-    getItem: (key: string): string => store[key] ?? null,
+    getItem: (key: string): string | null => store[key] ?? null,
     setItem: (key: string, value: string): void => {
       store[key] = value.toString()
     },

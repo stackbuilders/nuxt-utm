@@ -1,5 +1,10 @@
 import { defineNuxtModule, addPlugin, addImports, addTypeTemplate, createResolver } from '@nuxt/kit'
 
+export type {
+  UTMParams, GCLIDParams, AdditionalInfo, DataObject, BeforeTrackContext, NuxtUTMHooks,
+} from './runtime/types'
+export type { UseNuxtUTMReturn } from './runtime/composables'
+
 export interface ModuleOptions {
   trackingEnabled?: boolean
 }
@@ -32,14 +37,9 @@ export default defineNuxtModule<ModuleOptions>({
       filename: 'types/utm-hooks.d.ts',
       getContents: () =>
         [
-          'import type { DataObject, BeforeTrackContext } from "nuxt-utm"',
-          '',
+          `import type { NuxtUTMHooks } from ${JSON.stringify(resolver.resolve('./runtime/types'))}`,
           'declare module "#app" {',
-          '  interface RuntimeNuxtHooks {',
-          '    "utm:before-track": (context: BeforeTrackContext) => void | Promise<void>',
-          '    "utm:before-persist": (data: DataObject) => void | Promise<void>',
-          '    "utm:tracked": (data: DataObject) => void | Promise<void>',
-          '  }',
+          '  interface RuntimeNuxtHooks extends NuxtUTMHooks {}',
           '}',
         ].join('\n'),
     })

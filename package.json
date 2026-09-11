@@ -52,7 +52,8 @@
     "lint:fix": "eslint . --fix && prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
+    "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit",
+    "test:package": "yarn prepack && node scripts/test-package.mjs"
   },
   "dependencies": {
     "@nuxt/kit": "^3.17.2 || ^4.0.0"
@@ -70,6 +71,7 @@
     "tmp": "^0.2.4"
   },
   "devDependencies": {
+    "@nuxt/cli": "^3.37.0",
     "@nuxt/devtools": "^3.1.1",
     "@nuxt/eslint": "^1.11.0",
     "@nuxt/eslint-config": "^1.11.0",

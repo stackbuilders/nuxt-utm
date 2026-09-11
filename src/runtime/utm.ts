@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import type { LocationQuery } from 'vue-router'
-import type { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from 'nuxt-utm'
+import type { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from './types'
 
 export const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15)
@@ -82,7 +82,8 @@ export const isRepeatedEntry = (data: Ref<DataObject[]>, currentEntry: DataObjec
   const newGCLID = currentEntry.gclidParams
 
   return (
-    lastEntry &&
+    !!lastEntry &&
+    !!lastUtm &&
     lastUtm.utm_campaign === newUtm.utm_campaign &&
     lastUtm.utm_content === newUtm.utm_content &&
     lastUtm.utm_medium === newUtm.utm_medium &&
