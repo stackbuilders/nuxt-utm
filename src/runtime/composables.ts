@@ -7,6 +7,7 @@ type HookCleanup = () => void
 export interface UseNuxtUTMReturn {
   data: Readonly<Ref<readonly DataObject[]>>
   trackingEnabled: Readonly<Ref<boolean>>
+  storageAvailable: Readonly<Ref<boolean>>
   enableTracking: () => void
   disableTracking: () => void
   clearData: () => void
@@ -21,6 +22,7 @@ export const useNuxtUTM = (): UseNuxtUTMReturn => {
   return {
     data: nuxtApp.$utm,
     trackingEnabled: nuxtApp.$utmTrackingEnabled,
+    storageAvailable: nuxtApp.$utmStorageAvailable,
     enableTracking: nuxtApp.$utmEnableTracking,
     disableTracking: nuxtApp.$utmDisableTracking,
     clearData: nuxtApp.$utmClearData,

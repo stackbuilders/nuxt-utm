@@ -1,42 +1,43 @@
 import type { Ref } from 'vue'
 import type { LocationQuery } from 'vue-router'
+import { createStorage } from './storage'
+import { isDataObject } from './history'
 import type { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from './types'
 
 export const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15)
 }
 
-export const readLocalData = (localStorageKey: string) => {
-  const localData = localStorage.getItem(localStorageKey)
-
+export const readLocalData = (
+  localStorageKey: string,
+  storage = createStorage(() => localStorage),
+): DataObject[] => {
   try {
-    if (localData) {
-      return JSON.parse(localData) as DataObject[]
-    }
-  } catch (error) {
-    console.error('Error parsing local storage data', error)
+    const stored: unknown = JSON.parse(storage.getItem(localStorageKey) ?? '[]')
+    return Array.isArray(stored) ? stored.filter(isDataObject) : []
+  } catch {
+    return []
   }
-
-  return []
 }
 
-export const getSessionID = (sessionIdKey: string) => {
-  const sessionID = sessionStorage.getItem(sessionIdKey) || ''
-  if (sessionID == '') {
-    const newSessionID = generateSessionId()
-    sessionStorage.setItem(sessionIdKey, newSessionID)
-    return newSessionID
-  }
-  return sessionID
+export const getSessionID = (
+  sessionIdKey: string,
+  storage = createStorage(() => sessionStorage),
+): string => {
+  const existing = storage.getItem(sessionIdKey)
+  if (existing) return existing
+  const sessionId = generateSessionId()
+  storage.setItem(sessionIdKey, sessionId)
+  return sessionId
 }
 
 export const urlHasUtmParams = (query: LocationQuery): boolean => {
   return Boolean(
     query.utm_source ||
-      query.utm_medium ||
-      query.utm_campaign ||
-      query.utm_term ||
-      query.utm_content,
+    query.utm_medium ||
+    query.utm_campaign ||
+    query.utm_term ||
+    query.utm_content,
   )
 }
 
@@ -61,12 +62,12 @@ export const getGCLID = (query: LocationQuery): GCLIDParams => {
   }
 }
 
-export const getAdditionalInfo = (): AdditionalInfo => {
+export const getAdditionalInfo = (landingPageUrl = window.location.href): AdditionalInfo => {
   return {
     referrer: document.referrer,
     userAgent: navigator.userAgent,
     language: navigator.language,
-    landingPageUrl: window.location.href,
+    landingPageUrl,
     screen: {
       width: screen.width,
       height: screen.height,

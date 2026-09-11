@@ -32,8 +32,8 @@ describe('readLocalData function', () => {
   })
 
   it('Returns an array with objects if local storage has data', () => {
-    localStorage.setItem('nuxt-utm-test', utmItem)
-    expect(readLocalData('nuxt-utm-test')).toEqual(JSON.parse(utmItem))
+    localStorage.setItem('nuxt-utm-test', `[${utmItem}]`)
+    expect(readLocalData('nuxt-utm-test')).toEqual([JSON.parse(utmItem)])
   })
 })
 
@@ -111,6 +111,7 @@ const utmItem = `{
     "referrer": "http://localhost:3000/?utm_source=test_source&utm_medium=test_medium&utm_campaign=test_campaign&utm_term=test_term&utm_content=test_content",
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
     "language": "en-GB",
+    "landingPageUrl": "http://localhost:3000/",
     "screen": {
       "width": 1728,
       "height": 1117

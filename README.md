@@ -84,6 +84,7 @@ const utm = useNuxtUTM()
 // The composable returns:
 // - data: Reactive array of collected UTM data
 // - trackingEnabled: Reactive boolean indicating if tracking is active
+// - storageAvailable: Whether collected data can persist in localStorage
 // - enableTracking(): Enable UTM tracking
 // - disableTracking(): Disable UTM tracking
 // - clearData(): Clear all stored UTM data
@@ -150,6 +151,14 @@ const toggleTracking = (event) => {
 }
 </script>
 ```
+
+### Storage and pending tracking
+
+Disabling tracking or clearing data cancels pending collection, including collection waiting for an asynchronous hook. Already completed application side effects cannot be undone.
+
+If browser storage is blocked or full, the module keeps data in memory so your application can still use it during the current page lifetime. `utm.storageAvailable.value` becomes `false` when localStorage is unavailable. Memory-only data and preferences do not survive a reload. Clearing data always clears memory and attempts to remove persisted data; the browser may prevent that removal too.
+
+Invalid stored entries are ignored. The `utm:tracked` hook runs after an entry has been accepted into the available storage, which can be the memory fallback.
 
 ### Accessing UTM Data
 
