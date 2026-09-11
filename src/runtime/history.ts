@@ -1,4 +1,4 @@
-import type { DataObject } from './types'
+import type { AttributionSnapshot, DataObject, ModuleOptions } from './types'
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -26,4 +26,30 @@ export function isDataObject(value: unknown): value is DataObject {
     typeof additionalInfo.screen.height === 'number' &&
     Number.isFinite(additionalInfo.screen.height)
   )
+}
+
+export function retainHistory(
+  entries: DataObject[],
+  { maxAge, maxEntries }: Pick<ModuleOptions, 'maxAge' | 'maxEntries'>,
+  now = Date.now(),
+): DataObject[] {
+  const retained =
+    maxAge === undefined
+      ? entries
+      : entries.filter((entry) => now - Date.parse(entry.timestamp) < maxAge * 1000)
+  return maxEntries === undefined ? retained : retained.slice(0, maxEntries)
+}
+
+export function getCampaignTouches(history: readonly DataObject[]) {
+  const campaigns = history.filter(
+    (entry) =>
+      Object.values(entry.utmParams).some(Boolean) ||
+      Object.values(entry.gclidParams ?? {}).some(Boolean),
+  )
+  return { firstTouch: campaigns.at(-1) ?? null, lastTouch: campaigns[0] ?? null }
+}
+
+export function createAttributionSnapshot(entries: readonly DataObject[]): AttributionSnapshot {
+  const history: DataObject[] = JSON.parse(JSON.stringify(entries))
+  return { ...getCampaignTouches(history), history }
 }

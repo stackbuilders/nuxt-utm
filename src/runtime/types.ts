@@ -44,3 +44,17 @@ export interface NuxtUTMHooks {
   'utm:before-persist': (data: DataObject) => void | Promise<void>
   'utm:tracked': (data: DataObject) => void | Promise<void>
 }
+
+export interface ModuleOptions {
+  trackingEnabled?: boolean
+  maxAge?: number
+  maxEntries?: number
+  trackOnRouteChange?: boolean
+  captureWithoutCampaign?: boolean
+}
+
+export interface AttributionSnapshot {
+  firstTouch: DataObject | null
+  lastTouch: DataObject | null
+  history: DataObject[]
+}

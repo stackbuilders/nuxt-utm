@@ -1,12 +1,22 @@
 import { defineNuxtModule, addPlugin, addImports, addTypeTemplate, createResolver } from '@nuxt/kit'
+import type { ModuleOptions } from './runtime/types'
 
 export type {
-  UTMParams, GCLIDParams, AdditionalInfo, DataObject, BeforeTrackContext, NuxtUTMHooks,
+  ModuleOptions,
+  UTMParams,
+  GCLIDParams,
+  AdditionalInfo,
+  DataObject,
+  BeforeTrackContext,
+  NuxtUTMHooks,
+  AttributionSnapshot,
 } from './runtime/types'
 export type { UseNuxtUTMReturn } from './runtime/composables'
 
-export interface ModuleOptions {
-  trackingEnabled?: boolean
+const defaults = {
+  trackingEnabled: true,
+  trackOnRouteChange: false,
+  captureWithoutCampaign: true,
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -17,14 +27,22 @@ export default defineNuxtModule<ModuleOptions>({
       nuxt: '^3.0.0 || ^4.0.0',
     },
   },
-  defaults: {
-    trackingEnabled: true,
-  },
+  defaults,
   setup(options, nuxt) {
+    if (options.maxAge !== undefined && (!Number.isFinite(options.maxAge) || options.maxAge <= 0)) {
+      throw new Error('[nuxt-utm] maxAge must be a positive number of seconds')
+    }
+    if (
+      options.maxEntries !== undefined &&
+      (!Number.isInteger(options.maxEntries) || options.maxEntries <= 0)
+    ) {
+      throw new Error('[nuxt-utm] maxEntries must be a positive integer')
+    }
     const resolver = createResolver(import.meta.url)
 
     nuxt.options.runtimeConfig.public.utm = {
-      trackingEnabled: options.trackingEnabled ?? true,
+      ...defaults,
+      ...options,
     }
 
     addPlugin(resolver.resolve('./runtime/plugin'))

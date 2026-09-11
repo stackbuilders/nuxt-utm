@@ -1,5 +1,5 @@
-import type { Ref } from 'vue'
-import type { DataObject, BeforeTrackContext } from './types'
+import type { DeepReadonly, Ref } from 'vue'
+import type { DataObject, BeforeTrackContext, AttributionSnapshot } from './types'
 import { useNuxtApp } from '#imports'
 
 type HookCleanup = () => void
@@ -8,6 +8,10 @@ export interface UseNuxtUTMReturn {
   data: Readonly<Ref<readonly DataObject[]>>
   trackingEnabled: Readonly<Ref<boolean>>
   storageAvailable: Readonly<Ref<boolean>>
+  firstTouch: Readonly<Ref<DeepReadonly<DataObject> | null>>
+  lastTouch: Readonly<Ref<DeepReadonly<DataObject> | null>>
+  getAttribution: () => Promise<AttributionSnapshot>
+  capture: () => Promise<void>
   enableTracking: () => void
   disableTracking: () => void
   clearData: () => void
@@ -23,6 +27,10 @@ export const useNuxtUTM = (): UseNuxtUTMReturn => {
     data: nuxtApp.$utm,
     trackingEnabled: nuxtApp.$utmTrackingEnabled,
     storageAvailable: nuxtApp.$utmStorageAvailable,
+    firstTouch: nuxtApp.$utmFirstTouch,
+    lastTouch: nuxtApp.$utmLastTouch,
+    getAttribution: nuxtApp.$utmGetAttribution,
+    capture: nuxtApp.$utmCapture,
     enableTracking: nuxtApp.$utmEnableTracking,
     disableTracking: nuxtApp.$utmDisableTracking,
     clearData: nuxtApp.$utmClearData,
