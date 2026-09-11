@@ -1,5 +1,75 @@
 # Changelog
 
+## v0.3.0
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.15...v0.3.0)
+
+### 🚀 Enhancements
+
+- Add `capture()` and `getAttribution()` to prepare first-touch, last-touch, and retained visit history for form submissions ([#182](https://github.com/stackbuilders/nuxt-utm/pull/182))
+- Add `maxAge` and `maxEntries` retention controls, optional route-change tracking, and campaign-only capture ([#182](https://github.com/stackbuilders/nuxt-utm/pull/182))
+
+### 🩹 Fixes
+
+- **deps:** Resolve dependency security alerts ([#179](https://github.com/stackbuilders/nuxt-utm/pull/179))
+- Publish complete module types ([ea5af74](https://github.com/stackbuilders/nuxt-utm/commit/ea5af74))
+- Preserve tracking controls across pending hooks ([f2dfcc4](https://github.com/stackbuilders/nuxt-utm/commit/f2dfcc4))
+
+### 📦 Build
+
+- Use pnpm for the module and playground ([98e489a](https://github.com/stackbuilders/nuxt-utm/commit/98e489a))
+
+### 🏡 Chore
+
+- **deps-dev:** Bump nuxt from 4.4.6 to 4.4.7 ([#132](https://github.com/stackbuilders/nuxt-utm/pull/132))
+- **deps-dev:** Bump nuxt from 4.4.6 to 4.4.7 in /playground ([#129](https://github.com/stackbuilders/nuxt-utm/pull/129))
+- **deps-dev:** Bump @nuxt/devtools from 3.2.4 to 3.3.1 ([#145](https://github.com/stackbuilders/nuxt-utm/pull/145))
+- **deps-dev:** Bump nuxt from 4.4.7 to 4.5.1 in /playground ([#146](https://github.com/stackbuilders/nuxt-utm/pull/146))
+- Automate safe Dependabot updates ([#148](https://github.com/stackbuilders/nuxt-utm/pull/148))
+- **deps-dev:** Bump playwright from 1.57.0 to 1.62.0 ([#151](https://github.com/stackbuilders/nuxt-utm/pull/151))
+- **deps-dev:** Bump @nuxt/eslint-config from 1.15.2 to 1.16.0 ([#152](https://github.com/stackbuilders/nuxt-utm/pull/152))
+- **deps-dev:** Bump @nuxt/eslint from 1.15.2 to 1.16.0 ([#154](https://github.com/stackbuilders/nuxt-utm/pull/154))
+- Test maintained Node.js releases ([#149](https://github.com/stackbuilders/nuxt-utm/pull/149))
+- Harden Dependabot auto-merge ([#155](https://github.com/stackbuilders/nuxt-utm/pull/155))
+- Auto-merge Dependabot updates after CI ([#156](https://github.com/stackbuilders/nuxt-utm/pull/156))
+- **deps-dev:** Bump eslint from 9.39.4 to 10.7.0 ([#150](https://github.com/stackbuilders/nuxt-utm/pull/150))
+- Simplify Dependabot auto-merge ([#157](https://github.com/stackbuilders/nuxt-utm/pull/157))
+- **deps-dev:** Bump nuxt from 4.4.7 to 4.5.1 ([#144](https://github.com/stackbuilders/nuxt-utm/pull/144))
+- **deps-dev:** Bump @nuxt/schema from 4.4.7 to 4.5.1 ([#158](https://github.com/stackbuilders/nuxt-utm/pull/158))
+- **deps-dev:** Bump prettier from 3.8.3 to 3.9.6 ([#159](https://github.com/stackbuilders/nuxt-utm/pull/159))
+- **deps-dev:** Bump vitest from 4.1.5 to 4.1.10 ([#160](https://github.com/stackbuilders/nuxt-utm/pull/160))
+- **deps-dev:** Bump playwright from 1.62.0 to 1.62.1 ([#161](https://github.com/stackbuilders/nuxt-utm/pull/161))
+- **deps-dev:** Bump eslint-plugin-prettier from 5.5.5 to 5.5.6 ([#163](https://github.com/stackbuilders/nuxt-utm/pull/163))
+- **deps-dev:** Bump eslint from 10.7.0 to 10.8.0 ([#166](https://github.com/stackbuilders/nuxt-utm/pull/166))
+- **deps-dev:** Bump @nuxt/devtools from 3.3.1 to 3.4.1 ([#164](https://github.com/stackbuilders/nuxt-utm/pull/164))
+- **deps-dev:** Bump @nuxt/eslint-config from 1.16.0 to 1.17.0 ([#165](https://github.com/stackbuilders/nuxt-utm/pull/165))
+- **deps-dev:** Bump vue-tsc from 2.2.12 to 3.3.8 ([#167](https://github.com/stackbuilders/nuxt-utm/pull/167))
+- **deps-dev:** Bump eslint from 10.8.0 to 10.8.1 ([#170](https://github.com/stackbuilders/nuxt-utm/pull/170))
+- **deps-dev:** Bump @nuxt/eslint from 1.16.0 to 1.17.0 ([#169](https://github.com/stackbuilders/nuxt-utm/pull/169))
+- **deps-dev:** Bump vitest from 4.1.10 to 4.1.11 ([#168](https://github.com/stackbuilders/nuxt-utm/pull/168))
+- **deps-dev:** Bump @nuxt/test-utils from 4.0.3 to 4.1.0 ([#171](https://github.com/stackbuilders/nuxt-utm/pull/171))
+- **deps-dev:** Bump eslint from 10.8.1 to 10.9.0 ([#173](https://github.com/stackbuilders/nuxt-utm/pull/173))
+- **deps-dev:** Bump @nuxt/devtools from 3.4.1 to 3.4.2 ([#174](https://github.com/stackbuilders/nuxt-utm/pull/174))
+- **deps-dev:** Bump typescript from 5.8.3 to 5.9.3 ([#172](https://github.com/stackbuilders/nuxt-utm/pull/172))
+- **deps-dev:** Bump playwright-core from 1.57.0 to 1.62.1 ([#162](https://github.com/stackbuilders/nuxt-utm/pull/162))
+- **deps-dev:** Bump @nuxt/module-builder from 1.0.2 to 1.0.3 ([#186](https://github.com/stackbuilders/nuxt-utm/pull/186))
+- **deps-dev:** Bump vue-router from 5.2.0 to 5.3.0 ([5fff2dd](https://github.com/stackbuilders/nuxt-utm/commit/5fff2dd))
+- **deps-dev:** Bump nuxt from 4.5.1 to 4.5.2 ([06faa9a](https://github.com/stackbuilders/nuxt-utm/commit/06faa9a))
+- **deps-dev:** Bump @types/node from 25.9.6 to 26.2.0 ([c351fb5](https://github.com/stackbuilders/nuxt-utm/commit/c351fb5))
+- **deps-dev:** Bump eslint from 10.9.0 to 10.9.1 ([0ea6332](https://github.com/stackbuilders/nuxt-utm/commit/0ea6332))
+
+### ✅ Tests
+
+- Verify packed module on Nuxt static sites ([f584dd7](https://github.com/stackbuilders/nuxt-utm/commit/f584dd7))
+
+### 🤖 CI
+
+- Install matching Playwright browser ([#178](https://github.com/stackbuilders/nuxt-utm/pull/178))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](https://github.com/sadjow))
+
 ## v0.2.15
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.14...v0.2.15)
