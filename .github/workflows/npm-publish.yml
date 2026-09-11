@@ -14,9 +14,11 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
-      - run: yarn install
-      - run: yarn dev:build
-      - run: npm run prepack
+      - uses: pnpm/action-setup@v6
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dev:prepare
+      - run: pnpm dev:build
+      - run: pnpm run prepack
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

@@ -8,7 +8,7 @@ We follow a PR-based release process that works with protected branches:
 
 ```mermaid
 flowchart TD
-    A[Create release branch] --> B[Run yarn release:prepare]
+    A[Create release branch] --> B[Run pnpm release:prepare]
     B --> C[Commit and push branch]
     C --> D[Open PR to main]
     D --> E[PR Review and Merge]
@@ -49,7 +49,7 @@ flowchart TD
 3. Make sure all tests pass:
 
    ```bash
-   yarn test
+   pnpm test
    ```
 
 4. Run the release script, which will:
@@ -58,7 +58,7 @@ flowchart TD
    - Update the `CHANGELOG.md`
 
    ```bash
-   yarn release:prepare
+   pnpm release:prepare
    ```
 
 5. Commit and push the release branch:

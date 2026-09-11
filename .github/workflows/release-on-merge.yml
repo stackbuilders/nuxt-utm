@@ -54,15 +54,19 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
+      - uses: pnpm/action-setup@v6
 
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare module types
+        run: pnpm dev:prepare
 
       - name: Build
-        run: yarn dev:build
+        run: pnpm dev:build
 
       - name: Prepack
-        run: npm run prepack
+        run: pnpm run prepack
 
       - name: Publish to NPM
         run: npm publish

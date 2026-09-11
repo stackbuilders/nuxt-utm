@@ -29,59 +29,42 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Cache node modules
-        id: cache-npm
-        uses: actions/cache@v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.node-version }}-
-            ${{ runner.os }}-node-
-            ${{ runner.os }}-
-
-      # Only list the state of node modules if cache wasn't hit
-      - if: steps.cache-npm.outputs.cache-hit != 'true'
-        name: List the state of node modules
-        continue-on-error: true
-        run: yarn list
+          cache: true
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Cache Playwright browser
         uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install Playwright browser
-        run: yarn playwright-core install chromium
+        run: pnpm exec playwright-core install chromium
 
-      - run: yarn lint --max-warnings 0
+      - run: pnpm lint --max-warnings 0
 
       - name: Prepare module types
-        run: yarn dev:prepare
+        run: pnpm dev:prepare
 
       - name: Check types
-        run: yarn test:types
+        run: pnpm test:types
 
       - name: Validate published package types
-        run: yarn test:package
+        run: pnpm test:package
 
       - name: Build Playground
-        run: yarn dev:build
+        run: pnpm dev:build
 
       - name: Execute tests
-        run: yarn test
+        run: pnpm test
 
-      - name: Install playground dependencies
-        working-directory: playground
-        run: yarn install --frozen-lockfile
-
-      - name: Build playground from its lockfile
-        working-directory: playground
-        run: yarn build
+      - name: Build playground from the workspace
+        run: pnpm --dir playground build
 
   compatibility:
     timeout-minutes: 15
@@ -95,12 +78,14 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: yarn
-      - run: yarn install --frozen-lockfile
-      - run: yarn playwright-core install --with-deps chromium
-      - run: yarn dev:prepare
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright-core install --with-deps chromium
+      - run: pnpm dev:prepare
       - name: Test packed module in a generated static site
-        run: yarn test:compatibility
+        run: pnpm test:compatibility
         env:
           NUXT_VERSION: ${{ matrix.nuxt-version }}
           NUXT_TELEMETRY_DISABLED: '1'
