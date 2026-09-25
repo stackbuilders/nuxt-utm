@@ -74,7 +74,7 @@
     "eslint-plugin-prettier": "^5.4.0",
     "hookable": "^6.1.1",
     "nuxt": "^4.2.1",
-    "playwright": "1.62.1",
+    "playwright": "1.63.0",
     "playwright-core": "1.62.1",
     "prettier": "^3.5.3",
     "typescript": "~5.9.3",
