@@ -4,37 +4,52 @@ on:
   push:
     branches: [main]
     paths:
-      # Triggers on version bump; actual release check happens in check-release job
+      # Triggers on version bump; the check-release job decides what is still missing
       - 'package.json'
+  # Finishes a release whose tag or npm publish did not complete
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   check-release:
+    # Manual runs can target any branch, but only main may release
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
-      should_release: ${{ steps.check.outputs.should_release }}
       version: ${{ steps.check.outputs.version }}
+      create_release: ${{ steps.check.outputs.create_release }}
+      publish: ${{ steps.check.outputs.publish }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Check if release needed
+      - name: Check what the version still needs
         id: check
         run: |
+          NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
-          TAG="v$VERSION"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists, skipping release"
-            echo "should_release=false" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists, skipping the GitHub Release"
+            echo "create_release=false" >> "$GITHUB_OUTPUT"
           else
-            echo "Tag $TAG does not exist, will create release"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "create_release=true" >> "$GITHUB_OUTPUT"
           fi
 
-  release-and-publish:
+          if [ "$(npm view "$NAME@$VERSION" version 2>/dev/null)" = "$VERSION" ]; then
+            echo "$NAME@$VERSION is already on npm, skipping the publish"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
     needs: check-release
-    if: needs.check-release.outputs.should_release == 'true'
+    if: needs.check-release.outputs.create_release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,16 +59,28 @@ jobs:
       - name: Create Release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.check-release.outputs.version }}
         run: |
-          VERSION="${{ needs.check-release.outputs.version }}"
           gh release create "v$VERSION" \
+            --target "$GITHUB_SHA" \
             --title "v$VERSION" \
             --generate-notes
 
+  publish:
+    needs: check-release
+    if: needs.check-release.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # npm trusted publishing exchanges this OIDC token for a short-lived publish token
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+
+      # Trusted publishing needs npm 11.5.1 or later, bundled since Node 24.5
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org/
       - uses: pnpm/action-setup@v6
 
       - name: Install dependencies
@@ -70,5 +97,3 @@ jobs:
 
       - name: Publish to NPM
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}

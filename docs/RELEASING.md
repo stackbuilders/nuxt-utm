@@ -13,10 +13,11 @@ flowchart TD
     C --> D[Open PR to main]
     D --> E[PR Review and Merge]
     E --> F{Version tag exists?}
-    F -->|No| G[Create git tag]
-    G --> H[Create GitHub Release]
-    H --> I[Publish to NPM]
-    F -->|Yes| J[Skip release]
+    F -->|No| G[Create git tag and GitHub Release]
+    F -->|Yes| H[Skip GitHub Release]
+    E --> I{Version on npm?}
+    I -->|No| J[Publish to npm]
+    I -->|Yes| K[Skip publish]
 ```
 
 1. **Create a Release PR**:
@@ -29,7 +30,7 @@ flowchart TD
    - Triggered automatically when the PR is merged to main
    - Detects the new version and creates a git tag
    - Creates a GitHub Release
-   - Publishes the package to NPM
+   - Publishes the package to npm through trusted publishing
 
 ## Creating a Release
 
@@ -62,7 +63,7 @@ flowchart TD
    pnpm release:prepare
    ```
 
-   The script leaves the tag and the GitHub Release to the merge workflow. A tag created before the merge makes that workflow skip publishing.
+   The script leaves the tag and the GitHub Release to the merge workflow, which creates them on the merge commit. A tag created before the merge would point at the release branch instead.
 
 5. Push the release branch:
 
@@ -76,16 +77,36 @@ flowchart TD
    - Detect the new version
    - Create a git tag (`vX.Y.Z`)
    - Create a GitHub Release
-   - Trigger the NPM publish workflow
+   - Publish the package to npm
 
 ## Automated Release Detection
 
-The [release-on-merge.yml](../.github/workflows/release-on-merge.yml) workflow runs on every push to `main` that modifies `package.json`. It:
+The [release-on-merge.yml](../.github/workflows/release-on-merge.yml) workflow runs on every push to `main` that modifies `package.json`, and can also be run manually from `main`. It:
 
 1. Reads the version from `package.json`
-2. Checks if a git tag for that version already exists
-3. If no tag exists, creates the tag and a GitHub Release
-4. The GitHub Release triggers the [npm-publish.yml](../.github/workflows/npm-publish.yml) workflow
+2. Creates the tag and a GitHub Release if no tag exists for that version
+3. Builds and publishes the package if npm does not have that version yet
+
+Each step checks the current state first, so running the workflow again only completes what is missing.
+
+## npm Trusted Publishing
+
+The workflow publishes through [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so the repository stores no npm token. npm exchanges the workflow's GitHub OIDC token for a short-lived publish token and generates provenance for the release.
+
+This relies on a trusted publisher configured for the `nuxt-utm` package on npmjs.com:
+
+- Provider: GitHub Actions
+- Repository: `stackbuilders/nuxt-utm`
+- Workflow filename: `release-on-merge.yml`
+- Environment: none
+
+A package maintainer can set it under the package's Settings on npmjs.com, or with npm 11.15 or later:
+
+```bash
+npm trust github nuxt-utm --repo stackbuilders/nuxt-utm --file release-on-merge.yml --allow-publish
+```
+
+Renaming the workflow file requires updating this configuration.
 
 ## Version Numbering
 
@@ -100,15 +121,13 @@ We follow [Semantic Versioning](https://semver.org/) for this project:
 If the automated release fails:
 
 1. Check the GitHub Actions logs for errors
-2. Ensure the `npm_token` secret is correctly set in the repository settings
-3. Verify that the version in `package.json` hasn't already been published
-4. If the release workflow failed but the tag was created, you can manually trigger the `npm-publish` workflow
+2. If publishing fails with `ENEEDAUTH`, `E401`, or `E404`, confirm that the trusted publisher on npmjs.com names `stackbuilders/nuxt-utm` and `release-on-merge.yml` exactly. npm only validates that configuration when a publish runs
+3. Re-run the failed jobs, or run the Release on Merge workflow manually from `main`. It skips the tag and the publish when they already exist
 
 If a release was skipped:
 
-1. The workflow only runs when `package.json` is modified
-2. Check if the git tag already exists for the version
-3. You can manually trigger the release by creating a GitHub Release
+1. The workflow only runs automatically when `package.json` is modified on `main`
+2. Run the Release on Merge workflow manually from `main` to release the current version
 
 ## Additional Notes
 
