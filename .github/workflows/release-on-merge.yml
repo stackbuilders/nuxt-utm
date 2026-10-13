@@ -4,56 +4,121 @@ on:
   push:
     branches: [main]
     paths:
-      # Triggers on version bump; actual release check happens in check-release job
+      # Triggers on version bump; the check-release job decides what is still missing
       - 'package.json'
+  # Finishes a release whose GitHub Release or npm publish did not complete
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Overlapping runs would otherwise race to tag and publish the same version
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   check-release:
+    # Manual runs can start from any branch, but only runs from main release
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
-      should_release: ${{ steps.check.outputs.should_release }}
-      version: ${{ steps.check.outputs.version }}
+      version: ${{ steps.commit.outputs.version }}
+      sha: ${{ steps.commit.outputs.sha }}
+      create_release: ${{ steps.check.outputs.create_release }}
+      publish: ${{ steps.check.outputs.publish }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Check if release needed
-        id: check
+      # Later pushes and manual runs must still release the commit that set the version
+      - name: Find the release commit
+        id: commit
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=$(jq -r .version package.json)
           TAG="v$VERSION"
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists, skipping release"
-            echo "should_release=false" >> $GITHUB_OUTPUT
+
+          version_at() {
+            git show "$1:package.json" 2>/dev/null | jq -r .version
+          }
+
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            SHA=$(git rev-parse "$TAG^{commit}")
+            if ! git merge-base --is-ancestor "$SHA" HEAD || [ "$(version_at "$SHA")" != "$VERSION" ]; then
+              echo "::error::Tag $TAG must point at a commit on main that sets version $VERSION"
+              exit 1
+            fi
           else
-            echo "Tag $TAG does not exist, will create release"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            # The newest commit whose parent had another version is the one that set this version
+            for SHA in $(git log --first-parent --format=%H -- package.json); do
+              if [ "$(version_at "$SHA^")" != "$VERSION" ]; then
+                break
+              fi
+            done
           fi
 
-  release-and-publish:
+          echo "Releasing $TAG from $SHA"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Check what the version still needs
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.commit.outputs.version }}
+        run: |
+          NAME=$(jq -r .name package.json)
+
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "GitHub Release v$VERSION already exists, skipping it"
+            echo "create_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "create_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ "$(npm view "$NAME@$VERSION" version 2>/dev/null)" = "$VERSION" ]; then
+            echo "$NAME@$VERSION is already on npm, skipping the publish"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
     needs: check-release
-    if: needs.check-release.outputs.should_release == 'true'
+    if: needs.check-release.outputs.create_release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
-
+      # Creates the tag on the release commit unless it already exists
       - name: Create Release
         env:
+          GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.check-release.outputs.version }}
+          SHA: ${{ needs.check-release.outputs.sha }}
         run: |
-          VERSION="${{ needs.check-release.outputs.version }}"
           gh release create "v$VERSION" \
+            --target "$SHA" \
             --title "v$VERSION" \
             --generate-notes
 
-      - uses: actions/setup-node@v4
+  # Builds without the OIDC permission so install and build scripts cannot obtain publish access
+  build:
+    needs: check-release
+    if: needs.check-release.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      tarball: ${{ steps.pack.outputs.tarball }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.check-release.outputs.sha }}
+
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org/
       - uses: pnpm/action-setup@v6
 
       - name: Install dependencies
@@ -68,7 +133,34 @@ jobs:
       - name: Prepack
         run: pnpm run prepack
 
+      - name: Pack
+        id: pack
+        run: echo "tarball=$(npm pack --ignore-scripts --json | jq -r '.[0].filename')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: package
+          path: ${{ steps.pack.outputs.tarball }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # npm trusted publishing exchanges this OIDC token for a short-lived publish token
+      id-token: write
+    steps:
+      # Trusted publishing needs npm 11.5.1 or later, bundled since Node 24.5
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: package
+
       - name: Publish to NPM
-        run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+          TARBALL: ${{ needs.build.outputs.tarball }}
+        run: npm publish "$TARBALL"
