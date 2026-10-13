@@ -1,6 +1,6 @@
 ---
 repository:
-  description: A Nuxt 3 module for tracking UTM parameters.
+  description: Capture UTM and Google Ads click parameters to attribute leads to campaigns
   has_projects: false
   has_wiki: true
   default_branch: main
