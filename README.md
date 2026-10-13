@@ -10,7 +10,7 @@
 
 Nuxt UTM keeps campaign information in the browser until your application is ready to use it. It was built for **statically generated Nuxt websites**: collect a visitor's source now, then include it with a lead, signup, or form submission later.
 
-It supports Nuxt 3 and 4. Collection needs no backend, analytics account, or network request. Your application decides whether and when to send the data to its own API or CRM.
+It supports Nuxt 3 and 4, and is tested against Nuxt 5 nightly builds. Collection needs no backend, analytics account, or network request. Your application decides whether and when to send the data to its own API or CRM.
 
 [Release notes](CHANGELOG.md) · [Contributing](docs/CONTRIBUTING.md)
 
@@ -259,7 +259,7 @@ NUXT_VERSION=3 pnpm test:compatibility
 pnpm dev:build
 ```
 
-`test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3. CI runs both release lines separately from the Node 22, 24, and 26 checks. These are tested configurations, not runtime version restrictions.
+`test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3 or `NUXT_VERSION=npm:nuxt-nightly@5x` for the Nuxt 5 nightly. CI runs all three separately from the Node 22, 24, and 26 checks, and a nightly failure does not fail the workflow. These are tested configurations, not runtime version restrictions.
 
 Use `pnpm dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
 
