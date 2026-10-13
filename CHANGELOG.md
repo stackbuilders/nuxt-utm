@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.3.1
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.3.0...v0.3.1)
+
+### 🚀 Enhancements
+
+- Enable the module on Nuxt 5 and later instead of disabling it as incompatible ([#211](https://github.com/stackbuilders/nuxt-utm/pull/211))
+
+### 🏡 Chore
+
+- **deps-dev:** Bump @types/node from 26.2.0 to 26.4.0 ([#191](https://github.com/stackbuilders/nuxt-utm/pull/191))
+- **deps-dev:** Bump @nuxt/test-utils from 4.1.0 to 4.2.0 ([#192](https://github.com/stackbuilders/nuxt-utm/pull/192))
+- **deps-dev:** Bump vue from 3.5.41 to 3.5.42 ([#195](https://github.com/stackbuilders/nuxt-utm/pull/195))
+- **deps-dev:** Bump vue-tsc from 3.3.8 to 3.3.11 ([#193](https://github.com/stackbuilders/nuxt-utm/pull/193))
+- **deps-dev:** Bump vue-router from 5.3.0 to 5.3.1 ([#194](https://github.com/stackbuilders/nuxt-utm/pull/194))
+- **deps-dev:** Bump @types/node from 26.4.0 to 26.4.1 ([#196](https://github.com/stackbuilders/nuxt-utm/pull/196))
+- **deps-dev:** Bump eslint from 10.9.1 to 10.10.0 ([#197](https://github.com/stackbuilders/nuxt-utm/pull/197))
+- **deps-dev:** Bump @nuxt/test-utils from 4.2.0 to 4.3.2 ([#198](https://github.com/stackbuilders/nuxt-utm/pull/198))
+- **deps-dev:** Bump vue from 3.5.42 to 3.5.43 ([#200](https://github.com/stackbuilders/nuxt-utm/pull/200))
+- **deps-dev:** Bump playwright from 1.62.1 to 1.63.0 ([#201](https://github.com/stackbuilders/nuxt-utm/pull/201))
+- **deps-dev:** Bump @types/node from 26.4.1 to 26.5.1 ([#199](https://github.com/stackbuilders/nuxt-utm/pull/199))
+- **deps-dev:** Bump hookable from 6.1.1 to 6.1.2 ([#202](https://github.com/stackbuilders/nuxt-utm/pull/202))
+- **deps-dev:** Bump playwright-core from 1.62.1 to 1.63.0 ([#205](https://github.com/stackbuilders/nuxt-utm/pull/205))
+- **deps-dev:** Bump @types/node from 26.5.1 to 26.6.1 ([#203](https://github.com/stackbuilders/nuxt-utm/pull/203))
+- **deps-dev:** Bump prettier from 3.9.6 to 3.9.9 ([#204](https://github.com/stackbuilders/nuxt-utm/pull/204))
+- **deps-dev:** Bump eslint from 10.10.0 to 10.11.0 ([#207](https://github.com/stackbuilders/nuxt-utm/pull/207))
+- **deps-dev:** Bump vue-tsc from 3.3.11 to 3.3.12 ([#208](https://github.com/stackbuilders/nuxt-utm/pull/208))
+- **deps-dev:** Bump vitest from 4.1.11 to 5.0.0 ([#209](https://github.com/stackbuilders/nuxt-utm/pull/209))
+- **deps-dev:** Bump @types/node from 26.6.1 to 26.6.4 ([#210](https://github.com/stackbuilders/nuxt-utm/pull/210))
+- **deps-dev:** Bump @nuxt/test-utils from 4.3.2 to 4.3.3 ([#206](https://github.com/stackbuilders/nuxt-utm/pull/206))
+- Describe the package by its lead attribution use case ([#212](https://github.com/stackbuilders/nuxt-utm/pull/212))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](https://github.com/sadjow))
+
 ## v0.3.0
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.2.15...v0.3.0)

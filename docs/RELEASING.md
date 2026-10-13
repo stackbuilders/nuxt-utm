@@ -56,16 +56,17 @@ flowchart TD
 
    - Bump the version in `package.json`
    - Update the `CHANGELOG.md`
+   - Commit both as `chore(release): vX.Y.Z`
 
    ```bash
    pnpm release:prepare
    ```
 
-5. Commit and push the release branch:
+   The script leaves the tag and the GitHub Release to the merge workflow. A tag created before the merge makes that workflow skip publishing.
+
+5. Push the release branch:
 
    ```bash
-   git add .
-   git commit -m "chore: release vX.Y.Z"
    git push -u origin release-X.Y.Z
    ```
 
