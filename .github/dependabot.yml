@@ -14,7 +14,12 @@ updates:
       semver-minor-days: 14
       semver-major-days: 30
     open-pull-requests-limit: 5
+    groups:
+      # Tests import playwright while CI installs browsers through playwright-core,
+      # so a version skew leaves the test without a matching browser.
+      playwright:
+        patterns:
+          - 'playwright'
+          - 'playwright-core'
     assignees:
-      - sadjow
-    reviewers:
       - sadjow
