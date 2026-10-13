@@ -1,6 +1,6 @@
 {
   "name": "nuxt-utm",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Capture UTM and Google Ads click parameters to attribute leads to campaigns",
   "keywords": [
     "nuxt",
@@ -45,7 +45,7 @@
     "dev": "nuxi dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "release:prepare": "pnpm run prepack && changelogen --release --no-tag --no-push",
+    "release:prepare": "pnpm run prepack && changelogen --release --no-tag --no-push --no-github",
     "lint": "eslint .",
     "lint:prettier": "eslint --config .eslintprettier.config.js .",
     "format": "prettier --write .",
