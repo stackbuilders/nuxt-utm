@@ -239,7 +239,7 @@ const attribution: AttributionSnapshot = {
 }
 ```
 
-Supported UTM fields are `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, and `utm_content`. Google fields are `gclid` and `gad_source`. `gclidParams` and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
+Supported UTM fields are the Google Analytics 4 manual campaign parameters: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `gclidParams` and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
 
 ## Development
 
