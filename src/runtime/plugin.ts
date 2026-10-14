@@ -82,7 +82,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     pending = Promise.resolve()
   }
 
-  function capture(route: RouteLocationNormalized = nuxtApp._route): Promise<void> {
+  function capture(route: RouteLocationNormalized = router.currentRoute.value): Promise<void> {
     if (!isClient || !trackingEnabled.value) return Promise.resolve()
     const query = Object.fromEntries(
       Object.entries(route.query).map(([key, value]) => [
