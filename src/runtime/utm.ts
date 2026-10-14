@@ -30,8 +30,10 @@ const sameKeysAndValues = (
 ): boolean =>
   sameValues([...new Set([...Object.keys(first), ...Object.keys(second)])], first, second)
 
+// crypto.randomUUID is limited to secure contexts, and sites served over plain HTTP still track visits
 export const generateSessionId = () => {
-  return Math.random().toString(36).substring(2, 15)
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 export const readLocalData = (

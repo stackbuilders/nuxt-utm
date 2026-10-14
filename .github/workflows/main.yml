@@ -48,6 +48,9 @@ jobs:
 
       - run: pnpm lint --max-warnings 0
 
+      - name: Check formatting
+        run: pnpm format:check
+
       - name: Prepare module types
         run: pnpm dev:prepare
 

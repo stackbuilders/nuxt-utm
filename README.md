@@ -253,7 +253,7 @@ const attribution: AttributionSnapshot = {
 }
 ```
 
-Supported UTM fields are the Google Analytics 4 manual campaign parameters: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
+Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
 
 ## Development
 
@@ -265,6 +265,7 @@ pnpm install --frozen-lockfile
 pnpm dev:prepare
 pnpm playwright-core install chromium
 pnpm lint
+pnpm format:check
 pnpm test:types
 pnpm test
 pnpm test:package
