@@ -1,15 +1,18 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { createHooks } from 'hookable'
 import type { NuxtApp, RuntimeNuxtHooks } from '#app'
-import type { App, Ref } from 'vue'
+import { shallowRef } from 'vue'
+import type { App, MaybeRef, Ref } from 'vue'
 import type { RouteLocationNormalized } from 'vue-router'
 import type { DataObject, AttributionSnapshot, ModuleOptions } from 'nuxt-utm'
 import plugin from '../src/runtime/plugin'
 
+type RouteSnapshot = Pick<RouteLocationNormalized, 'path' | 'fullPath' | 'query'>
+
 const config = vi.hoisted(() => ({ public: { utm: {} as ModuleOptions } }))
 const router = vi.hoisted(() => ({
   afterEach: vi.fn(),
-  currentRoute: { value: {} as Pick<RouteLocationNormalized, 'path' | 'fullPath' | 'query'> },
+  currentRoute: {} as MaybeRef<RouteSnapshot>,
 }))
 vi.mock('#app', () => ({
   defineNuxtPlugin: (setup: unknown) => setup,
@@ -17,13 +20,13 @@ vi.mock('#app', () => ({
   useRouter: () => router,
 }))
 
-const visit = (fullPath: string) => {
+const routeTo = (fullPath: string): RouteSnapshot => {
   const url = new URL(fullPath, 'https://example.com')
-  router.currentRoute.value = {
-    path: url.pathname,
-    fullPath,
-    query: Object.fromEntries(url.searchParams),
-  }
+  return { path: url.pathname, fullPath, query: Object.fromEntries(url.searchParams) }
+}
+
+const visit = (fullPath: string) => {
+  router.currentRoute = shallowRef(routeTo(fullPath))
 }
 
 const memoryStorage = (): Storage => {
@@ -167,6 +170,13 @@ describe('tracking lifecycle', () => {
     expect(JSON.parse(localStorage.getItem('nuxt-utm-data')!)[0].utmParams.utm_source).toBe(
       'google',
     )
+  })
+
+  it('captures with the router Nuxt before 3.9.1 uses without pages, whose currentRoute is not a ref', async () => {
+    router.currentRoute = routeTo('/?utm_source=minimal-router')
+    const { controls, mount } = await setupTracker()
+    await mount()
+    expect(controls.utm.value[0]?.utmParams.utm_source).toBe('minimal-router')
   })
 
   it('ignores valid JSON that is not tracking history', async () => {

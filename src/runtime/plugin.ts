@@ -1,6 +1,6 @@
 import type { BeforeTrackContext, DataObject, ModuleOptions, NuxtUTMHooks } from './types'
 import type { RouteLocationNormalized } from 'vue-router'
-import { computed, ref, readonly } from 'vue'
+import { computed, ref, readonly, unref } from 'vue'
 import { createStorage } from './storage'
 import {
   createAttributionSnapshot,
@@ -82,7 +82,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     pending = Promise.resolve()
   }
 
-  function capture(route: RouteLocationNormalized = router.currentRoute.value): Promise<void> {
+  // Without pages, Nuxt before 3.9.1 exposes the route itself as currentRoute instead of a ref
+  function capture(route: RouteLocationNormalized = unref(router.currentRoute)): Promise<void> {
     if (!isClient || !trackingEnabled.value) return Promise.resolve()
     const query = Object.fromEntries(
       Object.entries(route.query).map(([key, value]) => [
