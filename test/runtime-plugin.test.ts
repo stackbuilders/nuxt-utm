@@ -1,16 +1,33 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { createHooks } from 'hookable'
 import type { NuxtApp, RuntimeNuxtHooks } from '#app'
-import type { App, Ref } from 'vue'
+import { shallowRef } from 'vue'
+import type { App, MaybeRef, Ref } from 'vue'
+import type { RouteLocationNormalized } from 'vue-router'
 import type { DataObject, AttributionSnapshot, ModuleOptions } from 'nuxt-utm'
 import plugin from '../src/runtime/plugin'
 
+type RouteSnapshot = Pick<RouteLocationNormalized, 'path' | 'fullPath' | 'query'>
+
 const config = vi.hoisted(() => ({ public: { utm: {} as ModuleOptions } }))
+const router = vi.hoisted(() => ({
+  afterEach: vi.fn(),
+  currentRoute: {} as MaybeRef<RouteSnapshot>,
+}))
 vi.mock('#app', () => ({
   defineNuxtPlugin: (setup: unknown) => setup,
   useRuntimeConfig: () => config,
-  useRouter: () => ({ afterEach: vi.fn() }),
+  useRouter: () => router,
 }))
+
+const routeTo = (fullPath: string): RouteSnapshot => {
+  const url = new URL(fullPath, 'https://example.com')
+  return { path: url.pathname, fullPath, query: Object.fromEntries(url.searchParams) }
+}
+
+const visit = (fullPath: string) => {
+  router.currentRoute = shallowRef(routeTo(fullPath))
+}
 
 const memoryStorage = (): Storage => {
   const values = new Map<string, string>()
@@ -41,7 +58,6 @@ const deferred = () => {
 async function setupTracker() {
   const hooks = createHooks<RuntimeNuxtHooks>()
   const app = {
-    _route: { path: '/', fullPath: '/?utm_source=google', query: { utm_source: 'google' } },
     hook: hooks.hook,
     callHook: hooks.callHook,
   } as unknown as NuxtApp
@@ -54,7 +70,7 @@ async function setupTracker() {
     utmEnableTracking: () => void
     utmClearData: () => void
   }
-  return { app, hooks, controls, mount: () => hooks.callHook('app:mounted', {} as App) }
+  return { hooks, controls, mount: () => hooks.callHook('app:mounted', {} as App) }
 }
 
 beforeEach(() => {
@@ -63,6 +79,7 @@ beforeEach(() => {
     captureWithoutCampaign: true,
     trackOnRouteChange: false,
   }
+  visit('/?utm_source=google')
   vi.stubGlobal('window', { location: { href: 'https://example.com/?utm_source=google' } })
   vi.stubGlobal('localStorage', memoryStorage())
   vi.stubGlobal('sessionStorage', memoryStorage())
@@ -155,6 +172,13 @@ describe('tracking lifecycle', () => {
     )
   })
 
+  it('captures with the router Nuxt before 3.9.1 uses without pages, whose currentRoute is not a ref', async () => {
+    router.currentRoute = routeTo('/?utm_source=minimal-router')
+    const { controls, mount } = await setupTracker()
+    await mount()
+    expect(controls.utm.value[0]?.utmParams.utm_source).toBe('minimal-router')
+  })
+
   it('keeps tracking when a runtime override replaces clickParams with a string', async () => {
     config.public.utm.clickParams = 'fbclid,msclkid' as unknown as string[]
     const { controls, mount } = await setupTracker()
@@ -225,14 +249,11 @@ describe('attribution snapshots', () => {
   })
 
   it('retains campaign touches through direct visits and supports manual capture', async () => {
-    const { app, controls, mount } = await setupTracker()
+    const { controls, mount } = await setupTracker()
     await mount()
-    Object.assign(app._route, {
-      fullPath: '/?utm_source=newsletter',
-      query: { utm_source: 'newsletter' },
-    })
+    visit('/?utm_source=newsletter')
     await controls.utmCapture()
-    Object.assign(app._route, { fullPath: '/contact', query: {} })
+    visit('/contact')
     await controls.utmCapture()
     const snapshot = await controls.utmGetAttribution()
     expect(snapshot.history).toHaveLength(3)
@@ -243,11 +264,11 @@ describe('attribution snapshots', () => {
 
   it('can capture only campaign visits', async () => {
     config.public.utm.captureWithoutCampaign = false
-    const { app, controls, mount } = await setupTracker()
-    Object.assign(app._route, { fullPath: '/contact', query: {} })
+    const { controls, mount } = await setupTracker()
+    visit('/contact')
     await mount()
     expect(controls.utm.value).toEqual([])
-    Object.assign(app._route, { fullPath: '/?gclid=click', query: { gclid: 'click' } })
+    visit('/?gclid=click')
     await controls.utmCapture()
     expect((await controls.utmGetAttribution()).lastTouch?.gclidParams?.gclid).toBe('click')
   })
@@ -256,12 +277,9 @@ describe('attribution snapshots', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     config.public.utm.maxEntries = 1
-    const { app, controls, mount } = await setupTracker()
+    const { controls, mount } = await setupTracker()
     await mount()
-    Object.assign(app._route, {
-      fullPath: '/?utm_source=newsletter',
-      query: { utm_source: 'newsletter' },
-    })
+    visit('/?utm_source=newsletter')
     await controls.utmCapture()
     expect(controls.utm.value).toHaveLength(1)
     expect((await controls.utmGetAttribution()).firstTouch?.utmParams.utm_source).toBe('newsletter')
