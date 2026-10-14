@@ -27,13 +27,16 @@ export function validateOptions({ maxAge, maxEntries, clickParams }: ModuleOptio
 // Kept out of src/runtime so the lookup stays out of the client bundle
 const AD_CLICK_SPELLINGS = new Map(AD_CLICK_PARAMETERS.map((name) => [name.toLowerCase(), name]))
 
-// Warn instead of failing the build, since a site may receive a spelling the platform does not document
-export const clickParamWarnings = ({ clickParams = [] }: ModuleOptions): string[] =>
-  clickParams.flatMap((name) => {
+// Warn instead of failing the build, since a site may receive a spelling the platform does not
+// document. Listing the documented spelling as well shows the other spelling is deliberate
+export const clickParamWarnings = ({ clickParams = [] }: ModuleOptions): string[] => {
+  const names = new Set(clickParams)
+  return [...names].flatMap((name) => {
     const spelling = AD_CLICK_SPELLINGS.get(name.toLowerCase())
-    return spelling && spelling !== name
+    return spelling && !names.has(spelling)
       ? [
           `clickParams lists ${name}; did you mean ${spelling}? Query parameter names are case-sensitive`,
         ]
       : []
   })
+}

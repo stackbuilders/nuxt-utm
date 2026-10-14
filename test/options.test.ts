@@ -40,4 +40,14 @@ describe('clickParamWarnings', () => {
     expect(clickParamWarnings({ clickParams: ['ScCid', 'fbclid', 'yclid'] })).toEqual([])
     expect(clickParamWarnings({})).toEqual([])
   })
+
+  it('accepts another spelling listed beside the documented one', () => {
+    expect(clickParamWarnings({ clickParams: ['ScCID', 'ScCid'] })).toEqual([])
+  })
+
+  it('warns once about a repeated name', () => {
+    expect(clickParamWarnings({ clickParams: ['sccid', 'sccid'] })).toEqual([
+      'clickParams lists sccid; did you mean ScCid? Query parameter names are case-sensitive',
+    ])
+  })
 })

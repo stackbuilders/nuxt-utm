@@ -155,7 +155,7 @@ Your editor suggests these platforms' click IDs:
 | Pinterest             | `epik`      |                                                                                           |
 | Reddit                | `rdt_cid`   |                                                                                           |
 
-Other names work the same way. Query parameter names are case-sensitive, so the build warns when a listed name matches one of these only by case, such as `sccid`.
+Other names work the same way. Query parameter names are case-sensitive, so the build warns when a listed name matches one of these only by case, such as `sccid`. To capture another spelling on purpose, list it beside the documented one.
 
 A click ID identifies an individual ad click, so list only the parameters your consent policy covers. Listed or not, every query parameter also stays in `additionalInfo.landingPageUrl` unless a `utm:before-persist` hook redacts it, as shown in [Hooks](#hooks).
 
