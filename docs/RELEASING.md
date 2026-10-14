@@ -65,6 +65,8 @@ flowchart TD
 
    The script leaves the tag and the GitHub Release to the merge workflow, which creates them on the merge commit. A tag pushed before the merge would point at the release branch, and the workflow stops instead of releasing from it.
 
+   changelogen lists each commit by its title. When the release changes behavior that consumers may need to act on, such as which visits count as campaigns or which fields an entry stores, add a short note to the new `CHANGELOG.md` section and amend the release commit before pushing.
+
 5. Push the release branch:
 
    ```bash
@@ -91,7 +93,7 @@ Because every run releases the release commit rather than the latest commit on `
 
 ## npm Trusted Publishing
 
-The workflow publishes through [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so the repository stores no npm token. npm exchanges the workflow's GitHub OIDC token for a short-lived publish token and generates provenance for the release. Only the publish job can request that OIDC token, and it publishes the tarball an earlier job built, so dependency install and build scripts never run with publish access.
+The workflow publishes through [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) and needs no npm token. npm exchanges the workflow's GitHub OIDC token for a short-lived publish token and generates provenance for the release. Only the publish job can request that OIDC token, and it publishes the tarball an earlier job built, so dependency install and build scripts never run with publish access.
 
 This relies on a trusted publisher configured for the `nuxt-utm` package on npmjs.com:
 
