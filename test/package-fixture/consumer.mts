@@ -38,9 +38,12 @@ export function skip(context: BeforeTrackContext): void {
 export const invalid: UTMParams = { utm_source: 123 }
 // @ts-expect-error Click IDs must retain their string type in the published package.
 export const invalidClick: GCLIDParams = { gbraid: 123 }
-// @ts-expect-error Configured click IDs must retain their string type in the published package.
-export const invalidAdClick: ClickParams = { fbclid: 123 }
+// @ts-expect-error Configured click IDs under any name must retain their string type in the published package.
+export const invalidAdClick: ClickParams = { partner_click_id: 123 }
 export const adClicks: ClickParams = { ScCid: 'snap-click', partner_click_id: 'abc123' }
+// Known click IDs must stay declared keys so editors suggest them when reading an entry.
+// Picking a name only the index signature covers would make it required and reject {}.
+export const declaredClickParam: Pick<NonNullable<DataObject['clickParams']>, 'ScCid'> = {}
 export const ga4Campaign: UTMParams = { utm_id: 'spring', utm_source_platform: 'Search Ads 360' }
 
 declare module 'nuxt-utm' {

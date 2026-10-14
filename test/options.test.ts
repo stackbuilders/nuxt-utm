@@ -28,10 +28,16 @@ describe('validateOptions', () => {
 
 describe('clickParamWarnings', () => {
   it.each([
-    ['sccid', 'ScCid'],
     ['FBCLID', 'fbclid'],
+    ['MSCLKID', 'msclkid'],
+    ['TTCLID', 'ttclid'],
+    ['LI_FAT_ID', 'li_fat_id'],
+    ['TWCLID', 'twclid'],
+    ['sccid', 'ScCid'],
+    ['EPIK', 'epik'],
+    ['RDT_CID', 'rdt_cid'],
   ])('suggests the documented spelling for %s', (name, spelling) => {
-    expect(clickParamWarnings({ clickParams: ['msclkid', name] })).toEqual([
+    expect(clickParamWarnings({ clickParams: ['partner_click_id', name] })).toEqual([
       `clickParams lists ${name}; did you mean ${spelling}? Query parameter names are case-sensitive`,
     ])
   })
