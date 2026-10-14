@@ -4,10 +4,13 @@ import type { LocationQuery } from 'vue-router'
 import type { DataObject, GCLIDParams } from '../src/runtime/types'
 import { createStorage } from '../src/runtime/storage'
 import {
+  getClickParams,
   getGCLID,
   getUtmParams,
   isRepeatedEntry,
   readLocalData,
+  urlHasClickParams,
+  urlHasGCLID,
   urlHasUtmParams,
 } from '../src/runtime/utm'
 
@@ -52,28 +55,47 @@ describe('urlHasUtmParams', () => {
   it('returns true when at least one UTM parameter is present', () => {
     expect(urlHasUtmParams({ utm_source: 'test_source' })).toBe(true)
   })
+
+  it.each(['utm_id', 'utm_source_platform', 'utm_creative_format', 'utm_marketing_tactic'])(
+    'treats the GA4 parameter %s alone as a campaign',
+    (name) => {
+      expect(urlHasUtmParams({ [name]: 'value' })).toBe(true)
+    },
+  )
 })
 
 describe('getUtmParams', () => {
-  it('reads the UTM parameters from the query', () => {
+  it('reads the UTM parameters, including the GA4 ones, from the query', () => {
     const query = {
+      utm_id: 'test_id',
       utm_source: 'test_source',
       utm_medium: 'test_medium',
+      utm_campaign: 'test_campaign',
+      utm_source_platform: 'test_platform',
       utm_term: 'test_term',
       utm_content: 'test_content',
+      utm_creative_format: 'test_format',
+      utm_marketing_tactic: 'test_tactic',
     }
     expect(getUtmParams(query)).toEqual(query)
   })
 
-  it('returns undefined values when no UTM parameters are present', () => {
-    expect(getUtmParams({})).toEqual({
-      utm_source: undefined,
-      utm_medium: undefined,
-      utm_campaign: undefined,
-      utm_term: undefined,
-      utm_content: undefined,
-    })
+  it('returns no values when no UTM parameters are present', () => {
+    expect(getUtmParams({ page: '2' })).toEqual({})
   })
+})
+
+describe('urlHasGCLID', () => {
+  it('returns false without Google click parameters', () => {
+    expect(urlHasGCLID({ utm_source: 'test_source' })).toBe(false)
+  })
+
+  it.each(['gclid', 'gad_source', 'gad_campaignid', 'gbraid', 'wbraid', 'dclid'])(
+    'treats %s alone as a campaign',
+    (name) => {
+      expect(urlHasGCLID({ [name]: 'value' })).toBe(true)
+    },
+  )
 })
 
 interface GCLIDCase {
@@ -151,12 +173,42 @@ describe('getGCLID', () => {
       },
     },
     {
+      name: 'the campaign ID and the click IDs that replace gclid',
+      query: { gad_campaignid: '123', gbraid: 'app-click', wbraid: 'web-click', dclid: 'dv-click' },
+      expected: {
+        gad_campaignid: '123',
+        gbraid: 'app-click',
+        wbraid: 'web-click',
+        dclid: 'dv-click',
+      },
+    },
+    {
       name: 'a single and a repeated parameter',
       query: { gclid: 'testGclid123', gad_source: ['testGadSourceABC', 'anotherGadSource'] },
       expected: { gclid: 'testGclid123', gad_source: 'testGadSourceABC,anotherGadSource' },
     },
   ])('reads $name', ({ query, expected }) => {
     expect(getGCLID(query)).toEqual(expected)
+  })
+})
+
+describe('configured click parameters', () => {
+  const names = ['fbclid', 'msclkid']
+
+  it('detects only the configured names', () => {
+    expect(urlHasClickParams({ fbclid: 'meta-click' }, names)).toBe(true)
+    expect(urlHasClickParams({ ttclid: 'tiktok-click' }, names)).toBe(false)
+    expect(urlHasClickParams({ fbclid: 'meta-click' }, [])).toBe(false)
+  })
+
+  it('reads the configured names from the query', () => {
+    const query = { fbclid: 'meta-click', ttclid: 'tiktok-click' }
+    expect(getClickParams(query, names)).toEqual({ fbclid: 'meta-click' })
+  })
+
+  it('ignores names the query inherits from Object.prototype', () => {
+    expect(urlHasClickParams({}, ['constructor', 'toString'])).toBe(false)
+    expect(getClickParams({}, ['constructor'])).toEqual({})
   })
 })
 
@@ -171,8 +223,28 @@ describe('isRepeatedEntry', () => {
     expect(isRepeatedEntry(history, { ...entry, sessionId: 'new-session' })).toBe(false)
   })
 
-  it('treats changed UTM parameters in the same session as a new entry', () => {
-    const utmParams = { ...entry.utmParams, utm_content: 'new-content' }
-    expect(isRepeatedEntry(history, { ...entry, utmParams })).toBe(false)
+  it.each(['utm_content', 'utm_id'] as const)(
+    'treats a changed %s in the same session as a new entry',
+    (name) => {
+      const utmParams = { ...entry.utmParams, [name]: 'new-value' }
+      expect(isRepeatedEntry(history, { ...entry, utmParams })).toBe(false)
+    },
+  )
+
+  it('treats a new Google click ID in the same session as a new entry', () => {
+    expect(isRepeatedEntry(history, { ...entry, gclidParams: { gbraid: 'app-click' } })).toBe(false)
+  })
+
+  it('compares configured click IDs within the same session', () => {
+    const click = { ...entry, clickParams: { fbclid: 'meta-click' } }
+    expect(isRepeatedEntry(history, click)).toBe(false)
+    expect(isRepeatedEntry(ref([click]), { ...click, clickParams: { fbclid: 'meta-click' } })).toBe(
+      true,
+    )
+  })
+
+  it('treats a visit without click IDs after one with them as a new entry', () => {
+    const click = { ...entry, clickParams: { fbclid: 'meta-click' } }
+    expect(isRepeatedEntry(ref([click]), entry)).toBe(false)
   })
 })

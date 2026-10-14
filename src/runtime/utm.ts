@@ -2,7 +2,33 @@ import type { Ref } from 'vue'
 import type { LocationQuery } from 'vue-router'
 import { createStorage } from './storage'
 import { isDataObject } from './history'
+import { GOOGLE_CLICK_PARAMETERS, UTM_PARAMETERS } from './parameters'
+import type { ParameterValues } from './parameters'
 import type { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from './types'
+
+// Configured names such as constructor would otherwise read what every object inherits
+const readParam = (query: LocationQuery, name: string) =>
+  Object.hasOwn(query, name) ? query[name] : undefined
+
+const hasAnyParam = (query: LocationQuery, names: readonly string[]): boolean =>
+  names.some((name) => Boolean(readParam(query, name)))
+
+const readParams = <Name extends string>(query: LocationQuery, names: readonly Name[]) =>
+  Object.fromEntries(
+    names.map((name) => [name, readParam(query, name)?.toString()]),
+  ) as ParameterValues<Name>
+
+const sameValues = <Name extends string>(
+  names: readonly Name[],
+  first: ParameterValues<Name> | undefined,
+  second: ParameterValues<Name> | undefined,
+): boolean => names.every((name) => first?.[name] === second?.[name])
+
+const sameKeysAndValues = (
+  first: ParameterValues<string> = {},
+  second: ParameterValues<string> = {},
+): boolean =>
+  sameValues([...new Set([...Object.keys(first), ...Object.keys(second)])], first, second)
 
 // crypto.randomUUID is limited to secure contexts, and sites served over plain HTTP still track visits
 export const generateSessionId = () => {
@@ -33,36 +59,23 @@ export const getSessionID = (
   return sessionId
 }
 
-export const urlHasUtmParams = (query: LocationQuery): boolean => {
-  return Boolean(
-    query.utm_source ||
-    query.utm_medium ||
-    query.utm_campaign ||
-    query.utm_term ||
-    query.utm_content,
-  )
-}
+export const urlHasUtmParams = (query: LocationQuery): boolean => hasAnyParam(query, UTM_PARAMETERS)
 
-export const getUtmParams = (query: LocationQuery): UTMParams => {
-  return {
-    utm_source: query.utm_source?.toString(),
-    utm_medium: query.utm_medium?.toString(),
-    utm_campaign: query.utm_campaign?.toString(),
-    utm_term: query.utm_term?.toString(),
-    utm_content: query.utm_content?.toString(),
-  }
-}
+export const getUtmParams = (query: LocationQuery): UTMParams => readParams(query, UTM_PARAMETERS)
 
-export const urlHasGCLID = (query: LocationQuery): boolean => {
-  return Boolean(query.gclid || query.gad_source)
-}
+export const urlHasGCLID = (query: LocationQuery): boolean =>
+  hasAnyParam(query, GOOGLE_CLICK_PARAMETERS)
 
-export const getGCLID = (query: LocationQuery): GCLIDParams => {
-  return {
-    gclid: query.gclid?.toString(),
-    gad_source: query.gad_source?.toString(),
-  }
-}
+export const getGCLID = (query: LocationQuery): GCLIDParams =>
+  readParams(query, GOOGLE_CLICK_PARAMETERS)
+
+export const urlHasClickParams = (query: LocationQuery, names: readonly string[]): boolean =>
+  hasAnyParam(query, names)
+
+export const getClickParams = (
+  query: LocationQuery,
+  names: readonly string[],
+): ParameterValues<string> => readParams(query, names)
 
 export const getAdditionalInfo = (landingPageUrl = window.location.href): AdditionalInfo => {
   return {
@@ -79,21 +92,13 @@ export const getAdditionalInfo = (landingPageUrl = window.location.href): Additi
 
 export const isRepeatedEntry = (data: Ref<DataObject[]>, currentEntry: DataObject): boolean => {
   const lastEntry = data.value?.[0]
-  const lastUtm = lastEntry?.utmParams
-  const newUtm = currentEntry.utmParams
-  const lastGCLID = lastEntry?.gclidParams
-  const newGCLID = currentEntry.gclidParams
 
   return (
-    !!lastEntry &&
-    !!lastUtm &&
-    lastUtm.utm_campaign === newUtm.utm_campaign &&
-    lastUtm.utm_content === newUtm.utm_content &&
-    lastUtm.utm_medium === newUtm.utm_medium &&
-    lastUtm.utm_source === newUtm.utm_source &&
-    lastUtm.utm_term === newUtm.utm_term &&
+    !!lastEntry?.utmParams &&
     lastEntry.sessionId === currentEntry.sessionId &&
-    lastGCLID?.gad_source === newGCLID?.gad_source &&
-    lastGCLID?.gclid === newGCLID?.gclid
+    sameValues(UTM_PARAMETERS, lastEntry.utmParams, currentEntry.utmParams) &&
+    sameValues(GOOGLE_CLICK_PARAMETERS, lastEntry.gclidParams, currentEntry.gclidParams) &&
+    // The configured names can change between visits, so compare every stored click ID
+    sameKeysAndValues(lastEntry.clickParams, currentEntry.clickParams)
   )
 }

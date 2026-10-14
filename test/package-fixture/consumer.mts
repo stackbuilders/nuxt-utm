@@ -1,6 +1,7 @@
 import type {
   DataObject,
   BeforeTrackContext,
+  GCLIDParams,
   ModuleOptions,
   UTMParams,
   UseNuxtUTMReturn,
@@ -13,9 +14,13 @@ export const options: ModuleOptions = {
   maxEntries: 100,
   trackOnRouteChange: true,
   captureWithoutCampaign: false,
+  clickParams: ['fbclid', 'msclkid'],
 }
 export function campaign(data: DataObject): string | undefined {
   return data.utmParams.utm_campaign
+}
+export function metaClick(data: DataObject): string | undefined {
+  return data.clickParams?.fbclid
 }
 export function skip(context: BeforeTrackContext): void {
   context.skip = true
@@ -23,6 +28,20 @@ export function skip(context: BeforeTrackContext): void {
 
 // @ts-expect-error Campaign values must retain their string type in the published package.
 export const invalid: UTMParams = { utm_source: 123 }
+// @ts-expect-error Click IDs must retain their string type in the published package.
+export const invalidClick: GCLIDParams = { gbraid: 123 }
+export const ga4Campaign: UTMParams = { utm_id: 'spring', utm_source_platform: 'Search Ads 360' }
+
+declare module 'nuxt-utm' {
+  interface UTMParams {
+    utm_partner?: string
+  }
+  interface GCLIDParams {
+    partner_click_id?: string
+  }
+}
+export const augmentedCampaign: UTMParams = { utm_partner: 'spring-fair' }
+export const augmentedClick: GCLIDParams = { partner_click_id: 'abc123' }
 
 export function enrich(utm: UseNuxtUTMReturn): void {
   utm.onBeforePersist((data) => {
