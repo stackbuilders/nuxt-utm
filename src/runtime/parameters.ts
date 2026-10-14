@@ -47,10 +47,6 @@ const BUILT_IN_FIELDS = new Map<string, 'utmParams' | 'gclidParams'>([
 
 export const builtInField = (name: string) => BUILT_IN_FIELDS.get(name)
 
-const AD_CLICK_SPELLINGS = new Map(AD_CLICK_PARAMETERS.map((name) => [name.toLowerCase(), name]))
-
-export const adClickSpelling = (name: string) => AD_CLICK_SPELLINGS.get(name.toLowerCase())
-
 export const isQueryParameterName = (name: unknown): name is string =>
   typeof name === 'string' && name !== '' && name.trim() === name
 
