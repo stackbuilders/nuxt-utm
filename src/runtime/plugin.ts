@@ -14,10 +14,13 @@ import {
   getUtmParams,
   getAdditionalInfo,
   isRepeatedEntry,
+  urlHasClickParams,
   urlHasGCLID,
   urlHasUtmParams,
+  getClickParams,
   getGCLID,
 } from './utm'
+import { isClickParameterName } from './parameters'
 import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#app'
 
 const LOCAL_STORAGE_KEY = 'nuxt-utm-data'
@@ -29,6 +32,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     Pick<ModuleOptions, 'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign'>
   > &
     ModuleOptions
+  // A runtime config override skips the build time checks, so a malformed list must not stop tracking
+  const clickParamNames = Array.isArray(options.clickParams)
+    ? options.clickParams.filter(isClickParameterName)
+    : []
   const router = useRouter()
   const isClient = typeof window !== 'undefined'
   const local = createStorage(() => localStorage)
@@ -100,7 +107,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (!isActive()) return
       if (!(await runHook('utm:before-track', context)) || context.skip || !isActive()) return
 
-      if (!options.captureWithoutCampaign && !urlHasUtmParams(query) && !urlHasGCLID(query)) return
+      const hasClickParams = urlHasClickParams(query, clickParamNames)
+      const isCampaign = urlHasUtmParams(query) || urlHasGCLID(query) || hasClickParams
+      if (!options.captureWithoutCampaign && !isCampaign) return
 
       const entry: DataObject = {
         timestamp,
@@ -109,6 +118,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         sessionId: getSessionID(SESSION_ID_KEY, session),
       }
       if (urlHasGCLID(query)) entry.gclidParams = getGCLID(query)
+      if (hasClickParams) entry.clickParams = getClickParams(query, clickParamNames)
       if (!(await runHook('utm:before-persist', entry)) || !isActive()) return
 
       const snapshot: unknown = JSON.parse(JSON.stringify(entry))

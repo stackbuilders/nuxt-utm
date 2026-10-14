@@ -24,7 +24,7 @@ For example, someone arrives from a Google campaign, returns through a newslette
 - **Last touch:** the most recent retained campaign, the newsletter.
 - **History:** the retained visits, newest first, including direct visits by default.
 
-First and last touch consider nonempty UTM or Google click parameters. Direct visits do not replace them; both are `null` when no campaign remains. Retention can remove the original first touch, so these values describe the history still available in this browser.
+First and last touch consider nonempty UTM, Google click, or configured click parameters. Direct visits do not replace them; both are `null` when no campaign remains. Retention can remove the original first touch, so these values describe the history still available in this browser.
 
 This is browser-local campaign context, not a reporting dashboard or a cross-device attribution service.
 
@@ -41,7 +41,7 @@ export default defineNuxtConfig({
 })
 ```
 
-The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting.
+The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, configured click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting.
 
 ## Send attribution with a form
 
@@ -108,13 +108,14 @@ The API must accept your static site's origin and validate the submitted data. C
 
 All new collection and retention options are opt-in. Existing behavior is preserved by default.
 
-| Option                   | Default | Behavior                                                                     |
-| ------------------------ | ------- | ---------------------------------------------------------------------------- |
-| `trackingEnabled`        | `true`  | Initial tracking preference when no saved preference exists.                 |
-| `trackOnRouteChange`     | `false` | Also capture successful client-side navigations whose full URL path changes. |
-| `captureWithoutCampaign` | `true`  | Include visits without UTM or Google click parameters.                       |
-| `maxAge`                 | Unset   | Retain entries younger than this many seconds. Must be positive and finite.  |
-| `maxEntries`             | Unset   | Retain at most this many entries. Must be a positive integer.                |
+| Option                   | Default | Behavior                                                                                                          |
+| ------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| `trackingEnabled`        | `true`  | Initial tracking preference when no saved preference exists.                                                      |
+| `trackOnRouteChange`     | `false` | Also capture successful client-side navigations whose full URL path changes.                                      |
+| `captureWithoutCampaign` | `true`  | Include visits without UTM, Google click, or configured click parameters.                                         |
+| `maxAge`                 | Unset   | Retain entries younger than this many seconds. Must be positive and finite.                                       |
+| `maxEntries`             | Unset   | Retain at most this many entries. Must be a positive integer.                                                     |
+| `clickParams`            | Unset   | Extra campaign parameters to capture, such as other ad platforms' click IDs. Must not repeat UTM or Google names. |
 
 For example, to retain up to 100 campaign visits for 30 days and capture client-side navigation:
 
@@ -130,9 +131,22 @@ export default defineNuxtConfig({
 })
 ```
 
+To attribute clicks from other ad platforms, list their click ID parameters, such as Meta's `fbclid`, Microsoft Advertising's `msclkid`, TikTok's `ttclid`, or LinkedIn's `li_fat_id`. A visit with a nonempty value for any of them is a campaign visit: the values are saved in the entry's `clickParams` and count toward first touch, last touch, and deduplication. UTM and Google click parameters are already captured in `utmParams` and `gclidParams`, so the build fails if the list repeats one of them.
+
+```ts
+export default defineNuxtConfig({
+  modules: ['nuxt-utm'],
+  utm: {
+    clickParams: ['fbclid', 'msclkid', 'ttclid', 'li_fat_id'],
+  },
+})
+```
+
+A click ID identifies an individual ad click, so list only the parameters your consent policy covers. Listed or not, every query parameter also stays in `additionalInfo.landingPageUrl` unless a `utm:before-persist` hook redacts it, as shown in [Hooks](#hooks).
+
 Retention runs when history is loaded, a visit is saved, or `getAttribution()` is called. There is no background expiry timer. Without retention options, history has no configured age or entry limit.
 
-Consecutive entries with the same UTM parameters, Google click parameters, and session ID are deduplicated. URLs, timestamps, and `customParams` do not participate in that comparison. This is not a pageview counter. The session ID uses sessionStorage for the current browser tab; it has no inactivity timeout.
+Consecutive entries with the same UTM parameters, Google click parameters, configured click parameters, and session ID are deduplicated. URLs, timestamps, and `customParams` do not participate in that comparison. This is not a pageview counter. The session ID uses sessionStorage for the current browser tab; it has no inactivity timeout.
 
 ## Composable
 
@@ -189,8 +203,8 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   nuxtApp.hook('utm:before-persist', (data) => {
     const url = new URL(data.additionalInfo.landingPageUrl)
-    const fbclid = url.searchParams.get('fbclid')
-    if (fbclid) data.customParams = { ...data.customParams, fbclid }
+    const promo = url.searchParams.get('promo')
+    if (promo) data.customParams = { ...data.customParams, promo }
     data.additionalInfo.landingPageUrl = `${url.origin}${url.pathname}`
   })
 })
@@ -239,7 +253,7 @@ const attribution: AttributionSnapshot = {
 }
 ```
 
-Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `gclidParams` and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
+Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
 
 ## Development
 

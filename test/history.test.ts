@@ -45,6 +45,11 @@ describe('retained attribution history', () => {
     expect(createAttributionSnapshot([click]).lastTouch).toEqual(click)
   })
 
+  it('recognizes a configured click identifier as a campaign', () => {
+    const click = { ...direct, clickParams: { fbclid: 'meta-click' } }
+    expect(createAttributionSnapshot([click]).lastTouch).toEqual(click)
+  })
+
   it('returns null campaign touches for direct visits and empty history', () => {
     expect(createAttributionSnapshot([direct])).toEqual({
       firstTouch: null,
@@ -73,6 +78,7 @@ describe('retained attribution history', () => {
     { ...first, utmParams: null },
     { ...first, timestamp: 'invalid' },
     { ...first, additionalInfo: {} },
+    { ...first, clickParams: { fbclid: 1 } },
   ])('rejects malformed stored entries: %j', (entry) => {
     expect(isDataObject(entry)).toBe(false)
   })

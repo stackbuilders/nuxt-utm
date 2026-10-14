@@ -14,9 +14,13 @@ export const options: ModuleOptions = {
   maxEntries: 100,
   trackOnRouteChange: true,
   captureWithoutCampaign: false,
+  clickParams: ['fbclid', 'msclkid'],
 }
 export function campaign(data: DataObject): string | undefined {
   return data.utmParams.utm_campaign
+}
+export function metaClick(data: DataObject): string | undefined {
+  return data.clickParams?.fbclid
 }
 export function skip(context: BeforeTrackContext): void {
   context.skip = true

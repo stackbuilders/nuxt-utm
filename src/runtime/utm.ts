@@ -6,17 +6,29 @@ import { GOOGLE_CLICK_PARAMETERS, UTM_PARAMETERS } from './parameters'
 import type { ParameterValues } from './parameters'
 import type { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from './types'
 
+// Configured names such as constructor would otherwise read what every object inherits
+const readParam = (query: LocationQuery, name: string) =>
+  Object.hasOwn(query, name) ? query[name] : undefined
+
 const hasAnyParam = (query: LocationQuery, names: readonly string[]): boolean =>
-  names.some((name) => Boolean(query[name]))
+  names.some((name) => Boolean(readParam(query, name)))
 
 const readParams = <Name extends string>(query: LocationQuery, names: readonly Name[]) =>
-  Object.fromEntries(names.map((name) => [name, query[name]?.toString()])) as ParameterValues<Name>
+  Object.fromEntries(
+    names.map((name) => [name, readParam(query, name)?.toString()]),
+  ) as ParameterValues<Name>
 
 const sameValues = <Name extends string>(
   names: readonly Name[],
   first: ParameterValues<Name> | undefined,
   second: ParameterValues<Name> | undefined,
 ): boolean => names.every((name) => first?.[name] === second?.[name])
+
+const sameKeysAndValues = (
+  first: ParameterValues<string> = {},
+  second: ParameterValues<string> = {},
+): boolean =>
+  sameValues([...new Set([...Object.keys(first), ...Object.keys(second)])], first, second)
 
 // crypto.randomUUID is limited to secure contexts, and sites served over plain HTTP still track visits
 export const generateSessionId = () => {
@@ -57,6 +69,14 @@ export const urlHasGCLID = (query: LocationQuery): boolean =>
 export const getGCLID = (query: LocationQuery): GCLIDParams =>
   readParams(query, GOOGLE_CLICK_PARAMETERS)
 
+export const urlHasClickParams = (query: LocationQuery, names: readonly string[]): boolean =>
+  hasAnyParam(query, names)
+
+export const getClickParams = (
+  query: LocationQuery,
+  names: readonly string[],
+): ParameterValues<string> => readParams(query, names)
+
 export const getAdditionalInfo = (landingPageUrl = window.location.href): AdditionalInfo => {
   return {
     referrer: document.referrer,
@@ -77,6 +97,8 @@ export const isRepeatedEntry = (data: Ref<DataObject[]>, currentEntry: DataObjec
     !!lastEntry?.utmParams &&
     lastEntry.sessionId === currentEntry.sessionId &&
     sameValues(UTM_PARAMETERS, lastEntry.utmParams, currentEntry.utmParams) &&
-    sameValues(GOOGLE_CLICK_PARAMETERS, lastEntry.gclidParams, currentEntry.gclidParams)
+    sameValues(GOOGLE_CLICK_PARAMETERS, lastEntry.gclidParams, currentEntry.gclidParams) &&
+    // The configured names can change between visits, so compare every stored click ID
+    sameKeysAndValues(lastEntry.clickParams, currentEntry.clickParams)
   )
 }

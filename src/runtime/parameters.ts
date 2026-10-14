@@ -25,3 +25,16 @@ export const GOOGLE_CLICK_PARAMETERS = [
 export type UTMParameter = (typeof UTM_PARAMETERS)[number]
 export type GoogleClickParameter = (typeof GOOGLE_CLICK_PARAMETERS)[number]
 export type ParameterValues<Name extends string> = { [Key in Name]?: string }
+
+const BUILT_IN_FIELDS = new Map<string, 'utmParams' | 'gclidParams'>([
+  ...UTM_PARAMETERS.map((name) => [name, 'utmParams'] as const),
+  ...GOOGLE_CLICK_PARAMETERS.map((name) => [name, 'gclidParams'] as const),
+])
+
+export const builtInField = (name: string) => BUILT_IN_FIELDS.get(name)
+
+export const isQueryParameterName = (name: unknown): name is string =>
+  typeof name === 'string' && name !== '' && name.trim() === name
+
+export const isClickParameterName = (name: unknown): name is string =>
+  isQueryParameterName(name) && !builtInField(name)
