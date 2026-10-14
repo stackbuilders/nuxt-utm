@@ -205,6 +205,11 @@ describe('configured click parameters', () => {
     const query = { fbclid: 'meta-click', ttclid: 'tiktok-click' }
     expect(getClickParams(query, names)).toEqual({ fbclid: 'meta-click' })
   })
+
+  it('ignores names the query inherits from Object.prototype', () => {
+    expect(urlHasClickParams({}, ['constructor', 'toString'])).toBe(false)
+    expect(getClickParams({}, ['constructor'])).toEqual({})
+  })
 })
 
 describe('isRepeatedEntry', () => {
@@ -236,5 +241,10 @@ describe('isRepeatedEntry', () => {
     expect(isRepeatedEntry(ref([click]), { ...click, clickParams: { fbclid: 'meta-click' } })).toBe(
       true,
     )
+  })
+
+  it('treats a visit without click IDs after one with them as a new entry', () => {
+    const click = { ...entry, clickParams: { fbclid: 'meta-click' } }
+    expect(isRepeatedEntry(ref([click]), entry)).toBe(false)
   })
 })

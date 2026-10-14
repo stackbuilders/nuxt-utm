@@ -6,11 +6,17 @@ import { GOOGLE_CLICK_PARAMETERS, UTM_PARAMETERS } from './parameters'
 import type { ParameterValues } from './parameters'
 import type { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from './types'
 
+// Configured names such as constructor would otherwise read what every object inherits
+const readParam = (query: LocationQuery, name: string) =>
+  Object.hasOwn(query, name) ? query[name] : undefined
+
 const hasAnyParam = (query: LocationQuery, names: readonly string[]): boolean =>
-  names.some((name) => Boolean(query[name]))
+  names.some((name) => Boolean(readParam(query, name)))
 
 const readParams = <Name extends string>(query: LocationQuery, names: readonly Name[]) =>
-  Object.fromEntries(names.map((name) => [name, query[name]?.toString()])) as ParameterValues<Name>
+  Object.fromEntries(
+    names.map((name) => [name, readParam(query, name)?.toString()]),
+  ) as ParameterValues<Name>
 
 const sameValues = <Name extends string>(
   names: readonly Name[],

@@ -20,6 +20,7 @@ import {
   getClickParams,
   getGCLID,
 } from './utm'
+import { isClickParameterName } from './parameters'
 import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#app'
 
 const LOCAL_STORAGE_KEY = 'nuxt-utm-data'
@@ -31,7 +32,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     Pick<ModuleOptions, 'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign'>
   > &
     ModuleOptions
-  const clickParamNames = options.clickParams ?? []
+  // A runtime config override skips the build time checks, so a malformed list must not stop tracking
+  const clickParamNames = Array.isArray(options.clickParams)
+    ? options.clickParams.filter(isClickParameterName)
+    : []
   const router = useRouter()
   const isClient = typeof window !== 'undefined'
   const local = createStorage(() => localStorage)

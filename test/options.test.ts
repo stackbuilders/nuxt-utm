@@ -7,9 +7,21 @@ describe('validateOptions', () => {
     expect(() => validateOptions({ clickParams: ['fbclid', 'msclkid'] })).not.toThrow()
   })
 
-  it.each<unknown>(['fbclid', [''], [1]])('rejects clickParams %j', (clickParams) => {
-    expect(() => validateOptions({ clickParams } as ModuleOptions)).toThrow(
-      '[nuxt-utm] clickParams must be a list of query parameter names',
+  it.each<unknown>(['fbclid', [''], [1], [' fbclid'], ['msclkid ']])(
+    'rejects clickParams %j',
+    (clickParams) => {
+      expect(() => validateOptions({ clickParams } as ModuleOptions)).toThrow(
+        '[nuxt-utm] clickParams must be a list of query parameter names',
+      )
+    },
+  )
+
+  it.each([
+    ['utm_source', 'utmParams'],
+    ['gclid', 'gclidParams'],
+  ])('rejects the built-in name %s', (name, field) => {
+    expect(() => validateOptions({ clickParams: ['fbclid', name] })).toThrow(
+      `[nuxt-utm] clickParams cannot include ${name}, which is already captured in ${field}`,
     )
   })
 })
