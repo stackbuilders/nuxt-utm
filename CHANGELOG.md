@@ -1,5 +1,49 @@
 # Changelog
 
+## v0.4.0
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.3.1...v0.4.0)
+
+### ⚠️ Behavior changes
+
+- A visit tagged only with `utm_id`, `utm_source_platform`, `utm_creative_format`, `utm_marketing_tactic`, `gad_campaignid`, `gbraid`, `wbraid`, or `dclid` now counts as a campaign visit. It is saved even with `captureWithoutCampaign: false` and can become first or last touch. Entries store these values in `utmParams` and `gclidParams`, so an API that rejects unknown keys in `getAttribution()` payloads needs to accept them ([#223](https://github.com/stackbuilders/nuxt-utm/pull/223))
+- New session IDs are 32 hexadecimal characters instead of up to 13 base-36 characters. A tab that already has a session ID keeps it, so history can hold both formats ([#222](https://github.com/stackbuilders/nuxt-utm/pull/222))
+
+### 🚀 Enhancements
+
+- Capture GA4 campaign parameters and Google click IDs used on iOS and Display & Video 360 ([#223](https://github.com/stackbuilders/nuxt-utm/pull/223))
+- Capture click IDs from other ad platforms with the clickParams option ([#224](https://github.com/stackbuilders/nuxt-utm/pull/224))
+- Suggest known ad platform click IDs and warn about miscased names ([#226](https://github.com/stackbuilders/nuxt-utm/pull/226))
+
+### 🩹 Fixes
+
+- **deps:** Refresh transitive dependencies to patched releases ([#215](https://github.com/stackbuilders/nuxt-utm/pull/215))
+- Generate session IDs from 128 cryptographically random bits ([#222](https://github.com/stackbuilders/nuxt-utm/pull/222))
+- Capture the router's current route when pages call capture during navigation ([#221](https://github.com/stackbuilders/nuxt-utm/pull/221))
+
+### 📖 Documentation
+
+- Describe release notes for behavior changes and the tokenless publish workflow ([#225](https://github.com/stackbuilders/nuxt-utm/pull/225))
+
+### 🏡 Chore
+
+- **deps-dev:** Bump vitest from 5.0.0 to 5.0.3 ([#217](https://github.com/stackbuilders/nuxt-utm/pull/217))
+- Remove package manager settings the toolchain ignores ([#219](https://github.com/stackbuilders/nuxt-utm/pull/219))
+
+### ✅ Tests
+
+- Consolidate utm helper tests into one suite ([#218](https://github.com/stackbuilders/nuxt-utm/pull/218))
+
+### 🤖 CI
+
+- Update playwright packages together in dependabot ([#214](https://github.com/stackbuilders/nuxt-utm/pull/214))
+- Publish to npm through trusted publishing ([#216](https://github.com/stackbuilders/nuxt-utm/pull/216))
+- Make Prettier the only formatter and check formatting in CI ([#220](https://github.com/stackbuilders/nuxt-utm/pull/220))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](https://github.com/sadjow))
+
 ## v0.3.1
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.3.0...v0.3.1)
