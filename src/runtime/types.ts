@@ -22,6 +22,7 @@ export interface DataObject {
   additionalInfo: AdditionalInfo
   sessionId: string
   gclidParams?: GCLIDParams
+  clickParams?: ParameterValues<string>
   customParams?: Record<string, unknown>
 }
 
@@ -43,6 +44,7 @@ export interface ModuleOptions {
   maxEntries?: number
   trackOnRouteChange?: boolean
   captureWithoutCampaign?: boolean
+  clickParams?: string[]
 }
 
 export interface AttributionSnapshot {

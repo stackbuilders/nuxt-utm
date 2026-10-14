@@ -16,6 +16,7 @@ export function isDataObject(value: unknown): value is DataObject {
     typeof value.sessionId === 'string' &&
     isStringMap(value.utmParams) &&
     (value.gclidParams === undefined || isStringMap(value.gclidParams)) &&
+    (value.clickParams === undefined || isStringMap(value.clickParams)) &&
     (value.customParams === undefined || isRecord(value.customParams)) &&
     ['referrer', 'userAgent', 'language', 'landingPageUrl'].every(
       (key) => typeof additionalInfo[key] === 'string',
@@ -41,10 +42,10 @@ export function retainHistory(
 }
 
 export function getCampaignTouches(history: readonly DataObject[]) {
-  const campaigns = history.filter(
-    (entry) =>
-      Object.values(entry.utmParams).some(Boolean) ||
-      Object.values(entry.gclidParams ?? {}).some(Boolean),
+  const campaigns = history.filter((entry) =>
+    [entry.utmParams, entry.gclidParams, entry.clickParams].some((params) =>
+      Object.values(params ?? {}).some(Boolean),
+    ),
   )
   return { firstTouch: campaigns.at(-1) ?? null, lastTouch: campaigns[0] ?? null }
 }

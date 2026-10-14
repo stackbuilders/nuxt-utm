@@ -14,8 +14,10 @@ import {
   getUtmParams,
   getAdditionalInfo,
   isRepeatedEntry,
+  urlHasClickParams,
   urlHasGCLID,
   urlHasUtmParams,
+  getClickParams,
   getGCLID,
 } from './utm'
 import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#app'
@@ -29,6 +31,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     Pick<ModuleOptions, 'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign'>
   > &
     ModuleOptions
+  const clickParamNames = options.clickParams ?? []
   const router = useRouter()
   const isClient = typeof window !== 'undefined'
   const local = createStorage(() => localStorage)
@@ -100,7 +103,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (!isActive()) return
       if (!(await runHook('utm:before-track', context)) || context.skip || !isActive()) return
 
-      if (!options.captureWithoutCampaign && !urlHasUtmParams(query) && !urlHasGCLID(query)) return
+      const hasClickParams = urlHasClickParams(query, clickParamNames)
+      const isCampaign = urlHasUtmParams(query) || urlHasGCLID(query) || hasClickParams
+      if (!options.captureWithoutCampaign && !isCampaign) return
 
       const entry: DataObject = {
         timestamp,
@@ -109,6 +114,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         sessionId: getSessionID(SESSION_ID_KEY, session),
       }
       if (urlHasGCLID(query)) entry.gclidParams = getGCLID(query)
+      if (hasClickParams) entry.clickParams = getClickParams(query, clickParamNames)
       if (!(await runHook('utm:before-persist', entry)) || !isActive()) return
 
       const snapshot: unknown = JSON.parse(JSON.stringify(entry))

@@ -18,6 +18,12 @@ const sameValues = <Name extends string>(
   second: ParameterValues<Name> | undefined,
 ): boolean => names.every((name) => first?.[name] === second?.[name])
 
+const sameKeysAndValues = (
+  first: ParameterValues<string> = {},
+  second: ParameterValues<string> = {},
+): boolean =>
+  sameValues([...new Set([...Object.keys(first), ...Object.keys(second)])], first, second)
+
 export const generateSessionId = () => {
   return Math.random().toString(36).substring(2, 15)
 }
@@ -55,6 +61,14 @@ export const urlHasGCLID = (query: LocationQuery): boolean =>
 export const getGCLID = (query: LocationQuery): GCLIDParams =>
   readParams(query, GOOGLE_CLICK_PARAMETERS)
 
+export const urlHasClickParams = (query: LocationQuery, names: readonly string[]): boolean =>
+  hasAnyParam(query, names)
+
+export const getClickParams = (
+  query: LocationQuery,
+  names: readonly string[],
+): ParameterValues<string> => readParams(query, names)
+
 export const getAdditionalInfo = (landingPageUrl = window.location.href): AdditionalInfo => {
   return {
     referrer: document.referrer,
@@ -75,6 +89,8 @@ export const isRepeatedEntry = (data: Ref<DataObject[]>, currentEntry: DataObjec
     !!lastEntry?.utmParams &&
     lastEntry.sessionId === currentEntry.sessionId &&
     sameValues(UTM_PARAMETERS, lastEntry.utmParams, currentEntry.utmParams) &&
-    sameValues(GOOGLE_CLICK_PARAMETERS, lastEntry.gclidParams, currentEntry.gclidParams)
+    sameValues(GOOGLE_CLICK_PARAMETERS, lastEntry.gclidParams, currentEntry.gclidParams) &&
+    // The configured names can change between visits, so compare every stored click ID
+    sameKeysAndValues(lastEntry.clickParams, currentEntry.clickParams)
   )
 }

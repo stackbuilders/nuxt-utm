@@ -4,10 +4,12 @@ import type { LocationQuery } from 'vue-router'
 import type { DataObject, GCLIDParams } from '../src/runtime/types'
 import { createStorage } from '../src/runtime/storage'
 import {
+  getClickParams,
   getGCLID,
   getUtmParams,
   isRepeatedEntry,
   readLocalData,
+  urlHasClickParams,
   urlHasGCLID,
   urlHasUtmParams,
 } from '../src/runtime/utm'
@@ -190,6 +192,21 @@ describe('getGCLID', () => {
   })
 })
 
+describe('configured click parameters', () => {
+  const names = ['fbclid', 'msclkid']
+
+  it('detects only the configured names', () => {
+    expect(urlHasClickParams({ fbclid: 'meta-click' }, names)).toBe(true)
+    expect(urlHasClickParams({ ttclid: 'tiktok-click' }, names)).toBe(false)
+    expect(urlHasClickParams({ fbclid: 'meta-click' }, [])).toBe(false)
+  })
+
+  it('reads the configured names from the query', () => {
+    const query = { fbclid: 'meta-click', ttclid: 'tiktok-click' }
+    expect(getClickParams(query, names)).toEqual({ fbclid: 'meta-click' })
+  })
+})
+
 describe('isRepeatedEntry', () => {
   const history = ref<DataObject[]>([entry])
 
@@ -211,5 +228,13 @@ describe('isRepeatedEntry', () => {
 
   it('treats a new Google click ID in the same session as a new entry', () => {
     expect(isRepeatedEntry(history, { ...entry, gclidParams: { gbraid: 'app-click' } })).toBe(false)
+  })
+
+  it('compares configured click IDs within the same session', () => {
+    const click = { ...entry, clickParams: { fbclid: 'meta-click' } }
+    expect(isRepeatedEntry(history, click)).toBe(false)
+    expect(isRepeatedEntry(ref([click]), { ...click, clickParams: { fbclid: 'meta-click' } })).toBe(
+      true,
+    )
   })
 })
