@@ -24,8 +24,8 @@ export async function testCompatibility({ root, directory, tarball }) {
       private: true,
       type: 'module',
       packageManager,
-      dependencies: { 'nuxt': version, 'nuxt-utm': `file:${tarball}`, 'vue': '^3.5.0' },
-      devDependencies: { 'typescript': '~5.9.3', 'vue-tsc': '^3.3.8' },
+      dependencies: { nuxt: version, 'nuxt-utm': `file:${tarball}`, vue: '^3.5.0' },
+      devDependencies: { typescript: '~5.9.3', 'vue-tsc': '^3.3.8' },
     }),
   )
   writeFileSync(
@@ -39,9 +39,12 @@ export async function testCompatibility({ root, directory, tarball }) {
       timeout: 300_000,
       env: { ...process.env, NUXT_TELEMETRY_DISABLED: '1' },
     })
-  const allowBuilds = JSON.parse(execFileSync(pnpmCommand, [...pnpmArguments, 'config', 'get', 'allowBuilds', '--json'], {
-    cwd: root, encoding: 'utf8',
-  }))
+  const allowBuilds = JSON.parse(
+    execFileSync(pnpmCommand, [...pnpmArguments, 'config', 'get', 'allowBuilds', '--json'], {
+      cwd: root,
+      encoding: 'utf8',
+    }),
+  )
   writeFileSync(join(fixture, 'pnpm-workspace.yaml'), JSON.stringify({ allowBuilds }))
   run(['install', '--no-frozen-lockfile'])
   const installed = JSON.parse(
@@ -108,7 +111,13 @@ export async function testCompatibility({ root, directory, tarball }) {
     await page.getByRole('button', { name: 'Send', exact: true }).click()
     await page.getByRole('status').filter({ hasText: 'Please try again' }).waitFor()
     assert.equal(submissions.length, 1)
-    assert.equal(await page.getByTestId('history-count').textContent().then((text) => text.trim()), '3')
+    assert.equal(
+      await page
+        .getByTestId('history-count')
+        .textContent()
+        .then((text) => text.trim()),
+      '3',
+    )
     await page.getByRole('button', { name: 'Send', exact: true }).click()
     await page.getByRole('status').filter({ hasText: 'Sent' }).waitFor()
     assert.equal(submissions.length, 2)

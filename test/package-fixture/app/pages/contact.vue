@@ -40,19 +40,8 @@ async function submitLead() {
     </ClientOnly>
     <form @submit.prevent="submitLead">
       <label for="email">Email</label>
-      <input
-        id="email"
-        v-model="email"
-        type="email"
-        autocomplete="email"
-        required
-      >
-      <button
-        type="submit"
-        :disabled="submitting"
-      >
-        Send
-      </button>
+      <input id="email" v-model="email" type="email" autocomplete="email" required />
+      <button type="submit" :disabled="submitting">Send</button>
       <p role="status">
         {{ status }}
       </p>

@@ -1,38 +1,20 @@
 // @ts-check
 import { createConfigForNuxt } from '@nuxt/eslint-config/flat'
+import prettier from 'eslint-config-prettier/flat'
 
 // Run `npx @eslint/config-inspector` to inspect the resolved config interactively
 export default createConfigForNuxt({
   features: {
     // Rules for module authors
     tooling: true,
-    // Rules for formatting
-    stylistic: true,
+    // Prettier formats the code, so the key order rule that came with stylistic is enabled on its own
+    nuxt: { sortConfigKeys: true },
   },
   dirs: {
     src: ['./playground'],
   },
-}).append({
-  rules: {
-    '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
-    '@stylistic/semi': ['error', 'never'],
-    '@stylistic/comma-dangle': ['error', 'always-multiline'],
-    '@stylistic/arrow-parens': ['error', 'always'],
-    '@stylistic/operator-linebreak': 'off',
-    '@stylistic/brace-style': 'off',
-    '@stylistic/indent-binary-ops': 'off',
-    '@stylistic/member-delimiter-style': [
-      'error',
-      {
-        multiline: {
-          delimiter: 'none',
-          requireLast: false,
-        },
-        singleline: {
-          delimiter: 'comma',
-          requireLast: false,
-        },
-      },
-    ],
-  },
+}).append(prettier, {
+  // eslint-config-prettier turns this off, but without semicolons it is the rule that catches
+  // a new line silently continuing the previous statement
+  rules: { 'no-unexpected-multiline': 'error' },
 })
