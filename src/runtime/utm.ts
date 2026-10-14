@@ -6,17 +6,23 @@ import { GOOGLE_CLICK_PARAMETERS, UTM_PARAMETERS } from './parameters'
 import type { ParameterValues } from './parameters'
 import type { UTMParams, AdditionalInfo, DataObject, GCLIDParams } from './types'
 
+// A repeated parameter arrives as an array when a link builder appends one the URL already has.
+// Like URLSearchParams.get, keep the first value, but skip empty ones so they cannot hide a
+// later value. When every value is empty, keep the first so it reads like a single empty value.
+const firstNonemptyValue = (value: LocationQuery[string] | undefined): string | undefined => {
+  const values = [value].flat().filter((entry) => typeof entry === 'string')
+  return values.find(Boolean) ?? values[0]
+}
+
 // Configured names such as constructor would otherwise read what every object inherits
 const readParam = (query: LocationQuery, name: string) =>
-  Object.hasOwn(query, name) ? query[name] : undefined
+  Object.hasOwn(query, name) ? firstNonemptyValue(query[name]) : undefined
 
 const hasAnyParam = (query: LocationQuery, names: readonly string[]): boolean =>
   names.some((name) => Boolean(readParam(query, name)))
 
 const readParams = <Name extends string>(query: LocationQuery, names: readonly Name[]) =>
-  Object.fromEntries(
-    names.map((name) => [name, readParam(query, name)?.toString()]),
-  ) as ParameterValues<Name>
+  Object.fromEntries(names.map((name) => [name, readParam(query, name)])) as ParameterValues<Name>
 
 const sameValues = <Name extends string>(
   names: readonly Name[],
