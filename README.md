@@ -12,7 +12,7 @@ Nuxt UTM keeps campaign information in the browser until your application is rea
 
 It supports Nuxt 3 and 4, and is tested against Nuxt 5 nightly builds. Collection needs no backend, analytics account, or network request. Your application decides whether and when to send the data to its own API or CRM.
 
-[Release notes](CHANGELOG.md) · [Contributing](docs/CONTRIBUTING.md)
+[Release notes](CHANGELOG.md) · [Recipes](docs/RECIPES.md) · [Contributing](docs/CONTRIBUTING.md)
 
 ## What is attribution?
 
@@ -103,6 +103,8 @@ async function submitLead() {
 `getAttribution()` waits for pending collection and enrichment, applies retention, and returns a detached, JSON-serializable `{ firstTouch, lastTouch, history }` snapshot. It does not send anything. Capture the composable during setup as above, then use its methods in event handlers.
 
 The API must accept your static site's origin and validate the submitted data. Campaign values and all browser-stored data are untrusted input. Authentication, duplicate submission handling, and retries belong to your application. A failed submission leaves the local history available; the module does not automatically retry requests or clear data after sending.
+
+The [recipes](docs/RECIPES.md) show how to send the Google Analytics client ID and Google Ads click IDs with a lead, and how to send attribution to form services that don't accept JSON.
 
 ## Configuration
 
