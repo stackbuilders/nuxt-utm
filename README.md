@@ -144,20 +144,20 @@ export default defineNuxtConfig({
 
 Your editor suggests these platforms' click IDs:
 
-| Platform              | Click ID    | Notes                                                                                     |
-| --------------------- | ----------- | ----------------------------------------------------------------------------------------- |
-| Meta                  | `fbclid`    | Facebook also adds it to links in organic posts, so an organic share is a campaign visit. |
-| Microsoft Advertising | `msclkid`   | Added when auto-tagging is on.                                                            |
-| TikTok                | `ttclid`    |                                                                                           |
-| LinkedIn              | `li_fat_id` | Added when enhanced conversion tracking is on in the Insight Tag.                         |
-| X                     | `twclid`    |                                                                                           |
-| Snapchat              | `ScCid`     | Mixed case, as Snapchat sends it.                                                         |
-| Pinterest             | `epik`      |                                                                                           |
-| Reddit                | `rdt_cid`   |                                                                                           |
+| Platform              | Click ID    | Notes                                                                                                |
+| --------------------- | ----------- | ---------------------------------------------------------------------------------------------------- |
+| Meta                  | `fbclid`    | Facebook also adds it to links in organic posts, so an organic share is a campaign visit.            |
+| Microsoft Advertising | `msclkid`   | Added when auto-tagging is on.                                                                       |
+| TikTok                | `ttclid`    |                                                                                                      |
+| LinkedIn              | `li_fat_id` | Added when enhanced conversion tracking is on in the Insight Tag settings, the default for new tags. |
+| X                     | `twclid`    |                                                                                                      |
+| Snapchat              | `ScCid`     | Mixed case, as Snapchat sends it.                                                                    |
+| Pinterest             | `epik`      |                                                                                                      |
+| Reddit                | `rdt_cid`   |                                                                                                      |
 
 Other names work the same way. Query parameter names are case-sensitive, so the build warns when a listed name matches one of these only by case, such as `sccid`. To capture another spelling on purpose, list it beside the documented one.
 
-A click ID identifies an individual ad click, so list only the parameters your consent policy covers. Listed or not, every query parameter also stays in `additionalInfo.landingPageUrl` unless a `utm:before-persist` hook redacts it, as shown in [Hooks](#hooks).
+A click ID identifies an individual click, so list only the parameters your consent policy covers. Listed or not, every query parameter also stays in `additionalInfo.landingPageUrl` unless a `utm:before-persist` hook redacts it, as shown in [Hooks](#hooks).
 
 Send click IDs to a platform's conversion API exactly as captured. Meta's [`fbc` parameter](https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/fbp-and-fbc) also records when the click ID was first seen. A later session can save the same click ID again, so use the oldest entry that has it. When the Meta Pixel has set an `_fbc` cookie, send that value instead.
 
