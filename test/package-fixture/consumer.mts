@@ -1,6 +1,7 @@
 import type {
   DataObject,
   BeforeTrackContext,
+  ClickParams,
   GCLIDParams,
   ModuleOptions,
   UTMParams,
@@ -14,8 +15,15 @@ export const options: ModuleOptions = {
   maxEntries: 100,
   trackOnRouteChange: true,
   captureWithoutCampaign: false,
-  clickParams: ['fbclid', 'msclkid'],
+  clickParams: ['fbclid', 'msclkid', 'partner_click_id'],
 }
+// Known click IDs must stay literal members of the option type so editors suggest them.
+export const suggestedClickParam: Extract<
+  NonNullable<ModuleOptions['clickParams']>[number],
+  'ScCid'
+> = 'ScCid'
+// @ts-expect-error Click parameter names must remain strings in the published package.
+export const invalidClickNames: ModuleOptions = { clickParams: [123] }
 export function campaign(data: DataObject): string | undefined {
   return data.utmParams.utm_campaign
 }
@@ -30,6 +38,9 @@ export function skip(context: BeforeTrackContext): void {
 export const invalid: UTMParams = { utm_source: 123 }
 // @ts-expect-error Click IDs must retain their string type in the published package.
 export const invalidClick: GCLIDParams = { gbraid: 123 }
+// @ts-expect-error Configured click IDs must retain their string type in the published package.
+export const invalidAdClick: ClickParams = { fbclid: 123 }
+export const adClicks: ClickParams = { ScCid: 'snap-click', partner_click_id: 'abc123' }
 export const ga4Campaign: UTMParams = { utm_id: 'spring', utm_source_platform: 'Search Ads 360' }
 
 declare module 'nuxt-utm' {

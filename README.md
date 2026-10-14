@@ -131,7 +131,7 @@ export default defineNuxtConfig({
 })
 ```
 
-To attribute clicks from other ad platforms, list their click ID parameters, such as Meta's `fbclid`, Microsoft Advertising's `msclkid`, TikTok's `ttclid`, or LinkedIn's `li_fat_id`. A visit with a nonempty value for any of them is a campaign visit: the values are saved in the entry's `clickParams` and count toward first touch, last touch, and deduplication. UTM and Google click parameters are already captured in `utmParams` and `gclidParams`, so the build fails if the list repeats one of them.
+To attribute clicks from other ad platforms, list their click ID parameters. A visit with a nonempty value for any of them is a campaign visit: the values are saved in the entry's `clickParams` and count toward first touch, last touch, and deduplication. UTM and Google click parameters are already captured in `utmParams` and `gclidParams`, so the build fails if the list repeats one of them.
 
 ```ts
 export default defineNuxtConfig({
@@ -142,7 +142,31 @@ export default defineNuxtConfig({
 })
 ```
 
+Your editor suggests these platforms' click IDs:
+
+| Platform              | Click ID    | Notes                                                                                     |
+| --------------------- | ----------- | ----------------------------------------------------------------------------------------- |
+| Meta                  | `fbclid`    | Facebook also adds it to links in organic posts, so an organic share is a campaign visit. |
+| Microsoft Advertising | `msclkid`   | Added when auto-tagging is on.                                                            |
+| TikTok                | `ttclid`    |                                                                                           |
+| LinkedIn              | `li_fat_id` | Added when enhanced conversion tracking is on in the Insight Tag.                         |
+| X                     | `twclid`    |                                                                                           |
+| Snapchat              | `ScCid`     | Mixed case, as Snapchat sends it.                                                         |
+| Pinterest             | `epik`      |                                                                                           |
+| Reddit                | `rdt_cid`   |                                                                                           |
+
+Other names work the same way. Query parameter names are case-sensitive, so the build warns when a listed name matches one of these only by case, such as `sccid`.
+
 A click ID identifies an individual ad click, so list only the parameters your consent policy covers. Listed or not, every query parameter also stays in `additionalInfo.landingPageUrl` unless a `utm:before-persist` hook redacts it, as shown in [Hooks](#hooks).
+
+Send click IDs to a platform's conversion API exactly as captured. Meta's [`fbc` parameter](https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/fbp-and-fbc) also records when the click ID was first seen, which is the entry's `timestamp`:
+
+```ts
+import type { DataObject } from 'nuxt-utm'
+
+const metaClickId = ({ clickParams, timestamp }: DataObject) =>
+  clickParams?.fbclid && `fb.1.${Date.parse(timestamp)}.${clickParams.fbclid}`
+```
 
 Retention runs when history is loaded, a visit is saved, or `getAttribution()` is called. There is no background expiry timer. Without retention options, history has no configured age or entry limit.
 
@@ -253,7 +277,7 @@ const attribution: AttributionSnapshot = {
 }
 ```
 
-Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
+Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `ClickParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
 
 ## Development
 

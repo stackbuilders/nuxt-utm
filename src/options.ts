@@ -1,5 +1,5 @@
 import type { ModuleOptions } from './runtime/types'
-import { builtInField, isQueryParameterName } from './runtime/parameters'
+import { adClickSpelling, builtInField, isQueryParameterName } from './runtime/parameters'
 
 export function validateOptions({ maxAge, maxEntries, clickParams }: ModuleOptions) {
   if (maxAge !== undefined && (!Number.isFinite(maxAge) || maxAge <= 0)) {
@@ -23,3 +23,14 @@ export function validateOptions({ maxAge, maxEntries, clickParams }: ModuleOptio
     }
   }
 }
+
+// Warn instead of failing the build, since a site may receive a spelling the platform does not document
+export const clickParamWarnings = ({ clickParams = [] }: ModuleOptions): string[] =>
+  clickParams.flatMap((name) => {
+    const spelling = adClickSpelling(name)
+    return spelling && spelling !== name
+      ? [
+          `clickParams lists ${name}; did you mean ${spelling}? Query parameter names are case-sensitive`,
+        ]
+      : []
+  })

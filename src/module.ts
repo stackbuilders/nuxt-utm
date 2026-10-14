@@ -1,11 +1,19 @@
-import { defineNuxtModule, addPlugin, addImports, addTypeTemplate, createResolver } from '@nuxt/kit'
+import {
+  defineNuxtModule,
+  addPlugin,
+  addImports,
+  addTypeTemplate,
+  createResolver,
+  useLogger,
+} from '@nuxt/kit'
 import type { ModuleOptions } from './runtime/types'
-import { validateOptions } from './options'
+import { clickParamWarnings, validateOptions } from './options'
 
 export type {
   ModuleOptions,
   UTMParams,
   GCLIDParams,
+  ClickParams,
   AdditionalInfo,
   DataObject,
   BeforeTrackContext,
@@ -31,6 +39,8 @@ export default defineNuxtModule<ModuleOptions>({
   defaults,
   setup(options, nuxt) {
     validateOptions(options)
+    const logger = useLogger('nuxt-utm')
+    for (const warning of clickParamWarnings(options)) logger.warn(warning)
     const resolver = createResolver(import.meta.url)
 
     nuxt.options.runtimeConfig.public.utm = {
