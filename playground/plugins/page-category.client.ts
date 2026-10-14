@@ -5,7 +5,9 @@ export default defineNuxtPlugin(() => {
   const utm = useNuxtUTM()
 
   utm.onBeforePersist((data) => {
-    const pageCategory = new URL(data.additionalInfo.landingPageUrl).searchParams.get('page_category')
+    const pageCategory = new URL(data.additionalInfo.landingPageUrl).searchParams.get(
+      'page_category',
+    )
     if (!pageCategory) return
 
     data.customParams = {

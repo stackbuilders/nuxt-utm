@@ -14,28 +14,15 @@
       </p>
 
       <div class="buttons">
-        <button @click="utm.enableTracking">
-          Enable Tracking
-        </button>
-        <button @click="utm.disableTracking">
-          Disable Tracking
-        </button>
-        <button
-          class="danger"
-          @click="utm.clearData"
-        >
-          Clear All Data
-        </button>
+        <button @click="utm.enableTracking">Enable Tracking</button>
+        <button @click="utm.disableTracking">Disable Tracking</button>
+        <button class="danger" @click="utm.clearData">Clear All Data</button>
       </div>
 
       <h2>Custom Hook Testing</h2>
       <div class="buttons">
-        <button @click="visitWithPageCategory('pricing')">
-          Track pageCategory: pricing
-        </button>
-        <button @click="visitWithPageCategory('features')">
-          Track pageCategory: features
-        </button>
+        <button @click="visitWithPageCategory('pricing')">Track pageCategory: pricing</button>
+        <button @click="visitWithPageCategory('features')">Track pageCategory: features</button>
       </div>
 
       <div class="info">

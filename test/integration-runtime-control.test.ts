@@ -73,7 +73,9 @@ describe('Runtime tracking control', async () => {
 
     let rawData = await page.evaluate(() => window.localStorage.getItem('nuxt-utm-data'))
     let entries = JSON.parse(rawData ?? '[]')
-    const hasDisabled = entries.some((e: DataObject) => e.utmParams?.utm_source === 'while_disabled')
+    const hasDisabled = entries.some(
+      (e: DataObject) => e.utmParams?.utm_source === 'while_disabled',
+    )
     expect(hasDisabled).toBe(false)
 
     // Enable tracking
@@ -119,7 +121,9 @@ describe('Runtime tracking control', async () => {
     expect(rawData).toBeNull()
 
     // Check session ID is also cleared
-    const sessionId = await page.evaluate(() => window.sessionStorage.getItem('nuxt-utm-session-id'))
+    const sessionId = await page.evaluate(() =>
+      window.sessionStorage.getItem('nuxt-utm-session-id'),
+    )
     expect(sessionId).toBeNull()
 
     await page.close()
