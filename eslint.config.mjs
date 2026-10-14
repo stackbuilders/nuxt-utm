@@ -13,8 +13,20 @@ export default createConfigForNuxt({
   dirs: {
     src: ['./playground'],
   },
-}).append(prettier, {
-  // eslint-config-prettier turns this off, but without semicolons it is the rule that catches
-  // a new line silently continuing the previous statement
-  rules: { 'no-unexpected-multiline': 'error' },
-})
+}).append(
+  prettier,
+  {
+    // eslint-config-prettier turns this off, but without semicolons it is the rule that catches
+    // a new line silently continuing the previous statement
+    rules: { 'no-unexpected-multiline': 'error' },
+  },
+  {
+    // Public types such as UTMParams extend a derived type as interfaces so apps can augment them
+    rules: {
+      '@typescript-eslint/no-empty-object-type': [
+        'error',
+        { allowInterfaces: 'with-single-extends' },
+      ],
+    },
+  },
+)

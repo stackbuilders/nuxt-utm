@@ -1,4 +1,4 @@
-// The manual campaign parameters Google Analytics 4 reads
+// The manual campaign parameters Google Analytics 4 documents
 export const UTM_PARAMETERS = [
   'utm_id',
   'utm_source',
@@ -11,7 +11,7 @@ export const UTM_PARAMETERS = [
   'utm_marketing_tactic',
 ] as const
 
-// Google Ads sends gbraid or wbraid instead of gclid for some iOS clicks,
+// Google Ads sends gbraid or wbraid alongside or instead of gclid for some iOS clicks,
 // and Display & Video 360 and Campaign Manager 360 tag their clicks with dclid
 export const GOOGLE_CLICK_PARAMETERS = [
   'gclid',

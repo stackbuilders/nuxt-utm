@@ -1,9 +1,9 @@
 import type { RouteLocationNormalized, LocationQuery } from 'vue-router'
 import type { GoogleClickParameter, ParameterValues, UTMParameter } from './parameters'
 
-export type UTMParams = ParameterValues<UTMParameter>
+export interface UTMParams extends ParameterValues<UTMParameter> {}
 
-export type GCLIDParams = ParameterValues<GoogleClickParameter>
+export interface GCLIDParams extends ParameterValues<GoogleClickParameter> {}
 
 export interface AdditionalInfo {
   referrer: string
