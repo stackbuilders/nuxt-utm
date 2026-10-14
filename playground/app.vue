@@ -6,11 +6,13 @@
       <h2>Tracking Controls</h2>
       <p>
         Tracking is currently:
-        <strong
-          :class="{ enabled: utm.trackingEnabled.value, disabled: !utm.trackingEnabled.value }"
-        >
-          {{ utm.trackingEnabled.value ? 'ENABLED' : 'DISABLED' }}
-        </strong>
+        <ClientOnly>
+          <strong
+            :class="{ enabled: utm.trackingEnabled.value, disabled: !utm.trackingEnabled.value }"
+          >
+            {{ utm.trackingEnabled.value ? 'ENABLED' : 'DISABLED' }}
+          </strong>
+        </ClientOnly>
       </p>
 
       <div class="buttons">
@@ -37,10 +39,12 @@
       </div>
     </div>
 
-    <div class="data">
-      <h2>Collected UTM Data ({{ utm.data.value.length }} entries)</h2>
-      <pre>{{ utm.data.value }}</pre>
-    </div>
+    <ClientOnly>
+      <div class="data">
+        <h2>Collected UTM Data ({{ utm.data.value.length }} entries)</h2>
+        <pre>{{ utm.data.value }}</pre>
+      </div>
+    </ClientOnly>
   </div>
 </template>
 
