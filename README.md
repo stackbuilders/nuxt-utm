@@ -251,6 +251,7 @@ pnpm install --frozen-lockfile
 pnpm dev:prepare
 pnpm playwright-core install chromium
 pnpm lint
+pnpm format:check
 pnpm test:types
 pnpm test
 pnpm test:package
