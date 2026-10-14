@@ -13,4 +13,8 @@ export default createConfigForNuxt({
   dirs: {
     src: ['./playground'],
   },
-}).append(prettier)
+}).append(prettier, {
+  // eslint-config-prettier turns this off, but without semicolons it is the rule that catches
+  // a new line silently continuing the previous statement
+  rules: { 'no-unexpected-multiline': 'error' },
+})
