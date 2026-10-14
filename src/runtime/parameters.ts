@@ -22,8 +22,22 @@ export const GOOGLE_CLICK_PARAMETERS = [
   'dclid',
 ] as const
 
+// The click IDs Meta, Microsoft Advertising, TikTok, LinkedIn, X, Snapchat, Pinterest, and Reddit
+// add to landing page URLs. Each identifies an individual click, so capturing them stays opt-in
+export const AD_CLICK_PARAMETERS = [
+  'fbclid',
+  'msclkid',
+  'ttclid',
+  'li_fat_id',
+  'twclid',
+  'ScCid',
+  'epik',
+  'rdt_cid',
+] as const
+
 export type UTMParameter = (typeof UTM_PARAMETERS)[number]
 export type GoogleClickParameter = (typeof GOOGLE_CLICK_PARAMETERS)[number]
+export type AdClickParameter = (typeof AD_CLICK_PARAMETERS)[number]
 export type ParameterValues<Name extends string> = { [Key in Name]?: string }
 
 const BUILT_IN_FIELDS = new Map<string, 'utmParams' | 'gclidParams'>([

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ModuleOptions } from '../src/runtime/types'
-import { validateOptions } from '../src/options'
+import { clickParamWarnings, validateOptions } from '../src/options'
 
 describe('validateOptions', () => {
   it('accepts a list of click parameter names', () => {
@@ -23,5 +23,37 @@ describe('validateOptions', () => {
     expect(() => validateOptions({ clickParams: ['fbclid', name] })).toThrow(
       `[nuxt-utm] clickParams cannot include ${name}, which is already captured in ${field}`,
     )
+  })
+})
+
+describe('clickParamWarnings', () => {
+  it.each([
+    ['FBCLID', 'fbclid'],
+    ['MSCLKID', 'msclkid'],
+    ['TTCLID', 'ttclid'],
+    ['LI_FAT_ID', 'li_fat_id'],
+    ['TWCLID', 'twclid'],
+    ['sccid', 'ScCid'],
+    ['EPIK', 'epik'],
+    ['RDT_CID', 'rdt_cid'],
+  ])('suggests the documented spelling for %s', (name, spelling) => {
+    expect(clickParamWarnings({ clickParams: ['partner_click_id', name] })).toEqual([
+      `clickParams lists ${name}; did you mean ${spelling}? Query parameter names are case-sensitive`,
+    ])
+  })
+
+  it('accepts documented spellings and names it does not know', () => {
+    expect(clickParamWarnings({ clickParams: ['ScCid', 'fbclid', 'yclid'] })).toEqual([])
+    expect(clickParamWarnings({})).toEqual([])
+  })
+
+  it('accepts another spelling listed beside the documented one', () => {
+    expect(clickParamWarnings({ clickParams: ['ScCID', 'ScCid'] })).toEqual([])
+  })
+
+  it('warns once about a repeated name', () => {
+    expect(clickParamWarnings({ clickParams: ['sccid', 'sccid'] })).toEqual([
+      'clickParams lists sccid; did you mean ScCid? Query parameter names are case-sensitive',
+    ])
   })
 })

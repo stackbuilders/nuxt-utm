@@ -206,6 +206,11 @@ describe('configured click parameters', () => {
     expect(getClickParams(query, names)).toEqual({ fbclid: 'meta-click' })
   })
 
+  it('matches names with their exact casing', () => {
+    const query = { sccid: 'other-click', ScCid: 'snap-click' }
+    expect(getClickParams(query, ['ScCid'])).toEqual({ ScCid: 'snap-click' })
+  })
+
   it('ignores names the query inherits from Object.prototype', () => {
     expect(urlHasClickParams({}, ['constructor', 'toString'])).toBe(false)
     expect(getClickParams({}, ['constructor'])).toEqual({})

@@ -1,9 +1,18 @@
 import type { RouteLocationNormalized, LocationQuery } from 'vue-router'
-import type { GoogleClickParameter, ParameterValues, UTMParameter } from './parameters'
+import type {
+  AdClickParameter,
+  GoogleClickParameter,
+  ParameterValues,
+  UTMParameter,
+} from './parameters'
 
 export interface UTMParams extends ParameterValues<UTMParameter> {}
 
 export interface GCLIDParams extends ParameterValues<GoogleClickParameter> {}
+
+export interface ClickParams extends ParameterValues<AdClickParameter> {
+  [name: string]: string | undefined
+}
 
 export interface AdditionalInfo {
   referrer: string
@@ -22,7 +31,7 @@ export interface DataObject {
   additionalInfo: AdditionalInfo
   sessionId: string
   gclidParams?: GCLIDParams
-  clickParams?: ParameterValues<string>
+  clickParams?: ClickParams
   customParams?: Record<string, unknown>
 }
 
@@ -44,7 +53,8 @@ export interface ModuleOptions {
   maxEntries?: number
   trackOnRouteChange?: boolean
   captureWithoutCampaign?: boolean
-  clickParams?: string[]
+  // Intersecting string with {} keeps the known names as editor suggestions while accepting any name
+  clickParams?: (AdClickParameter | (string & {}))[]
 }
 
 export interface AttributionSnapshot {

@@ -1,6 +1,7 @@
 import type {
   DataObject,
   BeforeTrackContext,
+  ClickParams,
   GCLIDParams,
   ModuleOptions,
   UTMParams,
@@ -14,13 +15,25 @@ export const options: ModuleOptions = {
   maxEntries: 100,
   trackOnRouteChange: true,
   captureWithoutCampaign: false,
-  clickParams: ['fbclid', 'msclkid'],
+  clickParams: ['fbclid', 'msclkid', 'partner_click_id'],
 }
+// Known click IDs must stay literal members of the option type so editors suggest them.
+export const suggestedClickParam: Extract<
+  NonNullable<ModuleOptions['clickParams']>[number],
+  'ScCid'
+> = 'ScCid'
+// @ts-expect-error Click parameter names must remain strings in the published package.
+export const invalidClickNames: ModuleOptions = { clickParams: [123] }
 export function campaign(data: DataObject): string | undefined {
   return data.utmParams.utm_campaign
 }
 export function metaClick(data: DataObject): string | undefined {
   return data.clickParams?.fbclid
+}
+// Mirrors the README's Meta fbc example so it keeps compiling against the published types.
+export const metaClickId = (history: DataObject[], fbclid: string) => {
+  const firstSeen = history.findLast(({ clickParams }) => clickParams?.fbclid === fbclid)
+  return firstSeen && `fb.1.${Date.parse(firstSeen.timestamp)}.${fbclid}`
 }
 export function skip(context: BeforeTrackContext): void {
   context.skip = true
@@ -30,6 +43,12 @@ export function skip(context: BeforeTrackContext): void {
 export const invalid: UTMParams = { utm_source: 123 }
 // @ts-expect-error Click IDs must retain their string type in the published package.
 export const invalidClick: GCLIDParams = { gbraid: 123 }
+// @ts-expect-error Configured click IDs under any name must retain their string type in the published package.
+export const invalidAdClick: ClickParams = { partner_click_id: 123 }
+export const adClicks: ClickParams = { ScCid: 'snap-click', partner_click_id: 'abc123' }
+// Known click IDs must stay declared keys so editors suggest them when reading an entry.
+// Picking a name only the index signature covers would make it required and reject {}.
+export const declaredClickParam: Pick<NonNullable<DataObject['clickParams']>, 'ScCid'> = {}
 export const ga4Campaign: UTMParams = { utm_id: 'spring', utm_source_platform: 'Search Ads 360' }
 
 declare module 'nuxt-utm' {
