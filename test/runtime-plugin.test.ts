@@ -179,6 +179,13 @@ describe('tracking lifecycle', () => {
     expect(controls.utm.value[0]?.utmParams.utm_source).toBe('minimal-router')
   })
 
+  it('keeps tracking when a runtime override replaces clickParams with a string', async () => {
+    config.public.utm.clickParams = 'fbclid,msclkid' as unknown as string[]
+    const { controls, mount } = await setupTracker()
+    await mount()
+    expect(controls.utm.value[0]?.utmParams.utm_source).toBe('google')
+  })
+
   it('ignores valid JSON that is not tracking history', async () => {
     localStorage.setItem('nuxt-utm-data', '{}')
     const { controls, mount } = await setupTracker()
