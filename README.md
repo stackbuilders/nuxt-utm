@@ -159,13 +159,16 @@ Other names work the same way. Query parameter names are case-sensitive, so the 
 
 A click ID identifies an individual ad click, so list only the parameters your consent policy covers. Listed or not, every query parameter also stays in `additionalInfo.landingPageUrl` unless a `utm:before-persist` hook redacts it, as shown in [Hooks](#hooks).
 
-Send click IDs to a platform's conversion API exactly as captured. Meta's [`fbc` parameter](https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/fbp-and-fbc) also records when the click ID was first seen, which is the entry's `timestamp`:
+Send click IDs to a platform's conversion API exactly as captured. Meta's [`fbc` parameter](https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/fbp-and-fbc) also records when the click ID was first seen. A later session can save the same click ID again, so use the oldest entry that has it. When the Meta Pixel has set an `_fbc` cookie, send that value instead.
 
 ```ts
 import type { DataObject } from 'nuxt-utm'
 
-const metaClickId = ({ clickParams, timestamp }: DataObject) =>
-  clickParams?.fbclid && `fb.1.${Date.parse(timestamp)}.${clickParams.fbclid}`
+// history is newest first, so the last match is where the click ID was first seen
+const metaClickId = (history: DataObject[], fbclid: string) => {
+  const firstSeen = history.findLast(({ clickParams }) => clickParams?.fbclid === fbclid)
+  return firstSeen && `fb.1.${Date.parse(firstSeen.timestamp)}.${fbclid}`
+}
 ```
 
 Retention runs when history is loaded, a visit is saved, or `getAttribution()` is called. There is no background expiry timer. Without retention options, history has no configured age or entry limit.

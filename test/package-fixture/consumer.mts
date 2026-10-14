@@ -30,6 +30,11 @@ export function campaign(data: DataObject): string | undefined {
 export function metaClick(data: DataObject): string | undefined {
   return data.clickParams?.fbclid
 }
+// Mirrors the README's Meta fbc example so it keeps compiling against the published types.
+export const metaClickId = (history: DataObject[], fbclid: string) => {
+  const firstSeen = history.findLast(({ clickParams }) => clickParams?.fbclid === fbclid)
+  return firstSeen && `fb.1.${Date.parse(firstSeen.timestamp)}.${fbclid}`
+}
 export function skip(context: BeforeTrackContext): void {
   context.skip = true
 }
