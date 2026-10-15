@@ -270,7 +270,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 
 Replace `~/utils/consent` with your consent tool's API. A saved preference outlives consent that expires without a callback, so the hook checks consent on every capture. If your consent UI shows `trackingEnabled`, see the `<ClientOnly>` note in [Composable](#composable).
 
-Visitors often give consent after leaving the landing page. When the app starts with tracking disabled, the module holds the landing route in memory, never in storage, until tracking is enabled. `enableTracking()` then records the landing page with the time of the visit, followed by the current page. The held route is discarded once recorded, by `clearData()`, and when the visitor reloads or leaves the site. Pages visited in between are not recovered, and nothing is held when tracking was already enabled at startup, as with a saved preference that outlived expired consent.
+Visitors often give consent after leaving the landing page. When the app starts with tracking disabled, the module holds the landing route in memory, never in storage, until tracking is enabled. `enableTracking()` then records the landing page with the time of the visit, followed by the current page. Hooks for the landing page run at that point, so read the page from `context.route`, not `window.location`. Pages visited in between are not recovered, and nothing is held when tracking was already enabled at startup, as with a saved preference that outlived expired consent.
+
+The held route lives only as long as the page, so a reload or a new visit starts without it, and it is discarded once recorded. `disableTracking()` keeps it, so a visitor who declines and then accepts during the same visit still has the landing page recorded. `clearData()` discards it; if your consent tool reports a refusal before the visitor has chosen, call `clearData()` only once the visitor actually refuses.
 
 To collect less:
 
