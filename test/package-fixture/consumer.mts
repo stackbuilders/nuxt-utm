@@ -35,6 +35,19 @@ export const metaClickId = (history: DataObject[], fbclid: string) => {
   const firstSeen = history.findLast(({ clickParams }) => clickParams?.fbclid === fbclid)
   return firstSeen && `fb.1.${Date.parse(firstSeen.timestamp)}.${fbclid}`
 }
+// Copies of the docs/RECIPES.md helpers that use the module's types, so the recipes keep compiling against the published package.
+export const latestGoogleAdsClick = ({ history }: AttributionSnapshot) =>
+  history.find(
+    ({ gclidParams }) => gclidParams?.gclid || gclidParams?.gbraid || gclidParams?.wbraid,
+  )?.gclidParams
+const utmNames = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'] as const
+export function attributionFields({ firstTouch, lastTouch }: AttributionSnapshot) {
+  const fields = new URLSearchParams()
+  for (const [touchName, touch] of Object.entries({ first: firstTouch, last: lastTouch })) {
+    for (const name of utmNames) fields.set(`${touchName}_${name}`, touch?.utmParams[name] ?? '')
+  }
+  return fields
+}
 export function skip(context: BeforeTrackContext): void {
   context.skip = true
 }
