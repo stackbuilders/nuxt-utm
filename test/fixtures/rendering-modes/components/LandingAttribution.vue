@@ -24,6 +24,7 @@ onMounted(async () => {
 <template>
   <NuxtLink to="/ssr?utm_source=next">Next campaign</NuxtLink>
   <button type="button" @click="utm.capture()">Capture</button>
+  <button type="button" @click="utm.enableTracking()">Accept tracking</button>
   <output data-testid="on-mount">{{
     landingPagesOnMount && JSON.stringify(landingPagesOnMount)
   }}</output>

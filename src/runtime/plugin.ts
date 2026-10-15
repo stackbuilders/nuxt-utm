@@ -50,6 +50,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     storedPreference === null ? options.trackingEnabled : storedPreference === 'true',
   )
   const touches = computed(() => getCampaignTouches(data.value))
+  let untrackedLanding: { route: RouteLocationNormalized; timestamp: string } | undefined
   let generation = 0
   let pending = Promise.resolve()
   let cancelPending!: () => void
@@ -101,7 +102,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     return nuxtApp.isHydrating && route.fullPath !== landingRoute.fullPath ? landingRoute : route
   }
 
-  function capture(route = visitedRoute()): Promise<void> {
+  function capture(route = visitedRoute(), timestamp = new Date().toISOString()): Promise<void> {
     if (!isClient || !trackingEnabled.value) return Promise.resolve()
     const query = Object.fromEntries(
       Object.entries(route.query).map(([key, value]) => [
@@ -111,7 +112,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     )
     const context: BeforeTrackContext = { route: { ...route, query }, query, skip: false }
     const landingPageUrl = new URL(route.fullPath, window.location.href).href
-    const timestamp = new Date().toISOString()
     const currentGeneration = generation
     const isActive = () => trackingEnabled.value && generation === currentGeneration
 
@@ -159,7 +159,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     trackingEnabled.value = true
     if (isClient) {
       local.setItem(TRACKING_ENABLED_KEY, 'true')
-      void capture()
+      const current = visitedRoute()
+      const landing = untrackedLanding
+      untrackedLanding = undefined
+      if (landing) void capture(landing.route, landing.timestamp)
+      if (landing?.route.fullPath !== current.fullPath) void capture(current)
     }
   }
 
@@ -171,6 +175,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const clearData = () => {
     invalidatePending()
+    untrackedLanding = undefined
     data.value = []
     if (isClient) {
       local.removeItem(LOCAL_STORAGE_KEY)
@@ -200,6 +205,11 @@ export default defineNuxtPlugin((nuxtApp) => {
         lastFullPath = to.fullPath
         void capture(to)
       })
+    }
+    // Consent often arrives after the visitor has left the landing page, so its campaign waits in
+    // memory until tracking is enabled
+    if (!trackingEnabled.value) {
+      untrackedLanding = { route: landing, timestamp: new Date().toISOString() }
     }
     await capture(landing)
   })

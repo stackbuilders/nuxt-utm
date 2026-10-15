@@ -195,18 +195,18 @@ const payload = await utm.getAttribution()
 await utm.capture()
 ```
 
-| Member                                                      | Purpose                                                                                         |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `data`                                                      | Read-only reactive history, newest first.                                                       |
-| `firstTouch`, `lastTouch`                                   | Read-only reactive campaign entries, or `null`.                                                 |
-| `trackingEnabled`                                           | Read-only reactive tracking preference.                                                         |
-| `storageAvailable`                                          | Whether browser history can persist in localStorage.                                            |
-| `getAttribution()`                                          | Prepare a detached snapshot after pending persistence completes.                                |
-| `capture()`                                                 | Capture the current route manually, respecting tracking controls, hooks, and deduplication.     |
-| `enableTracking()`                                          | Save the enabled preference and start capturing the current route.                              |
-| `disableTracking()`                                         | Save the disabled preference and cancel pending collection.                                     |
-| `clearData()`                                               | Clear history and the session ID, and cancel pending collection. Keeps the tracking preference. |
-| `onBeforeTrack(cb)`, `onBeforePersist(cb)`, `onTracked(cb)` | Register a hook; return a function that unregisters it.                                         |
+| Member                                                      | Purpose                                                                                                                       |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `data`                                                      | Read-only reactive history, newest first.                                                                                     |
+| `firstTouch`, `lastTouch`                                   | Read-only reactive campaign entries, or `null`.                                                                               |
+| `trackingEnabled`                                           | Read-only reactive tracking preference.                                                                                       |
+| `storageAvailable`                                          | Whether browser history can persist in localStorage.                                                                          |
+| `getAttribution()`                                          | Prepare a detached snapshot after pending persistence completes.                                                              |
+| `capture()`                                                 | Capture the current route manually, respecting tracking controls, hooks, and deduplication.                                   |
+| `enableTracking()`                                          | Save the enabled preference and capture the current route, after the landing route if the app started with tracking disabled. |
+| `disableTracking()`                                         | Save the disabled preference and cancel pending collection.                                                                   |
+| `clearData()`                                               | Clear history, the session ID, and a held landing route, and cancel pending collection. Keeps the tracking preference.        |
+| `onBeforeTrack(cb)`, `onBeforePersist(cb)`, `onTracked(cb)` | Register a hook; return a function that unregisters it.                                                                       |
 
 Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams.utm_source`. Data is empty during server rendering; collection occurs in the browser after mounting. The server also renders the configured `trackingEnabled` value, while the browser loads any saved tracking preference. Wrap displays of browser history or the tracking preference in Nuxt’s `<ClientOnly>` to avoid hydration mismatches for returning visitors. Call `getAttribution()` from a client action after mounting, such as the form handler above.
 
@@ -268,7 +268,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 })
 ```
 
-Replace `~/utils/consent` with your consent tool's API. A saved preference outlives consent that expires without a callback, so the hook checks consent on every capture. `enableTracking()` captures the current page only; campaign parameters from pages visited before consent are not recovered. If your consent UI shows `trackingEnabled`, see the `<ClientOnly>` note in [Composable](#composable).
+Replace `~/utils/consent` with your consent tool's API. A saved preference outlives consent that expires without a callback, so the hook checks consent on every capture. If your consent UI shows `trackingEnabled`, see the `<ClientOnly>` note in [Composable](#composable).
+
+Visitors often give consent after leaving the landing page. When the app starts with tracking disabled, the module holds the landing route in memory, never in storage, until tracking is enabled. `enableTracking()` then records the landing page with the time of the visit, followed by the current page. The held route is discarded once recorded, by `clearData()`, and when the visitor reloads or leaves the site. Pages visited in between are not recovered, and nothing is held when tracking was already enabled at startup, as with a saved preference that outlived expired consent.
 
 To collect less:
 

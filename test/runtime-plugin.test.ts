@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { createHooks } from 'hookable'
 import type { NuxtApp, RuntimeNuxtHooks } from '#app'
-import { computed, isReadonly, shallowRef } from 'vue'
+import { computed, isReadonly, shallowRef, unref } from 'vue'
 import type { App, MaybeRef, Ref } from 'vue'
 import type { RouteLocationNormalized } from 'vue-router'
 import type { DataObject, AttributionSnapshot, ModuleOptions } from 'nuxt-utm'
@@ -193,6 +193,83 @@ describe('tracking lifecycle', () => {
     const { controls, mount } = await setupTracker()
     await mount()
     expect(controls.utm.value).toHaveLength(1)
+  })
+})
+
+describe('tracking enabled after landing', () => {
+  const sources = (history: readonly DataObject[]) =>
+    history.map(({ timestamp, utmParams }) => [utmParams.utm_source, timestamp])
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+    config.public.utm.trackingEnabled = false
+  })
+
+  it('records the landing page at its arrival time, then the current page', async () => {
+    const { controls, mount } = await setupTracker()
+    await mount()
+    vi.setSystemTime(new Date('2026-01-01T00:05:00Z'))
+    visit('/pricing?utm_source=newsletter')
+    controls.utmEnableTracking()
+
+    expect(sources((await controls.utmGetAttribution()).history)).toEqual([
+      ['newsletter', '2026-01-01T00:05:00.000Z'],
+      ['google', '2026-01-01T00:00:00.000Z'],
+    ])
+  })
+
+  it('records the landing page once when tracking is enabled on it', async () => {
+    const { controls, mount } = await setupTracker()
+    await mount()
+    vi.setSystemTime(new Date('2026-01-01T00:05:00Z'))
+    controls.utmEnableTracking()
+
+    expect(sources((await controls.utmGetAttribution()).history)).toEqual([
+      ['google', '2026-01-01T00:00:00.000Z'],
+    ])
+  })
+
+  it('records the landing page only the first time tracking is enabled', async () => {
+    const { controls, mount } = await setupTracker()
+    await mount()
+    visit('/pricing?utm_source=newsletter')
+    controls.utmEnableTracking()
+    await controls.utmGetAttribution()
+    controls.utmDisableTracking()
+    visit('/contact?utm_source=partner')
+    controls.utmEnableTracking()
+
+    expect(
+      (await controls.utmGetAttribution()).history.map(({ utmParams }) => utmParams.utm_source),
+    ).toEqual(['partner', 'newsletter', 'google'])
+  })
+
+  it('keeps recording every visit without consent controls when tracking starts enabled', async () => {
+    config.public.utm.trackingEnabled = true
+    config.public.utm.trackOnRouteChange = true
+    const { controls, mount } = await setupTracker()
+    await mount()
+    const [afterNavigation] = router.afterEach.mock.lastCall!
+    visit('/pricing?utm_source=newsletter')
+    afterNavigation(unref(router.currentRoute), routeTo('/?utm_source=google'))
+
+    expect(sources((await controls.utmGetAttribution()).history)).toEqual([
+      ['newsletter', '2026-01-01T00:00:00.000Z'],
+      ['google', '2026-01-01T00:00:00.000Z'],
+    ])
+  })
+
+  it('forgets the landing page when data is cleared before tracking is enabled', async () => {
+    const { controls, mount } = await setupTracker()
+    await mount()
+    controls.utmClearData()
+    visit('/pricing?utm_source=newsletter')
+    controls.utmEnableTracking()
+
+    expect(
+      (await controls.utmGetAttribution()).history.map(({ utmParams }) => utmParams.utm_source),
+    ).toEqual(['newsletter'])
   })
 })
 
