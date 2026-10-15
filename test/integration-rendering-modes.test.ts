@@ -36,7 +36,7 @@ async function openLandingPage(path: string, consentOnMount?: ConsentOnMount) {
 }
 
 async function storedCampaigns(page: Page) {
-  await page.getByTestId('when-ready').filter({ hasText: '[' }).waitFor()
+  await page.getByTestId('after-startup').filter({ hasText: '[' }).waitFor()
   const stored = await page.waitForFunction(() => localStorage.getItem('nuxt-utm-data'))
   const entries: DataObject[] = JSON.parse((await stored.jsonValue()) ?? '[]')
   return entries.map(({ utmParams, additionalInfo }) => ({

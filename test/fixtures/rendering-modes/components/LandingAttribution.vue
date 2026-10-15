@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { onNuxtReady, useNuxtUTM } from '#imports'
+import { useNuxtApp, useNuxtUTM } from '#imports'
 
 const utm = useNuxtUTM()
+const { $startupFinished } = useNuxtApp()
 const landingPagesOnMount = ref<string[]>()
-const landingPagesWhenReady = ref<string[]>()
+const landingPagesAfterStartup = ref<string[]>()
 
 async function readLandingPages() {
   const { history } = await utm.getAttribution()
@@ -14,8 +15,9 @@ async function readLandingPages() {
 onMounted(async () => {
   landingPagesOnMount.value = await readLandingPages()
 })
-onNuxtReady(async () => {
-  landingPagesWhenReady.value = await readLandingPages()
+onMounted(async () => {
+  await $startupFinished
+  landingPagesAfterStartup.value = await readLandingPages()
 })
 </script>
 
@@ -25,7 +27,7 @@ onNuxtReady(async () => {
   <output data-testid="on-mount">{{
     landingPagesOnMount && JSON.stringify(landingPagesOnMount)
   }}</output>
-  <output data-testid="when-ready">{{
-    landingPagesWhenReady && JSON.stringify(landingPagesWhenReady)
+  <output data-testid="after-startup">{{
+    landingPagesAfterStartup && JSON.stringify(landingPagesAfterStartup)
   }}</output>
 </template>
