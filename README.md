@@ -43,7 +43,7 @@ export default defineNuxtConfig({
 
 The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, configured click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting. While the app hydrates, the module records the URL the visitor opened, even when Nuxt still shows the prerendered route without the query or a client middleware has already redirected.
 
-Nuxt UTM supports the Node.js release lines the Node.js project still maintains, currently 22, 24, and 26, and CI tests each of them. The package adds no Node.js version range of its own, so other versions your Nuxt release accepts aren't blocked, but they are untested.
+Nuxt UTM supports the Node.js release lines the Node.js project still maintains, currently 22, 24, and 26, and CI tests each of them. The package adds no Node.js version range of its own, so other versions your Nuxt release accepts aren't blocked, but they are untested. For Nuxt, CI tests the latest Nuxt 3 and Nuxt 4 releases and Nuxt 5 nightly builds; earlier minor releases aren't blocked either, but they are untested.
 
 ## Send attribution with a form
 
