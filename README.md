@@ -110,7 +110,7 @@ The [recipes](docs/RECIPES.md) show how to send the Google Analytics client ID a
 
 | Option                      | Default | Behavior                                                                                                                                   |
 | --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `trackingEnabled`           | `true`  | Initial tracking preference when no saved preference exists.                                                                               |
+| `trackingEnabled`           | `true`  | Tracking preference at the start of each page load, unless a saved preference applies.                                                     |
 | `trackOnRouteChange`        | `false` | Also capture successful client-side navigations whose full URL path changes.                                                               |
 | `captureWithoutCampaign`    | `true`  | Include visits without UTM, Google click, or configured click parameters.                                                                  |
 | `captureLandingOnEnable`    | `true`  | When tracking starts disabled, `enableTracking()` also records the landing page, held in memory until then.                                |
@@ -214,7 +214,7 @@ Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams
 
 To start with collection disabled, configure `utm: { trackingEnabled: false }`. Connect `enableTracking()` and `disableTracking()` to your application's preference controls. Both save the preference in localStorage, and on later visits a saved preference takes precedence over the configured initial value. Disabling does not delete existing history; also call `clearData()` when deletion is intended.
 
-When another tool already remembers the visitor's choice, such as a consent manager, set `persistTrackingPreference: false` so that tool is the only record. The module then starts every page load from `trackingEnabled`, saves no preference, and removes one saved earlier, so your application calls `enableTracking()` on each page load that should be tracked.
+When another tool already remembers the visitor's choice, such as a consent manager, set `persistTrackingPreference: false` so that tool is the only record. The module then saves no preference and starts every page load from `trackingEnabled`. Pair this option with `trackingEnabled: false`, and call `enableTracking()` on each page load the tool allows, whether your visitors opt in or opt out; by default the landing page waits in memory until then, as described in [Privacy and consent](#privacy-and-consent). With `trackingEnabled: true`, the module records the landing page as the app mounts, usually before the tool reports the visitor's choice, and `disableTracking()` lasts only until the next page load, so the landing page of every page load is recorded for a visitor who opted out. Turning the option off also removes a preference saved earlier, including an opt-out, so make sure your consent tool already holds those choices.
 
 Disabling tracking or clearing data cancels pending collection, including collection waiting on an asynchronous hook. Already completed application side effects cannot be undone.
 
