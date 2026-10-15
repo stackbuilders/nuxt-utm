@@ -162,15 +162,12 @@ describe('getGCLID', () => {
       expected: { gclid: 'testGclid123', gad_source: undefined },
     },
     {
-      name: 'repeated parameters as comma-separated strings',
+      name: 'the first value of repeated parameters',
       query: {
         gclid: ['testGclid123', 'anotherGclid'],
         gad_source: ['testGadSourceABC', 'anotherGadSource'],
       },
-      expected: {
-        gclid: 'testGclid123,anotherGclid',
-        gad_source: 'testGadSourceABC,anotherGadSource',
-      },
+      expected: { gclid: 'testGclid123', gad_source: 'testGadSourceABC' },
     },
     {
       name: 'the campaign ID and the click IDs that replace gclid',
@@ -185,7 +182,7 @@ describe('getGCLID', () => {
     {
       name: 'a single and a repeated parameter',
       query: { gclid: 'testGclid123', gad_source: ['testGadSourceABC', 'anotherGadSource'] },
-      expected: { gclid: 'testGclid123', gad_source: 'testGadSourceABC,anotherGadSource' },
+      expected: { gclid: 'testGclid123', gad_source: 'testGadSourceABC' },
     },
   ])('reads $name', ({ query, expected }) => {
     expect(getGCLID(query)).toEqual(expected)
@@ -214,6 +211,30 @@ describe('configured click parameters', () => {
   it('ignores names the query inherits from Object.prototype', () => {
     expect(urlHasClickParams({}, ['constructor', 'toString'])).toBe(false)
     expect(getClickParams({}, ['constructor'])).toEqual({})
+  })
+})
+
+describe('repeated parameters', () => {
+  it('stores a repeated identical value once', () => {
+    expect(getUtmParams({ utm_source: ['google', 'google'] })).toEqual({ utm_source: 'google' })
+  })
+
+  it('keeps the first of two different values', () => {
+    expect(getUtmParams({ utm_source: ['a', 'b'] })).toEqual({ utm_source: 'a' })
+  })
+
+  it('skips null and empty entries before the first nonempty value', () => {
+    const query = { fbclid: [null, '', 'meta-click'] }
+    expect(urlHasClickParams(query, ['fbclid'])).toBe(true)
+    expect(getClickParams(query, ['fbclid'])).toEqual({ fbclid: 'meta-click' })
+  })
+
+  it('does not treat entries that are all null or empty as a campaign', () => {
+    const query = { utm_source: [null, ''], gclid: [null, ''], fbclid: [null, ''] }
+    expect(urlHasUtmParams(query)).toBe(false)
+    expect(urlHasGCLID(query)).toBe(false)
+    expect(urlHasClickParams(query, ['fbclid'])).toBe(false)
+    expect(getUtmParams(query)).toEqual({ utm_source: '' })
   })
 })
 
