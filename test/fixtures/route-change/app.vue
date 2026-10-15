@@ -14,5 +14,6 @@ async function openNewsletter() {
 
 <template>
   <button type="button" @click="openNewsletter">Newsletter</button>
+  <button type="button" @click="utm.enableTracking()">Accept tracking</button>
   <p v-if="lastSource">Last touch: {{ lastSource }}</p>
 </template>
