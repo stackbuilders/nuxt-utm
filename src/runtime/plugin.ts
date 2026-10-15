@@ -1,6 +1,8 @@
 import type { BeforeTrackContext, DataObject, ModuleOptions, NuxtUTMHooks } from './types'
 import type { RouteLocationNormalized } from 'vue-router'
-import { computed, ref, readonly, unref } from 'vue'
+// Lets the emitted declaration name Nuxt's plugin type, which #imports does not export
+import type {} from 'nuxt/app'
+import { computed, ref, readonly, shallowRef, unref } from 'vue'
 import { createStorage } from './storage'
 import {
   createAttributionSnapshot,
@@ -21,7 +23,7 @@ import {
   getGCLID,
 } from './utm'
 import { isClickParameterName } from './parameters'
-import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#app'
+import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#imports'
 
 const LOCAL_STORAGE_KEY = 'nuxt-utm-data'
 const SESSION_ID_KEY = 'nuxt-utm-session-id'
@@ -41,7 +43,8 @@ export default defineNuxtPlugin((nuxtApp) => {
   const isClient = typeof window !== 'undefined'
   const local = createStorage(() => localStorage)
   const session = createStorage(() => sessionStorage)
-  const data = ref<DataObject[]>([])
+  // History is always replaced whole, so deep reactivity would only slow down serialization
+  const data = shallowRef<DataObject[]>([])
   const storedPreference = isClient ? local.getItem(TRACKING_ENABLED_KEY) : null
   const trackingEnabled = ref(
     storedPreference === null ? options.trackingEnabled : storedPreference === 'true',

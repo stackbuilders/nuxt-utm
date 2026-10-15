@@ -12,7 +12,7 @@ Nuxt UTM keeps campaign information in the browser until your application is rea
 
 It supports Nuxt 3 and 4, and is tested against Nuxt 5 nightly builds. Collection needs no backend, analytics account, or network request. Your application decides whether and when to send the data to its own API or CRM.
 
-[Release notes](CHANGELOG.md) · [Contributing](docs/CONTRIBUTING.md)
+[Release notes](CHANGELOG.md) · [Recipes](docs/RECIPES.md) · [Contributing](docs/CONTRIBUTING.md)
 
 ## What is attribution?
 
@@ -104,6 +104,8 @@ async function submitLead() {
 
 The API must accept your static site's origin and validate the submitted data. Campaign values and all browser-stored data are untrusted input. Authentication, duplicate submission handling, and retries belong to your application. A failed submission leaves the local history available; the module does not automatically retry requests or clear data after sending.
 
+The [recipes](docs/RECIPES.md) show how to send the Google Analytics client ID and Google Ads click IDs with a lead, and how to send attribution to form services that don't accept JSON.
+
 ## Configuration
 
 All new collection and retention options are opt-in. Existing behavior is preserved by default.
@@ -157,7 +159,7 @@ Your editor suggests these platforms' click IDs:
 
 Other names work the same way. Query parameter names are case-sensitive, so the build warns when a listed name matches one of these only by case, such as `sccid`. To capture another spelling on purpose, list it beside the documented one.
 
-A click ID identifies an individual click, so list only the parameters your consent policy covers. Listed or not, every query parameter also stays in `additionalInfo.landingPageUrl` unless a `utm:before-persist` hook redacts it, as shown in [Hooks](#hooks).
+A click ID identifies an individual click, so check [Privacy and consent](#privacy-and-consent) before listing one.
 
 Send click IDs to a platform's conversion API exactly as captured. Meta's [`fbc` parameter](https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/fbp-and-fbc) also records when the click ID was first seen. A later session can save the same click ID again, so use the oldest entry that has it. When the Meta Pixel has set an `_fbc` cookie, send that value instead.
 
@@ -171,7 +173,14 @@ const metaClickId = (history: DataObject[], fbclid: string) => {
 }
 ```
 
-Retention runs when history is loaded, a visit is saved, or `getAttribution()` is called. There is no background expiry timer. Without retention options, history has no configured age or entry limit.
+Retention runs when history is loaded, a visit is saved, or `getAttribution()` is called. There is no background expiry timer.
+
+Without retention options, history has no age or entry limit, and each new tab that lands on your site adds an entry, including direct visits by default. Two limits follow from that:
+
+- `getAttribution()` returns the whole history. A typical entry is about 0.7 KB, so around 150 entries exceed the 100 KB default request body limit of Express's [body parser](https://expressjs.com/en/resources/middleware/body-parser.html). Send only `firstTouch` and `lastTouch` if your API doesn't need the history.
+- Browsers limit localStorage to about [5 MiB per origin](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria), shared with the rest of your site. Once it is full, new visits stay in memory and are lost on reload.
+
+Set `maxEntries`, and usually `maxAge`, to keep both in bounds.
 
 Consecutive entries with the same UTM parameters, Google click parameters, configured click parameters, and session ID are deduplicated. URLs, timestamps, and `customParams` do not participate in that comparison. This is not a pageview counter. The session ID uses sessionStorage for the current browser tab; it has no inactivity timeout.
 
@@ -199,7 +208,7 @@ await utm.capture()
 | `clearData()`                                               | Clear history and the session ID, and cancel pending collection. Keeps the tracking preference. |
 | `onBeforeTrack(cb)`, `onBeforePersist(cb)`, `onTracked(cb)` | Register a hook; return a function that unregisters it.                                         |
 
-Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams.utm_source`. Data is empty during server rendering; collection occurs in the browser after mounting. Wrap browser-history displays in Nuxt’s `<ClientOnly>` to avoid hydration mismatches when a returning visitor already has stored history. Call `getAttribution()` from a client action after mounting, such as the form handler above.
+Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams.utm_source`. Data is empty during server rendering; collection occurs in the browser after mounting. The server also renders the configured `trackingEnabled` value, while the browser loads any saved tracking preference. Wrap displays of browser history or the tracking preference in Nuxt’s `<ClientOnly>` to avoid hydration mismatches for returning visitors. Call `getAttribution()` from a client action after mounting, such as the form handler above.
 
 ## Tracking preferences and storage
 
@@ -209,7 +218,65 @@ Disabling tracking or clearing data cancels pending collection, including collec
 
 If storage is blocked or full, the module keeps data in memory for the current page lifetime. `storageAvailable.value` becomes `false` if localStorage access fails. Memory-only history and preferences do not survive reloads. Clearing always removes in-memory data and attempts to remove persisted data, but a browser restriction can prevent that removal too. Invalid stored entries are ignored.
 
-History stays within the browser's storage for the site's origin. It is not shared across devices or unrelated domains. The module captures referrer, user agent, browser language, screen dimensions, and the full landing-page URL as well as campaign parameters. Use the hooks to remove context you do not need, and avoid placing sensitive information in URLs or custom data.
+Browsers can also delete the history themselves. Safari deletes localStorage after seven days without a click, tap, or key press on your site ([tracking prevention](https://webkit.org/tracking-prevention/)), so a visitor who returns later starts with an empty history, and their lead loses the original first touch. Private windows discard history when they close. History belongs to one origin, so `www.example.com` and `example.com` keep separate histories.
+
+If visitors often take longer than a week to convert, send the first touch to your server during the first visit, for example from a `utm:tracked` hook, and link it to the later lead with a cookie your server sets in its response. Safari's seven-day limit applies to storage written by scripts, not to cookies your own server sets. That cookie is also storage on the visitor's device, so the consent rules below apply to it.
+
+## Privacy and consent
+
+Nuxt UTM stores data only in the visitor's browser, for your site's origin. It sets no cookies, makes no network requests, and shares nothing across devices or unrelated domains. Data leaves the browser only when your application sends it.
+
+| Storage        | Key                         | Contents                                                                               |
+| -------------- | --------------------------- | -------------------------------------------------------------------------------------- |
+| localStorage   | `nuxt-utm-data`             | The history, one entry per captured visit.                                             |
+| sessionStorage | `nuxt-utm-session-id`       | A random ID, created when the tab's first visit is captured.                           |
+| localStorage   | `nuxt-utm-tracking-enabled` | `true` or `false`, saved only when you call `enableTracking()` or `disableTracking()`. |
+
+Each history entry holds:
+
+- a timestamp and the session ID
+- UTM and Google click parameters, and configured click IDs
+- custom data from your hooks
+- the referrer, user agent, browser language, and screen size
+- the full landing-page URL, including its query string and fragment
+
+The module reads its localStorage keys and applies retention when the app starts, even while tracking is disabled.
+
+Whether you need consent depends on where your visitors are and what you use the data for. In the EU, [Article 5(3) of the ePrivacy Directive](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02002L0058-20091219) requires consent to store information on a visitor's device or read it, with narrow exceptions such as storage strictly necessary for a service the visitor explicitly requested. The EDPB's [Guidelines 2/2023](https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-22023-technical-scope-art-53-eprivacy-directive_en) explain that this covers more than cookies, and the UK ICO's [guidance on storage and access technologies](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guidance-on-the-use-of-storage-and-access-technologies/) covers local storage under the UK rules. Data protection law such as the GDPR applies when the data is personal data. The GDPR's definition includes online identifiers, so stored click IDs can qualify before any form is submitted, and history submitted with a lead's contact details qualifies. This README is not legal advice.
+
+To collect only after consent, start with tracking disabled as described in [Tracking preferences and storage](#tracking-preferences-and-storage), then connect the module to your consent tool:
+
+```ts
+// plugins/utm-consent.client.ts
+import { hasConsent, onConsentChange } from '~/utils/consent'
+
+export default defineNuxtPlugin((nuxtApp) => {
+  const utm = useNuxtUTM()
+
+  nuxtApp.hook('utm:before-track', (context) => {
+    if (!hasConsent()) context.skip = true
+  })
+
+  onConsentChange((granted) => {
+    if (granted) {
+      utm.enableTracking()
+    } else {
+      utm.disableTracking()
+      utm.clearData()
+    }
+  })
+})
+```
+
+Replace `~/utils/consent` with your consent tool's API. A saved preference outlives consent that expires without a callback, so the hook checks consent on every capture. `enableTracking()` captures the current page only; campaign parameters from pages visited before consent are not recovered. If your consent UI shows `trackingEnabled`, see the `<ClientOnly>` note in [Composable](#composable).
+
+To collect less:
+
+- List in `clickParams` only the click IDs your consent policy covers.
+- Set `captureWithoutCampaign: false` to skip visits without campaign parameters.
+- Set `maxAge` and `maxEntries` to limit retention.
+- Redact context you do not need in a `utm:before-persist` hook. Every query parameter, listed or not, stays in `additionalInfo.landingPageUrl` unless a hook removes it, as shown in [Hooks](#hooks).
+- Avoid placing sensitive information in URLs or custom data.
 
 ## Hooks
 
@@ -280,7 +347,7 @@ const attribution: AttributionSnapshot = {
 }
 ```
 
-Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `ClickParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
+Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. When a parameter repeats in the URL, each field, including configured click parameters, keeps its first nonempty value: `?utm_source=&utm_source=google&utm_source=newsletter` saves `google`. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `ClickParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
 
 ## Development
 
