@@ -41,7 +41,7 @@ export default defineNuxtConfig({
 })
 ```
 
-The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, configured click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting.
+The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, configured click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting. While the app hydrates, the module records the URL the visitor opened, even when Nuxt still shows the prerendered route without the query or a client middleware has already redirected.
 
 ## Send attribution with a form
 
