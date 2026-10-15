@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { createHooks } from 'hookable'
 import type { NuxtApp, RuntimeNuxtHooks } from '#app'
-import { shallowRef } from 'vue'
+import { computed, isReadonly, shallowRef } from 'vue'
 import type { App, MaybeRef, Ref } from 'vue'
 import type { RouteLocationNormalized } from 'vue-router'
 import type { DataObject, AttributionSnapshot, ModuleOptions } from 'nuxt-utm'
@@ -14,7 +14,7 @@ const router = vi.hoisted(() => ({
   afterEach: vi.fn(),
   currentRoute: {} as MaybeRef<RouteSnapshot>,
 }))
-vi.mock('#app', () => ({
+vi.mock('#imports', () => ({
   defineNuxtPlugin: (setup: unknown) => setup,
   useRuntimeConfig: () => config,
   useRouter: () => router,
@@ -64,6 +64,8 @@ async function setupTracker() {
   const result = await plugin(app)
   const controls = result!.provide as {
     utm: Ref<readonly DataObject[]>
+    utmFirstTouch: Ref<DataObject | null>
+    utmLastTouch: Ref<DataObject | null>
     utmCapture: () => Promise<void>
     utmGetAttribution: () => Promise<AttributionSnapshot>
     utmDisableTracking: () => void
@@ -191,6 +193,33 @@ describe('tracking lifecycle', () => {
     const { controls, mount } = await setupTracker()
     await mount()
     expect(controls.utm.value).toHaveLength(1)
+  })
+})
+
+describe('reactive history', () => {
+  it('updates history and touches after capture while keeping entries read-only', async () => {
+    const { controls, mount } = await setupTracker()
+    const latestSource = computed(() => controls.utm.value[0]?.utmParams.utm_source)
+    const firstSource = computed(() => controls.utmFirstTouch.value?.utmParams.utm_source)
+    const lastSource = computed(() => controls.utmLastTouch.value?.utmParams.utm_source)
+    expect([latestSource.value, firstSource.value, lastSource.value]).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ])
+
+    await mount()
+    visit('/?utm_source=newsletter')
+    await controls.utmCapture()
+
+    expect([latestSource.value, firstSource.value, lastSource.value]).toEqual([
+      'newsletter',
+      'google',
+      'newsletter',
+    ])
+    expect(isReadonly(controls.utm.value[0]!.utmParams)).toBe(true)
+    expect(isReadonly(controls.utmFirstTouch.value!.additionalInfo.screen)).toBe(true)
+    expect(isReadonly(controls.utmLastTouch.value!.utmParams)).toBe(true)
   })
 })
 

@@ -1,6 +1,8 @@
 import type { BeforeTrackContext, DataObject, ModuleOptions, NuxtUTMHooks } from './types'
 import type { RouteLocationNormalized } from 'vue-router'
-import { computed, ref, readonly, unref } from 'vue'
+// Lets the emitted declaration name Nuxt's plugin type, which #imports does not export
+import type {} from 'nuxt/app'
+import { computed, ref, readonly, shallowRef, unref } from 'vue'
 import { createStorage } from './storage'
 import {
   createAttributionSnapshot,
@@ -21,7 +23,7 @@ import {
   getGCLID,
 } from './utm'
 import { isClickParameterName } from './parameters'
-import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#app'
+import { defineNuxtPlugin, useRuntimeConfig, useRouter } from '#imports'
 
 const LOCAL_STORAGE_KEY = 'nuxt-utm-data'
 const SESSION_ID_KEY = 'nuxt-utm-session-id'
@@ -37,10 +39,12 @@ export default defineNuxtPlugin((nuxtApp) => {
     ? options.clickParams.filter(isClickParameterName)
     : []
   const router = useRouter()
+  const landingRoute = unref(router.currentRoute)
   const isClient = typeof window !== 'undefined'
   const local = createStorage(() => localStorage)
   const session = createStorage(() => sessionStorage)
-  const data = ref<DataObject[]>([])
+  // History is always replaced whole, so deep reactivity would only slow down serialization
+  const data = shallowRef<DataObject[]>([])
   const storedPreference = isClient ? local.getItem(TRACKING_ENABLED_KEY) : null
   const trackingEnabled = ref(
     storedPreference === null ? options.trackingEnabled : storedPreference === 'true',
@@ -89,8 +93,15 @@ export default defineNuxtPlugin((nuxtApp) => {
     pending = Promise.resolve()
   }
 
-  // Without pages, Nuxt before 3.9.1 exposes the route itself as currentRoute instead of a ref
-  function capture(route: RouteLocationNormalized = unref(router.currentRoute)): Promise<void> {
+  // During hydration the live route can still be a prerendered path or a redirect target,
+  // while the campaign link pointed at the route this plugin saw during setup
+  function visitedRoute(): RouteLocationNormalized {
+    // Without pages, Nuxt before 3.9.1 exposes the route itself as currentRoute instead of a ref
+    const route = unref(router.currentRoute)
+    return nuxtApp.isHydrating && route.fullPath !== landingRoute.fullPath ? landingRoute : route
+  }
+
+  function capture(route = visitedRoute()): Promise<void> {
     if (!isClient || !trackingEnabled.value) return Promise.resolve()
     const query = Object.fromEntries(
       Object.entries(route.query).map(([key, value]) => [
