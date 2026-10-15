@@ -190,12 +190,18 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   refreshHistory()
   nuxtApp.hook('app:mounted', async () => {
+    const landing = visitedRoute()
     if (options.trackOnRouteChange) {
-      router.afterEach((to, from, failure) => {
-        if (!failure && to.fullPath !== from.fullPath) void capture(to)
+      // Without pages, Nuxt updates the route object `from` refers to before afterEach runs,
+      // so `from` already matches `to`
+      let lastFullPath = landing.fullPath
+      router.afterEach((to, _from, failure) => {
+        if (failure || to.fullPath === lastFullPath) return
+        lastFullPath = to.fullPath
+        void capture(to)
       })
     }
-    await capture()
+    await capture(landing)
   })
 
   return {
