@@ -21,5 +21,10 @@ updates:
         patterns:
           - 'playwright'
           - 'playwright-core'
+      # The coverage provider requires the exact vitest version it was released with.
+      vitest:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
     assignees:
       - sadjow
