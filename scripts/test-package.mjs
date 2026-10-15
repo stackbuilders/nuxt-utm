@@ -38,10 +38,29 @@ try {
       files: ['consumer.mts'],
     }),
   )
-  execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', directory], {
-    stdio: 'inherit',
-  })
+  const compiler = typescriptCompiler(process.env.TYPESCRIPT_VERSION)
+  execFileSync(process.execPath, [compiler, '-p', directory], { stdio: 'inherit' })
   if (process.argv.includes('--app')) await testCompatibility({ root, directory, tarball })
 } finally {
   rmSync(directory, { recursive: true, force: true })
+}
+
+// Consumers compile the published declarations with their own TypeScript, so CI checks newer
+// releases than the one this repository builds with
+function typescriptCompiler(version) {
+  if (!version) return join(root, 'node_modules/typescript/bin/tsc')
+  const prefix = join(directory, 'typescript')
+  const install = [
+    'install',
+    '--prefix',
+    prefix,
+    '--no-audit',
+    '--no-fund',
+    `typescript@${version}`,
+  ]
+  execFileSync('npm', install, { stdio: 'inherit' })
+  const typescript = join(prefix, 'node_modules/typescript')
+  const { version: installed } = JSON.parse(readFileSync(join(typescript, 'package.json'), 'utf8'))
+  console.log(`Checking package types with TypeScript ${installed}`)
+  return join(typescript, 'bin/tsc')
 }

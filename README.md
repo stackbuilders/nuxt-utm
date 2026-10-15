@@ -370,6 +370,8 @@ pnpm dev:build
 
 `test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3 or `NUXT_VERSION=npm:nuxt-nightly@5x` for the Nuxt 5 nightly. CI runs all three separately from the Node 22, 24, and 26 checks, and a nightly failure does not fail the workflow. These are tested configurations, not runtime version restrictions.
 
+Set `TYPESCRIPT_VERSION` to check the tarball with another TypeScript release, for example `TYPESCRIPT_VERSION=7 pnpm test:package`. Applications compile the published declarations with their own TypeScript, so CI also runs this check with the latest TypeScript 6 and 7 releases.
+
 Use `pnpm dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
 
 ## License

@@ -94,3 +94,25 @@ jobs:
         env:
           NUXT_VERSION: ${{ matrix.nuxt-version }}
           NUXT_TELEMETRY_DISABLED: '1'
+
+  declarations:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typescript-version: ['6', '7']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v6
+        with:
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dev:prepare
+      - name: Check published package types with TypeScript ${{ matrix.typescript-version }}
+        run: pnpm test:package
+        env:
+          TYPESCRIPT_VERSION: ${{ matrix.typescript-version }}
