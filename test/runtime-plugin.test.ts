@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { createHooks } from 'hookable'
 import type { NuxtApp, RuntimeNuxtHooks } from '#app'
-import { computed, isReadonly, shallowRef, unref } from 'vue'
+import { computed, isReadonly, reactive, shallowRef, unref } from 'vue'
 import type { App, MaybeRef, Ref } from 'vue'
 import type { RouteLocationNormalized } from 'vue-router'
 import type { DataObject, AttributionSnapshot, ModuleOptions } from 'nuxt-utm'
@@ -246,6 +246,79 @@ describe('tracking enabled after landing', () => {
     expect(
       (await controls.utmGetAttribution()).history.map(({ utmParams }) => utmParams.utm_source),
     ).toEqual(['partner', 'newsletter', 'google'])
+  })
+
+  it('records the landing page in an app without pages, whose router updates the route in place', async () => {
+    const route = reactive(routeTo('/?utm_source=google'))
+    router.currentRoute = computed(() => route)
+    const { controls, mount } = await setupTracker()
+    await mount()
+    vi.setSystemTime(new Date('2026-01-01T00:05:00Z'))
+    Object.assign(route, routeTo('/pricing?utm_source=newsletter'))
+    controls.utmEnableTracking()
+
+    expect(sources((await controls.utmGetAttribution()).history)).toEqual([
+      ['newsletter', '2026-01-01T00:05:00.000Z'],
+      ['google', '2026-01-01T00:00:00.000Z'],
+    ])
+  })
+
+  it('keeps the landing page when tracking is disabled before it is recorded', async () => {
+    const { controls, mount } = await setupTracker()
+    await mount()
+    visit('/pricing?utm_source=newsletter')
+    controls.utmEnableTracking()
+    controls.utmDisableTracking()
+    controls.utmEnableTracking()
+
+    expect(
+      (await controls.utmGetAttribution()).history.map(({ utmParams }) => utmParams.utm_source),
+    ).toEqual(['newsletter', 'google'])
+  })
+
+  it('keeps the landing page when tracking is disabled while its hook is pending', async () => {
+    const { hooks, controls, mount } = await setupTracker()
+    const entered = deferred()
+    const resume = deferred()
+    hooks.hook('utm:before-track', async ({ route }) => {
+      if (route.path !== '/') return
+      entered.resolve()
+      await resume.promise
+    })
+    await mount()
+    visit('/pricing?utm_source=newsletter')
+    controls.utmEnableTracking()
+    await entered.promise
+    controls.utmDisableTracking()
+    resume.resolve()
+    controls.utmEnableTracking()
+
+    expect(
+      (await controls.utmGetAttribution()).history.map(({ utmParams }) => utmParams.utm_source),
+    ).toEqual(['newsletter', 'google'])
+  })
+
+  it('keeps the landing page when tracking starts enabled and is disabled while recording it', async () => {
+    config.public.utm.trackingEnabled = true
+    const { hooks, controls, mount } = await setupTracker()
+    const entered = deferred()
+    const resume = deferred()
+    hooks.hook('utm:before-track', async ({ route }) => {
+      if (route.path !== '/') return
+      entered.resolve()
+      await resume.promise
+    })
+    const mounted = mount()
+    await entered.promise
+    controls.utmDisableTracking()
+    resume.resolve()
+    await mounted
+    visit('/pricing?utm_source=newsletter')
+    controls.utmEnableTracking()
+
+    expect(
+      (await controls.utmGetAttribution()).history.map(({ utmParams }) => utmParams.utm_source),
+    ).toEqual(['newsletter', 'google'])
   })
 
   it('keeps recording every visit without consent controls when tracking starts enabled', async () => {
