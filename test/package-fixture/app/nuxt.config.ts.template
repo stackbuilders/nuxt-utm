@@ -5,5 +5,9 @@ export default defineNuxtConfig({
   srcDir: '.',
   devtools: { enabled: false },
   utm: { trackOnRouteChange: true, maxEntries: 10 },
+  routeRules: {
+    '/landing/static': { prerender: true },
+    '/landing/client': { ssr: false },
+  },
   nitro: { prerender: { routes: ['/contact'] } },
 })
