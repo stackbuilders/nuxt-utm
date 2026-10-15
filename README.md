@@ -43,6 +43,8 @@ export default defineNuxtConfig({
 
 The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, configured click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting. While the app hydrates, the module records the URL the visitor opened, even when Nuxt still shows the prerendered route without the query or a client middleware has already redirected.
 
+Nuxt UTM supports the Node.js release lines the Node.js project still maintains, currently 22, 24, and 26, and CI tests each of them. The package adds no Node.js version range of its own, so other versions your Nuxt release accepts aren't blocked, but they are untested.
+
 ## Send attribution with a form
 
 A static site can send to an independently hosted API. Configure your actual endpoint; Nuxt UTM does not create one:
@@ -368,7 +370,7 @@ NUXT_VERSION=3 pnpm test:compatibility
 pnpm dev:build
 ```
 
-`test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3 or `NUXT_VERSION=npm:nuxt-nightly@5x` for the Nuxt 5 nightly. CI runs all three separately from the Node 22, 24, and 26 checks, and a nightly failure does not fail the workflow. These are tested configurations, not runtime version restrictions.
+`test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3 or `NUXT_VERSION=npm:nuxt-nightly@5x` for the Nuxt 5 nightly. CI runs all three separately from the checks on each supported Node.js version, and a nightly failure does not fail the workflow. These are tested configurations, not runtime version restrictions.
 
 Use `pnpm dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
 
