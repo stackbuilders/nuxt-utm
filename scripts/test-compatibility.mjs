@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import { cpSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { createServer } from 'node:http'
@@ -54,6 +54,7 @@ export async function testCompatibility({ root, directory, tarball }) {
   run(['exec', 'nuxt', 'prepare'])
   run(['exec', 'vue-tsc', '--noEmit'])
   run(['exec', 'nuxt', 'build'])
+  const landingResults = await visitBuiltLandingPages(fixture, ['ssr', 'client'])
   run(['exec', 'nuxt', 'generate'])
 
   const publicDirectory = join(fixture, '.output/public')
@@ -78,16 +79,13 @@ export async function testCompatibility({ root, directory, tarball }) {
   const origin = `http://127.0.0.1:${server.address().port}`
   let browser
   try {
+    browser = await chromium.launch()
+    landingResults.push(await visitLandingPage(browser, origin, 'static'))
     const html = await (await fetch(`${origin}/contact`)).text()
     assert.match(html, /Contact us/)
-    browser = await chromium.launch()
     const page = await browser.newPage()
     page.setDefaultTimeout(15_000)
-    const errors = []
-    page.on('pageerror', (error) => errors.push(error.message))
-    page.on('console', (message) => {
-      if (/hydration/i.test(message.text())) errors.push(message.text())
-    })
+    const errors = collectPageErrors(page)
     const submissions = []
     await page.route('**/api/leads', async (route) => {
       submissions.push(route.request().postDataJSON())
@@ -137,11 +135,106 @@ export async function testCompatibility({ root, directory, tarball }) {
       'newsletter',
     )
     assert.deepEqual(errors, [])
+    assert.deepEqual(
+      landingResults,
+      landingResults.map(({ mode }) => {
+        const landingPage = `/landing/${mode}?utm_source=${mode}`
+        return {
+          mode,
+          storedLandingPages: [landingPage],
+          landingPagesOnMount: [landingPage],
+          errors: [],
+        }
+      }),
+    )
     console.log(
-      `Nuxt ${installed.version}: package types, build, generate, navigation, reload, and form attribution passed`,
+      `Nuxt ${installed.version}: package types, build, generate, landing pages, navigation, reload, and form attribution passed`,
     )
   } finally {
     await browser?.close()
     await new Promise((resolve) => server.close(resolve))
   }
+}
+
+async function visitBuiltLandingPages(fixture, modes) {
+  const appServer = await startAppServer(fixture)
+  const browser = await chromium.launch().catch((error) => {
+    appServer.stop()
+    throw error
+  })
+  try {
+    const results = []
+    for (const mode of modes) results.push(await visitLandingPage(browser, appServer.origin, mode))
+    return results
+  } finally {
+    await browser.close()
+    appServer.stop()
+  }
+}
+
+async function startAppServer(fixture) {
+  const port = await findFreePort()
+  const origin = `http://127.0.0.1:${port}`
+  const serverProcess = spawn(process.execPath, [join(fixture, '.output/server/index.mjs')], {
+    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port) },
+    stdio: 'ignore',
+  })
+  const stop = () => serverProcess.kill()
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (
+      await fetch(origin).then(
+        ({ ok }) => ok,
+        () => false,
+      )
+    )
+      return { origin, stop }
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+  stop()
+  throw new Error('The built Nuxt server did not start')
+}
+
+async function findFreePort() {
+  const probe = createServer()
+  await new Promise((resolve) => probe.listen(0, '127.0.0.1', resolve))
+  const { port } = probe.address()
+  await new Promise((resolve) => probe.close(resolve))
+  return port
+}
+
+async function visitLandingPage(browser, origin, mode) {
+  const context = await browser.newContext()
+  try {
+    const page = await context.newPage()
+    page.setDefaultTimeout(15_000)
+    const errors = collectPageErrors(page)
+    await page.goto(`${origin}/landing/${mode}?utm_source=${mode}`)
+    const readOnMount = await page.getByTestId('on-mount').filter({ hasText: '[' }).textContent()
+    await page.waitForLoadState('networkidle')
+    const stored = await page.evaluate(() => localStorage.getItem('nuxt-utm-data'))
+    return {
+      mode,
+      storedLandingPages: JSON.parse(stored ?? '[]').map(({ additionalInfo }) =>
+        relativeUrl(additionalInfo.landingPageUrl),
+      ),
+      landingPagesOnMount: JSON.parse(readOnMount).map(relativeUrl),
+      errors,
+    }
+  } finally {
+    await context.close()
+  }
+}
+
+function relativeUrl(url) {
+  const { pathname, search } = new URL(url)
+  return pathname + search
+}
+
+function collectPageErrors(page) {
+  const errors = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  page.on('console', (message) => {
+    if (/hydration/i.test(message.text())) errors.push(message.text())
+  })
+  return errors
 }
