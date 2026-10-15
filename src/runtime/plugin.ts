@@ -31,7 +31,10 @@ const TRACKING_ENABLED_KEY = 'nuxt-utm-tracking-enabled'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const options = useRuntimeConfig().public.utm as Required<
-    Pick<ModuleOptions, 'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign'>
+    Pick<
+      ModuleOptions,
+      'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign' | 'captureLandingOnEnable'
+    >
   > &
     ModuleOptions
   // A runtime config override skips the build time checks, so a malformed list must not stop tracking
@@ -208,7 +211,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
     // Consent often arrives after the visitor has left the landing page, so its campaign waits in
     // memory until tracking is enabled
-    if (!trackingEnabled.value) {
+    if (options.captureLandingOnEnable && !trackingEnabled.value) {
       untrackedLanding = { route: landing, timestamp: new Date().toISOString() }
     }
     await capture(landing)

@@ -15,6 +15,7 @@ export const options: ModuleOptions = {
   maxEntries: 100,
   trackOnRouteChange: true,
   captureWithoutCampaign: false,
+  captureLandingOnEnable: false,
   clickParams: ['fbclid', 'msclkid', 'partner_click_id'],
 }
 // Known click IDs must stay literal members of the option type so editors suggest them.

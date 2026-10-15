@@ -53,6 +53,7 @@ export interface ModuleOptions {
   maxEntries?: number
   trackOnRouteChange?: boolean
   captureWithoutCampaign?: boolean
+  captureLandingOnEnable?: boolean
   // Intersecting string with {} keeps the known names as editor suggestions while accepting any name
   clickParams?: (AdClickParameter | (string & {}))[]
 }

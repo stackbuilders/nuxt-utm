@@ -79,6 +79,7 @@ beforeEach(() => {
   config.public.utm = {
     trackingEnabled: true,
     captureWithoutCampaign: true,
+    captureLandingOnEnable: true,
     trackOnRouteChange: false,
   }
   visit('/?utm_source=google')
@@ -257,6 +258,19 @@ describe('tracking enabled after landing', () => {
     expect(sources((await controls.utmGetAttribution()).history)).toEqual([
       ['newsletter', '2026-01-01T00:00:00.000Z'],
       ['google', '2026-01-01T00:00:00.000Z'],
+    ])
+  })
+
+  it('records only the current page when captureLandingOnEnable is off', async () => {
+    config.public.utm.captureLandingOnEnable = false
+    const { controls, mount } = await setupTracker()
+    await mount()
+    vi.setSystemTime(new Date('2026-01-01T00:05:00Z'))
+    visit('/pricing?utm_source=newsletter')
+    controls.utmEnableTracking()
+
+    expect(sources((await controls.utmGetAttribution()).history)).toEqual([
+      ['newsletter', '2026-01-01T00:05:00.000Z'],
     ])
   })
 
