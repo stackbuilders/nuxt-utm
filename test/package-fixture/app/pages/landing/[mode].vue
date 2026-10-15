@@ -20,5 +20,6 @@ onMounted(async () => {
     <output data-testid="on-mount">{{
       landingPagesOnMount && JSON.stringify(landingPagesOnMount)
     }}</output>
+    <NuxtLink to="/contact?utm_source=newsletter">Newsletter contact link</NuxtLink>
   </main>
 </template>

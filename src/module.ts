@@ -26,6 +26,7 @@ const defaults = {
   trackingEnabled: true,
   trackOnRouteChange: false,
   captureWithoutCampaign: true,
+  captureLandingOnEnable: true,
 }
 
 export default defineNuxtModule<ModuleOptions>({

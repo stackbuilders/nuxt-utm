@@ -5,6 +5,7 @@ import { setup, createPage, url } from '@nuxt/test-utils'
 
 type Page = Awaited<ReturnType<typeof createPage>>
 type ConsentOnMount = 'grant' | 'toggle'
+type StoredOptOut = ConsentOnMount | 'withheld'
 
 const LANDING_PAGES = [
   { path: '/ssr', rendering: 'server-rendered async', asyncSetup: true },
@@ -18,18 +19,18 @@ const CONSENT_CHANGES = [
   { consentOnMount: 'toggle', change: 'disables then enables tracking' },
 ] as const
 
-async function openLandingPage(path: string, consentOnMount?: ConsentOnMount) {
+async function openLandingPage(path: string, optOut?: StoredOptOut) {
   const page = await createPage()
   const problems: string[] = []
   page.on('pageerror', ({ message }) => problems.push(message))
   page.on('console', (message) => {
     if (/hydration/i.test(message.text())) problems.push(message.text())
   })
-  if (consentOnMount) {
+  if (optOut) {
     await page.addInitScript((consent) => {
       localStorage.setItem('nuxt-utm-tracking-enabled', 'false')
-      sessionStorage.setItem('consent-on-mount', consent)
-    }, consentOnMount)
+      if (consent !== 'withheld') sessionStorage.setItem('consent-on-mount', consent)
+    }, optOut)
   }
   await page.goto(url(path))
   return { page, problems }
@@ -92,6 +93,23 @@ describe('Landing page across rendering modes', async () => {
         await page.close()
       },
     )
+
+    it('records the visited campaign when consent arrives after a client navigation', async () => {
+      const { page, problems } = await openLandingPage(landingPage, 'withheld')
+      await page.getByTestId('after-startup').filter({ hasText: '[' }).waitFor()
+
+      await page.getByRole('link', { name: 'Next campaign' }).click()
+      await page.waitForURL('**/ssr?utm_source=next')
+      await page.getByRole('button', { name: 'Accept tracking' }).click()
+      await page.waitForFunction(() => localStorage.getItem('nuxt-utm-data')?.includes('"next"'))
+
+      expect(await storedCampaigns(page)).toEqual([
+        { source: 'next', landingPage: '/ssr?utm_source=next' },
+        { source, landingPage },
+      ])
+      expect(problems).toEqual([])
+      await page.close()
+    })
   })
 
   it('captures the route navigated to after a prerendered landing', async () => {

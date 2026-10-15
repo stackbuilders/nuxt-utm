@@ -143,12 +143,13 @@ export async function testCompatibility({ root, directory, tarball }) {
           mode,
           storedLandingPages: [landingPage],
           landingPagesOnMount: [landingPage],
+          storedAfterLateConsent: ['/contact?utm_source=newsletter', landingPage],
           errors: [],
         }
       }),
     )
     console.log(
-      `Nuxt ${installed.version}: package types, build, generate, landing pages, navigation, reload, and form attribution passed`,
+      `Nuxt ${installed.version}: package types, build, generate, landing pages, late consent, navigation, reload, and form attribution passed`,
     )
   } finally {
     await browser?.close()
@@ -203,26 +204,50 @@ async function findFreePort() {
 }
 
 async function visitLandingPage(browser, origin, mode) {
+  const landingPage = `${origin}/landing/${mode}?utm_source=${mode}`
+  const { errors: trackedErrors, ...tracked } = await withNewPage(browser, async (page) => {
+    await page.goto(landingPage)
+    const readOnMount = await page.getByTestId('on-mount').filter({ hasText: '[' }).textContent()
+    await page.waitForLoadState('networkidle')
+    return {
+      storedLandingPages: storedLandingPages(
+        await page.evaluate(() => localStorage.getItem('nuxt-utm-data')),
+      ),
+      landingPagesOnMount: JSON.parse(readOnMount).map(relativeUrl),
+    }
+  })
+  const { errors: lateConsentErrors, ...lateConsent } = await withNewPage(browser, async (page) => {
+    await page.addInitScript(() => localStorage.setItem('nuxt-utm-tracking-enabled', 'false'))
+    await page.goto(landingPage)
+    await page.getByTestId('on-mount').filter({ hasText: '[' }).waitFor()
+    await page.getByRole('link', { name: 'Newsletter contact link' }).click()
+    await page.waitForURL('**/contact?utm_source=newsletter')
+    await page.getByRole('button', { name: 'Accept tracking' }).click()
+    const stored = await page.waitForFunction(() => {
+      const stored = localStorage.getItem('nuxt-utm-data')
+      return stored?.includes('"newsletter"') && stored
+    })
+    return { storedAfterLateConsent: storedLandingPages(await stored.jsonValue()) }
+  })
+  return { mode, ...tracked, ...lateConsent, errors: [...trackedErrors, ...lateConsentErrors] }
+}
+
+async function withNewPage(browser, visit) {
   const context = await browser.newContext()
   try {
     const page = await context.newPage()
     page.setDefaultTimeout(15_000)
     const errors = collectPageErrors(page)
-    await page.goto(`${origin}/landing/${mode}?utm_source=${mode}`)
-    const readOnMount = await page.getByTestId('on-mount').filter({ hasText: '[' }).textContent()
-    await page.waitForLoadState('networkidle')
-    const stored = await page.evaluate(() => localStorage.getItem('nuxt-utm-data'))
-    return {
-      mode,
-      storedLandingPages: JSON.parse(stored ?? '[]').map(({ additionalInfo }) =>
-        relativeUrl(additionalInfo.landingPageUrl),
-      ),
-      landingPagesOnMount: JSON.parse(readOnMount).map(relativeUrl),
-      errors,
-    }
+    return { ...(await visit(page)), errors }
   } finally {
     await context.close()
   }
+}
+
+function storedLandingPages(stored) {
+  return JSON.parse(stored ?? '[]').map(({ additionalInfo }) =>
+    relativeUrl(additionalInfo.landingPageUrl),
+  )
 }
 
 function relativeUrl(url) {

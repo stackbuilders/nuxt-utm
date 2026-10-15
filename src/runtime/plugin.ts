@@ -29,9 +29,14 @@ const LOCAL_STORAGE_KEY = 'nuxt-utm-data'
 const SESSION_ID_KEY = 'nuxt-utm-session-id'
 const TRACKING_ENABLED_KEY = 'nuxt-utm-tracking-enabled'
 
+type HeldRoute = { route: RouteLocationNormalized; timestamp: string }
+
 export default defineNuxtPlugin((nuxtApp) => {
   const options = useRuntimeConfig().public.utm as Required<
-    Pick<ModuleOptions, 'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign'>
+    Pick<
+      ModuleOptions,
+      'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign' | 'captureLandingOnEnable'
+    >
   > &
     ModuleOptions
   // A runtime config override skips the build time checks, so a malformed list must not stop tracking
@@ -50,6 +55,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     storedPreference === null ? options.trackingEnabled : storedPreference === 'true',
   )
   const touches = computed(() => getCampaignTouches(data.value))
+  let untrackedLanding: HeldRoute | undefined
+  let capturingLanding: HeldRoute | undefined
   let generation = 0
   let pending = Promise.resolve()
   let cancelPending!: () => void
@@ -101,7 +108,30 @@ export default defineNuxtPlugin((nuxtApp) => {
     return nuxtApp.isHydrating && route.fullPath !== landingRoute.fullPath ? landingRoute : route
   }
 
-  function capture(route = visitedRoute()): Promise<void> {
+  // Consent often arrives after the visitor has left the landing page, so its campaign waits in
+  // memory until tracking is enabled. Without pages, Nuxt updates the route object in place on
+  // navigation, so the held route is a copy
+  function holdLanding(route: RouteLocationNormalized) {
+    untrackedLanding = {
+      route: { ...route, query: { ...route.query } },
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  // The held route is released once its capture completes; disableTracking() hands a cancelled
+  // capture back so the next enableTracking() still records it
+  function captureHeldLanding(): Promise<void> {
+    const landing = untrackedLanding
+    if (!landing) return Promise.resolve()
+    untrackedLanding = undefined
+    capturingLanding = landing
+    const startedIn = generation
+    return capture(landing.route, landing.timestamp).then(() => {
+      if (generation === startedIn) capturingLanding = undefined
+    })
+  }
+
+  function capture(route = visitedRoute(), timestamp = new Date().toISOString()): Promise<void> {
     if (!isClient || !trackingEnabled.value) return Promise.resolve()
     const query = Object.fromEntries(
       Object.entries(route.query).map(([key, value]) => [
@@ -111,7 +141,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     )
     const context: BeforeTrackContext = { route: { ...route, query }, query, skip: false }
     const landingPageUrl = new URL(route.fullPath, window.location.href).href
-    const timestamp = new Date().toISOString()
     const currentGeneration = generation
     const isActive = () => trackingEnabled.value && generation === currentGeneration
 
@@ -159,18 +188,25 @@ export default defineNuxtPlugin((nuxtApp) => {
     trackingEnabled.value = true
     if (isClient) {
       local.setItem(TRACKING_ENABLED_KEY, 'true')
-      void capture()
+      const current = visitedRoute()
+      const landing = untrackedLanding
+      void captureHeldLanding()
+      if (landing?.route.fullPath !== current.fullPath) void capture(current)
     }
   }
 
   const disableTracking = () => {
     invalidatePending()
     trackingEnabled.value = false
+    untrackedLanding ??= capturingLanding
+    capturingLanding = undefined
     if (isClient) local.setItem(TRACKING_ENABLED_KEY, 'false')
   }
 
   const clearData = () => {
     invalidatePending()
+    untrackedLanding = undefined
+    capturingLanding = undefined
     data.value = []
     if (isClient) {
       local.removeItem(LOCAL_STORAGE_KEY)
@@ -201,7 +237,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         void capture(to)
       })
     }
-    await capture(landing)
+    if (!options.captureLandingOnEnable) return capture(landing)
+    holdLanding(landing)
+    if (trackingEnabled.value) await captureHeldLanding()
   })
 
   return {
