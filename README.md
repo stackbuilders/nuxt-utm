@@ -43,6 +43,8 @@ export default defineNuxtConfig({
 
 The module captures the initial page after the app mounts and saves its UTM parameters, Google click parameters, configured click parameters, and visit context in localStorage. The same behavior works after `nuxt generate` with ordinary static hosting. While the app hydrates, the module records the URL the visitor opened, even when Nuxt still shows the prerendered route without the query or a client middleware has already redirected.
 
+Nuxt UTM supports the Node.js release lines the Node.js project still maintains, currently 22, 24, and 26, and CI tests each of them. The package adds no Node.js version range of its own, so other versions your Nuxt release accepts aren't blocked, but they are untested. For Nuxt, CI tests the latest Nuxt 3 and Nuxt 4 releases and Nuxt 5 nightly builds; earlier minor releases aren't blocked either, but they are untested.
+
 ## Send attribution with a form
 
 A static site can send to an independently hosted API. Configure your actual endpoint; Nuxt UTM does not create one:
@@ -371,6 +373,8 @@ const attribution: AttributionSnapshot = {
 
 Supported UTM fields are the manual campaign parameters Google Analytics 4 documents: `utm_id`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_source_platform`, `utm_term`, `utm_content`, `utm_creative_format`, and `utm_marketing_tactic`. Google click fields are `gclid`, `gad_source`, `gad_campaignid`, `gbraid`, `wbraid`, and `dclid`; Google Ads sends `gbraid` or `wbraid` alongside or instead of `gclid` for some iOS traffic. A nonempty value in any of these fields makes a visit a campaign visit. When a parameter repeats in the URL, each field, including configured click parameters, keeps its first nonempty value: `?utm_source=&utm_source=google&utm_source=newsletter` saves `google`. `clickParams` holds the values of the names listed in the `clickParams` option. `gclidParams`, `clickParams`, and `customParams` are optional. The package also exports `ModuleOptions`, `UTMParams`, `GCLIDParams`, `ClickParams`, `AdditionalInfo`, `BeforeTrackContext`, `NuxtUTMHooks`, and `UseNuxtUTMReturn`.
 
+CI compiles the published declarations with TypeScript 5.9 and with the latest TypeScript 6 and 7 releases. Older TypeScript releases are untested.
+
 ## Development
 
 Use the pnpm version pinned in `package.json`. The commands below assume Corepack is installed; see [pnpm installation](https://pnpm.io/installation) if needed.
@@ -390,7 +394,9 @@ NUXT_VERSION=3 pnpm test:compatibility
 pnpm dev:build
 ```
 
-`test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3 or `NUXT_VERSION=npm:nuxt-nightly@5x` for the Nuxt 5 nightly. CI runs all three separately from the Node 22, 24, and 26 checks, and a nightly failure does not fail the workflow. These are tested configurations, not runtime version restrictions.
+`test:package` checks the actual npm tarball from an isolated TypeScript consumer. `test:compatibility` also installs it in an independent Nuxt app, checks types, builds and generates static pages, and exercises campaign navigation, reload persistence, and form submission in Chromium. It tests the latest Nuxt 4 release by default; set `NUXT_VERSION=3` for Nuxt 3 or `NUXT_VERSION=npm:nuxt-nightly@5x` for the Nuxt 5 nightly. CI runs all three separately from the checks on each supported Node.js version, and a nightly failure does not fail the workflow. These are tested configurations, not runtime version restrictions.
+
+Set `TYPESCRIPT_VERSION` to check the tarball with another TypeScript release, for example `TYPESCRIPT_VERSION=7 pnpm test:package`. Applications compile the published declarations with their own TypeScript, so CI also runs this check with each release listed in [Data and TypeScript](#data-and-typescript).
 
 Use `pnpm dev` for the playground. See the [release documentation](docs/RELEASING.md) for preparing and publishing a version.
 
