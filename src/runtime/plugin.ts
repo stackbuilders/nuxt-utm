@@ -37,6 +37,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     ? options.clickParams.filter(isClickParameterName)
     : []
   const router = useRouter()
+  const landingRoute = unref(router.currentRoute)
   const isClient = typeof window !== 'undefined'
   const local = createStorage(() => localStorage)
   const session = createStorage(() => sessionStorage)
@@ -89,8 +90,15 @@ export default defineNuxtPlugin((nuxtApp) => {
     pending = Promise.resolve()
   }
 
-  // Without pages, Nuxt before 3.9.1 exposes the route itself as currentRoute instead of a ref
-  function capture(route: RouteLocationNormalized = unref(router.currentRoute)): Promise<void> {
+  // During hydration the live route can still be a prerendered path or a redirect target,
+  // while the campaign link pointed at the route this plugin saw during setup
+  function visitedRoute(): RouteLocationNormalized {
+    // Without pages, Nuxt before 3.9.1 exposes the route itself as currentRoute instead of a ref
+    const route = unref(router.currentRoute)
+    return nuxtApp.isHydrating && route.fullPath !== landingRoute.fullPath ? landingRoute : route
+  }
+
+  function capture(route = visitedRoute()): Promise<void> {
     if (!isClient || !trackingEnabled.value) return Promise.resolve()
     const query = Object.fromEntries(
       Object.entries(route.query).map(([key, value]) => [
