@@ -54,6 +54,7 @@ export interface ModuleOptions {
   trackOnRouteChange?: boolean
   captureWithoutCampaign?: boolean
   captureLandingOnEnable?: boolean
+  persistTrackingPreference?: boolean
   // Intersecting string with {} keeps the known names as editor suggestions while accepting any name
   clickParams?: (AdClickParameter | (string & {}))[]
 }
