@@ -35,7 +35,11 @@ export default defineNuxtPlugin((nuxtApp) => {
   const options = useRuntimeConfig().public.utm as Required<
     Pick<
       ModuleOptions,
-      'trackingEnabled' | 'trackOnRouteChange' | 'captureWithoutCampaign' | 'captureLandingOnEnable'
+      | 'trackingEnabled'
+      | 'trackOnRouteChange'
+      | 'captureWithoutCampaign'
+      | 'captureLandingOnEnable'
+      | 'persistTrackingPreference'
     >
   > &
     ModuleOptions
@@ -50,7 +54,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const session = createStorage(() => sessionStorage)
   // History is always replaced whole, so deep reactivity would only slow down serialization
   const data = shallowRef<DataObject[]>([])
-  const storedPreference = isClient ? local.getItem(TRACKING_ENABLED_KEY) : null
+  const storedPreference = isClient ? loadPreference() : null
   const trackingEnabled = ref(
     storedPreference === null ? options.trackingEnabled : storedPreference === 'true',
   )
@@ -63,6 +67,17 @@ export default defineNuxtPlugin((nuxtApp) => {
   let cancelled = new Promise<void>((resolve) => {
     cancelPending = resolve
   })
+
+  function loadPreference() {
+    if (options.persistTrackingPreference) return local.getItem(TRACKING_ENABLED_KEY)
+    // A preference saved under an earlier configuration would otherwise stay on the device unused
+    local.removeItem(TRACKING_ENABLED_KEY)
+    return null
+  }
+
+  function savePreference(enabled: boolean) {
+    if (options.persistTrackingPreference) local.setItem(TRACKING_ENABLED_KEY, String(enabled))
+  }
 
   function saveHistory(entries: DataObject[]) {
     if (entries.length) local.setItem(LOCAL_STORAGE_KEY, JSON.stringify(entries))
@@ -187,7 +202,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const enableTracking = () => {
     trackingEnabled.value = true
     if (isClient) {
-      local.setItem(TRACKING_ENABLED_KEY, 'true')
+      savePreference(true)
       const current = visitedRoute()
       const landing = untrackedLanding
       void captureHeldLanding()
@@ -200,7 +215,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     trackingEnabled.value = false
     untrackedLanding ??= capturingLanding
     capturingLanding = undefined
-    if (isClient) local.setItem(TRACKING_ENABLED_KEY, 'false')
+    if (isClient) savePreference(false)
   }
 
   const clearData = () => {

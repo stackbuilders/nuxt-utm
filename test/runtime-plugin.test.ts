@@ -66,6 +66,7 @@ async function setupTracker() {
     utm: Ref<readonly DataObject[]>
     utmFirstTouch: Ref<DataObject | null>
     utmLastTouch: Ref<DataObject | null>
+    utmTrackingEnabled: Ref<boolean>
     utmCapture: () => Promise<void>
     utmGetAttribution: () => Promise<AttributionSnapshot>
     utmDisableTracking: () => void
@@ -80,6 +81,7 @@ beforeEach(() => {
     trackingEnabled: true,
     captureWithoutCampaign: true,
     captureLandingOnEnable: true,
+    persistTrackingPreference: true,
     trackOnRouteChange: false,
   }
   visit('/?utm_source=google')
@@ -357,6 +359,47 @@ describe('tracking enabled after landing', () => {
     expect(
       (await controls.utmGetAttribution()).history.map(({ utmParams }) => utmParams.utm_source),
     ).toEqual(['newsletter'])
+  })
+})
+
+describe('tracking preference', () => {
+  const PREFERENCE_KEY = 'nuxt-utm-tracking-enabled'
+
+  it('saves the preference and prefers it over the configured value on later visits', async () => {
+    config.public.utm.trackingEnabled = false
+    const { controls } = await setupTracker()
+    controls.utmEnableTracking()
+
+    expect(localStorage.getItem(PREFERENCE_KEY)).toBe('true')
+    expect((await setupTracker()).controls.utmTrackingEnabled.value).toBe(true)
+  })
+
+  describe('when persistTrackingPreference is off', () => {
+    beforeEach(() => {
+      config.public.utm.persistTrackingPreference = false
+    })
+
+    it('starts every visit from the configured value', async () => {
+      localStorage.setItem(PREFERENCE_KEY, 'false')
+      const { controls, mount } = await setupTracker()
+      await mount()
+
+      expect(controls.utmTrackingEnabled.value).toBe(true)
+      expect(controls.utm.value.map(({ utmParams }) => utmParams.utm_source)).toEqual(['google'])
+    })
+
+    it('saves no preference and removes one saved earlier', async () => {
+      localStorage.setItem(PREFERENCE_KEY, 'true')
+      config.public.utm.trackingEnabled = false
+      const { controls } = await setupTracker()
+      expect(localStorage.getItem(PREFERENCE_KEY)).toBeNull()
+
+      controls.utmEnableTracking()
+      controls.utmDisableTracking()
+      expect(localStorage.getItem(PREFERENCE_KEY)).toBeNull()
+      expect(controls.utmTrackingEnabled.value).toBe(false)
+      expect((await setupTracker()).controls.utmTrackingEnabled.value).toBe(false)
+    })
   })
 })
 

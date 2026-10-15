@@ -110,15 +110,16 @@ The [recipes](docs/RECIPES.md) show how to send the Google Analytics client ID a
 
 ## Configuration
 
-| Option                   | Default | Behavior                                                                                                          |
-| ------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------- |
-| `trackingEnabled`        | `true`  | Initial tracking preference when no saved preference exists.                                                      |
-| `trackOnRouteChange`     | `false` | Also capture successful client-side navigations whose full URL path changes.                                      |
-| `captureWithoutCampaign` | `true`  | Include visits without UTM, Google click, or configured click parameters.                                         |
-| `captureLandingOnEnable` | `true`  | When tracking starts disabled, `enableTracking()` also records the landing page, held in memory until then.       |
-| `maxAge`                 | Unset   | Retain entries younger than this many seconds. Must be positive and finite.                                       |
-| `maxEntries`             | Unset   | Retain at most this many entries. Must be a positive integer.                                                     |
-| `clickParams`            | Unset   | Extra campaign parameters to capture, such as other ad platforms' click IDs. Must not repeat UTM or Google names. |
+| Option                      | Default | Behavior                                                                                                                                   |
+| --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `trackingEnabled`           | `true`  | Tracking preference at the start of each page load, unless a saved preference applies.                                                     |
+| `trackOnRouteChange`        | `false` | Also capture successful client-side navigations whose full URL path changes.                                                               |
+| `captureWithoutCampaign`    | `true`  | Include visits without UTM, Google click, or configured click parameters.                                                                  |
+| `captureLandingOnEnable`    | `true`  | When tracking starts disabled, `enableTracking()` also records the landing page, held in memory until then.                                |
+| `persistTrackingPreference` | `true`  | Save the preference set by `enableTracking()` and `disableTracking()`, which then takes precedence over `trackingEnabled` on later visits. |
+| `maxAge`                    | Unset   | Retain entries younger than this many seconds. Must be positive and finite.                                                                |
+| `maxEntries`                | Unset   | Retain at most this many entries. Must be a positive integer.                                                                              |
+| `clickParams`               | Unset   | Extra campaign parameters to capture, such as other ad platforms' click IDs. Must not repeat UTM or Google names.                          |
 
 For example, to retain up to 100 campaign visits for 30 days and capture client-side navigation:
 
@@ -204,8 +205,8 @@ await utm.capture()
 | `storageAvailable`                                          | Whether browser history can persist in localStorage.                                                                   |
 | `getAttribution()`                                          | Prepare a detached snapshot after pending persistence completes.                                                       |
 | `capture()`                                                 | Capture the current route manually, respecting tracking controls, hooks, and deduplication.                            |
-| `enableTracking()`                                          | Save the enabled preference and capture the current route, after a held landing route.                                 |
-| `disableTracking()`                                         | Save the disabled preference and cancel pending collection.                                                            |
+| `enableTracking()`                                          | Turn tracking on and capture the current route, after a held landing route.                                            |
+| `disableTracking()`                                         | Turn tracking off and cancel pending collection.                                                                       |
 | `clearData()`                                               | Clear history, the session ID, and a held landing route, and cancel pending collection. Keeps the tracking preference. |
 | `onBeforeTrack(cb)`, `onBeforePersist(cb)`, `onTracked(cb)` | Register a hook; return a function that unregisters it.                                                                |
 
@@ -213,7 +214,9 @@ Access refs with `.value` in script, for example `utm.lastTouch.value?.utmParams
 
 ## Tracking preferences and storage
 
-To start with collection disabled, configure `utm: { trackingEnabled: false }`. Connect `enableTracking()` and `disableTracking()` to your application's preference controls. A previously saved browser preference takes precedence over the configured initial value. Disabling does not delete existing history; also call `clearData()` when deletion is intended.
+To start with collection disabled, configure `utm: { trackingEnabled: false }`. Connect `enableTracking()` and `disableTracking()` to your application's preference controls. Both save the preference in localStorage, and on later visits a saved preference takes precedence over the configured initial value. Disabling does not delete existing history; also call `clearData()` when deletion is intended.
+
+When another tool already remembers the visitor's choice, such as a consent manager, set `persistTrackingPreference: false` so that tool is the only record. The module then saves no preference and starts every page load from `trackingEnabled`. Pair this option with `trackingEnabled: false`, and call `enableTracking()` on each page load the tool allows, whether your visitors opt in or opt out; by default the landing page waits in memory until then, as described in [Privacy and consent](#privacy-and-consent). With `trackingEnabled: true`, the module records the landing page as the app mounts, usually before the tool reports the visitor's choice, and `disableTracking()` lasts only until the next page load, so the landing page of every page load is recorded for a visitor who opted out. Turning the option off also removes a preference saved earlier, including an opt-out, so make sure your consent tool already holds those choices.
 
 Disabling tracking or clearing data cancels pending collection, including collection waiting on an asynchronous hook. Already completed application side effects cannot be undone.
 
@@ -227,11 +230,11 @@ If visitors often take longer than a week to convert, send the first touch to yo
 
 Nuxt UTM stores data only in the visitor's browser, for your site's origin. It sets no cookies, makes no network requests, and shares nothing across devices or unrelated domains. Data leaves the browser only when your application sends it.
 
-| Storage        | Key                         | Contents                                                                               |
-| -------------- | --------------------------- | -------------------------------------------------------------------------------------- |
-| localStorage   | `nuxt-utm-data`             | The history, one entry per captured visit.                                             |
-| sessionStorage | `nuxt-utm-session-id`       | A random ID, created when the tab's first visit is captured.                           |
-| localStorage   | `nuxt-utm-tracking-enabled` | `true` or `false`, saved only when you call `enableTracking()` or `disableTracking()`. |
+| Storage        | Key                         | Contents                                                                                                                        |
+| -------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| localStorage   | `nuxt-utm-data`             | The history, one entry per captured visit.                                                                                      |
+| sessionStorage | `nuxt-utm-session-id`       | A random ID, created when the tab's first visit is captured.                                                                    |
+| localStorage   | `nuxt-utm-tracking-enabled` | `true` or `false`, saved when you call `enableTracking()` or `disableTracking()` unless `persistTrackingPreference` is `false`. |
 
 Each history entry holds:
 
@@ -285,7 +288,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 })
 ```
 
-A saved preference outlives consent that expires without a callback, so the hook checks consent on every capture. If your consent UI shows `trackingEnabled`, see the `<ClientOnly>` note in [Composable](#composable).
+A saved preference outlives consent that expires without a callback, so the hook checks consent on every capture. If your consent tool reports the stored choice on every page load, you can instead set `persistTrackingPreference: false`: tracking then starts disabled on each load until the tool reports consent, so expired consent can't leave it on. If your consent UI shows `trackingEnabled`, see the `<ClientOnly>` note in [Composable](#composable).
 
 Visitors often give consent after leaving the landing page. When the app starts with tracking disabled, the module holds the landing route in memory, never in storage, until tracking is enabled. `enableTracking()` then records the landing page with the time of the visit, followed by the current page. Hooks for the landing page run at that point, so read the page from `context.route`, not `window.location`. Pages visited in between are not recovered. When tracking is already enabled at startup, as with a saved preference that outlived expired consent, the landing page is recorded right away instead, so a `utm:before-track` consent check decides then; if `disableTracking()` cancels that capture, the landing page stays held.
 
