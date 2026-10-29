@@ -1,0 +1,50 @@
+name: Retry release-age failures
+
+# Dependabot proposes security fixes immediately, but pnpm rejects lockfile entries published
+# within minimumReleaseAge. Those PRs fail CI only until their packages age past the window,
+# so re-running the same commit later lets auto-merge finish without weakening the policy.
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  rerun:
+    if: github.repository == 'stackbuilders/nuxt-utm'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      # pnpm's default minimumReleaseAge is one day
+      RELEASE_AGE_SECONDS: 86400
+      # Stops retrying a PR whose lockfile keeps failing for another reason
+      MAX_ATTEMPTS: 3
+    steps:
+      - name: Re-run CI on Dependabot PRs that waited out the release age
+        run: |
+          gh pr list --author app/dependabot --state open --json number,headRefOid \
+            --jq '.[] | "\(.number) \(.headRefOid)"' |
+          while read -r pr sha; do
+            run=$(gh run list --workflow main.yml --event pull_request --commit "$sha" --limit 1 \
+              --json databaseId,conclusion,attempt,updatedAt \
+              --jq ".[] | select(.conclusion == \"failure\"
+                and .attempt < $MAX_ATTEMPTS
+                and (.updatedAt | fromdateiso8601) < now - $RELEASE_AGE_SECONDS) | .databaseId")
+
+            if [ -z "$run" ]; then
+              continue
+            fi
+
+            if gh run view "$run" --log-failed | grep -q ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION; then
+              echo "PR #$pr: re-running CI run $run"
+              gh run rerun "$run" --failed
+            else
+              echo "PR #$pr: CI run $run failed for another reason, leaving it for review"
+            fi
+          done
