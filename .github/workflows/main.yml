@@ -22,15 +22,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.10
         with:
           cache: true
 
@@ -38,7 +38,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache Playwright browser
-        uses: actions/cache@v6
+        uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
@@ -79,11 +79,11 @@ jobs:
       matrix:
         nuxt-version: ['3', '4', 'npm:nuxt-nightly@5x']
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 22
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.10
         with:
           cache: true
       - run: pnpm install --frozen-lockfile
@@ -103,11 +103,11 @@ jobs:
       matrix:
         typescript-version: ['6', '7']
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 22
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.10
         with:
           cache: true
       - run: pnpm install --frozen-lockfile
