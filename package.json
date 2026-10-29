@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@nuxt/cli": "^3.37.0",
-    "@nuxt/devtools": "^3.1.1",
+    "@nuxt/devtools": "^3.4.4",
     "@nuxt/eslint": "^1.11.0",
     "@nuxt/eslint-config": "^1.11.0",
     "@nuxt/module-builder": "^1.0.2",
@@ -74,7 +74,7 @@
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.5",
     "hookable": "^6.1.1",
-    "nuxt": "^4.2.1",
+    "nuxt": "^4.6.3",
     "playwright": "1.64.0",
     "playwright-core": "1.64.0",
     "prettier": "^3.5.3",
