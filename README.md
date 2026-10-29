@@ -12,7 +12,7 @@ Nuxt UTM keeps campaign information in the browser until your application is rea
 
 It supports Nuxt 3 and 4, and is tested against Nuxt 5 nightly builds. Collection needs no backend, analytics account, or network request. Your application decides whether and when to send the data to its own API or CRM.
 
-[Release notes](CHANGELOG.md) · [Recipes](docs/RECIPES.md) · [Contributing](docs/CONTRIBUTING.md)
+[Release notes](CHANGELOG.md) · [Recipes](docs/RECIPES.md) · [Contributing](docs/CONTRIBUTING.md) · [Security](docs/SECURITY.md)
 
 ## What is attribution?
 
