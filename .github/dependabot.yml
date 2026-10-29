@@ -28,3 +28,19 @@ updates:
           - '@vitest/*'
     assignees:
       - sadjow
+
+  # Keeps the actions locked in .github/workflows/actions.lock current;
+  # Dependabot regenerates the matching lockfile entries in the same pull request.
+  - package-ecosystem: github-actions
+    directories:
+      - '/'
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+    assignees:
+      - sadjow
