@@ -11,6 +11,11 @@ overrides:
   'vite': '^8.2.4'
   'tmp': '^0.2.4'
   'esbuild': '0.28.1'
+  # glob 14 and minimatch 11 fix GHSA-3g3m-2fjr-6pw4 and GHSA-g3hv-75wg-m249. minimatch 11 removed
+  # makeRe, which eslint-plugin-import-x 4.17.1 imports, so that release alone stays on minimatch 10.
+  'glob@>=9 <14.0.2': '^14.0.2'
+  'minimatch@>=7 <11.0.1': '^11.0.1'
+  'eslint-plugin-import-x@4.17.1>minimatch': '^10.2.6'
 
 allowBuilds:
   '@parcel/watcher': true
