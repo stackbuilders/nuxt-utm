@@ -1,5 +1,72 @@
 # Changelog
 
+## v0.5.0
+
+[compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.4.0...v0.5.0)
+
+### ⚠️ Behavior changes
+
+- When an app starts with tracking disabled, `enableTracking()` now also records the page the visitor landed on in the current page load, timestamped when they arrived, before the current page. Hooks run for it when tracking is enabled, so a `utm:before-track` consent check still decides whether it is saved. Set `captureLandingOnEnable: false` to record only the current page. Apps that keep tracking enabled are unaffected ([#237](https://github.com/stackbuilders/nuxt-utm/pull/237))
+- A query parameter repeated in the URL now stores its first nonempty value instead of all values joined by commas: `?utm_source=google&utm_source=google` saves `google`, not `google,google`. A parameter whose repeats are all empty no longer counts as a campaign. Entries saved earlier keep their values ([#230](https://github.com/stackbuilders/nuxt-utm/pull/230))
+- When a client middleware redirects during the first page load, the entry records the URL the visitor opened, with its campaign parameters, instead of the redirect target ([#228](https://github.com/stackbuilders/nuxt-utm/pull/228))
+- Apps without a `pages/` directory that enable `trackOnRouteChange` now record client-side navigations, so their history can hold more entries than before ([#235](https://github.com/stackbuilders/nuxt-utm/pull/235))
+
+### 🚀 Enhancements
+
+- Record the landing campaign when tracking is enabled after navigation ([#237](https://github.com/stackbuilders/nuxt-utm/pull/237))
+- Add persistTrackingPreference to let a consent tool own the tracking choice ([#239](https://github.com/stackbuilders/nuxt-utm/pull/239))
+
+### 🔥 Performance
+
+- Import Nuxt helpers from #imports and keep history in a shallow ref ([#229](https://github.com/stackbuilders/nuxt-utm/pull/229))
+
+### 🩹 Fixes
+
+- Record the visited landing URL while prerendered pages hydrate ([#228](https://github.com/stackbuilders/nuxt-utm/pull/228))
+- Save the first nonempty value of a repeated query parameter ([#230](https://github.com/stackbuilders/nuxt-utm/pull/230))
+- **playground:** Render stored tracking state only in the browser ([#234](https://github.com/stackbuilders/nuxt-utm/pull/234))
+- Record client navigations in apps without pages ([#235](https://github.com/stackbuilders/nuxt-utm/pull/235))
+- **deps:** Resolve glob 14 and minimatch 11 for the consumers that support them ([#268](https://github.com/stackbuilders/nuxt-utm/pull/268))
+
+### 📖 Documentation
+
+- Describe stored data, consent, and storage limits ([#231](https://github.com/stackbuilders/nuxt-utm/pull/231))
+- Add recipes for Google click IDs and form field services ([#232](https://github.com/stackbuilders/nuxt-utm/pull/232))
+- State the supported Node.js versions and tested Nuxt releases ([#236](https://github.com/stackbuilders/nuxt-utm/pull/236))
+- Add a security policy for private vulnerability reports ([#249](https://github.com/stackbuilders/nuxt-utm/pull/249))
+
+### 🏡 Chore
+
+- Add a test coverage report ([#233](https://github.com/stackbuilders/nuxt-utm/pull/233))
+- **deps-dev:** Bump the playwright group across 1 directory with 2 updates ([#240](https://github.com/stackbuilders/nuxt-utm/pull/240))
+- **deps-dev:** Bump eslint from 10.11.0 to 10.12.0 ([#243](https://github.com/stackbuilders/nuxt-utm/pull/243))
+- **deps-dev:** Bump @types/node from 26.6.4 to 26.6.5 ([#242](https://github.com/stackbuilders/nuxt-utm/pull/242))
+- **deps-dev:** Bump vue from 3.5.43 to 3.5.44 ([#244](https://github.com/stackbuilders/nuxt-utm/pull/244))
+- **deps-dev:** Bump the vitest group across 1 directory with 2 updates ([#241](https://github.com/stackbuilders/nuxt-utm/pull/241))
+- Remove the unapplied repository settings file ([#257](https://github.com/stackbuilders/nuxt-utm/pull/257))
+- **deps-dev:** Bump the playwright group across 1 directory with 2 updates ([#252](https://github.com/stackbuilders/nuxt-utm/pull/252))
+- **deps-dev:** Bump @nuxt/schema from 4.5.2 to 4.6.1 ([#254](https://github.com/stackbuilders/nuxt-utm/pull/254))
+- **deps-dev:** Bump vue-tsc from 3.3.12 to 3.3.13 ([#253](https://github.com/stackbuilders/nuxt-utm/pull/253))
+- **deps-dev:** Bump @nuxt/test-utils from 4.3.3 to 4.3.4 ([#255](https://github.com/stackbuilders/nuxt-utm/pull/255))
+- **deps-dev:** Bump eslint from 10.12.0 to 10.13.0 ([#261](https://github.com/stackbuilders/nuxt-utm/pull/261))
+- **deps-dev:** Bump vue-router from 5.3.1 to 5.4.0 ([#260](https://github.com/stackbuilders/nuxt-utm/pull/260))
+- **deps-dev:** Bump @nuxt/schema from 4.6.1 to 4.6.2 ([#262](https://github.com/stackbuilders/nuxt-utm/pull/262))
+- **deps-dev:** Bump prettier from 3.9.9 to 3.9.10 ([#263](https://github.com/stackbuilders/nuxt-utm/pull/263))
+- **deps-dev:** Bump vue-tsc from 3.3.13 to 3.3.14 ([#265](https://github.com/stackbuilders/nuxt-utm/pull/265))
+- **deps-dev:** Bump @types/node from 26.6.5 to 26.6.6 ([#266](https://github.com/stackbuilders/nuxt-utm/pull/266))
+- **deps-dev:** Bump @nuxt/schema from 4.6.2 to 4.6.3 ([#264](https://github.com/stackbuilders/nuxt-utm/pull/264))
+
+### 🤖 CI
+
+- Check the published types with TypeScript 6 and 7 ([#238](https://github.com/stackbuilders/nuxt-utm/pull/238))
+- Re-run Dependabot CI once lockfile packages pass the release age ([#248](https://github.com/stackbuilders/nuxt-utm/pull/248))
+- Lock workflow action dependencies and track them with Dependabot ([#250](https://github.com/stackbuilders/nuxt-utm/pull/250))
+- Run Dependabot auto-merge on pull_request events ([#258](https://github.com/stackbuilders/nuxt-utm/pull/258))
+
+### ❤️ Contributors
+
+- Sadjow Leão ([@sadjow](https://github.com/sadjow))
+
 ## v0.4.0
 
 [compare changes](https://github.com/stackbuilders/nuxt-utm/compare/v0.3.1...v0.4.0)
